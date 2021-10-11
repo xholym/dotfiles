@@ -1,0 +1,14 @@
+# Ignore everything
+/*
+
+# Except these:
+!.gitignore
+!.vimrc
+!.ideavimrc
+
+# Except these in subdirs:
+!AppData/
+AppData/*
+!AppData/Local
+AppData/Local/*
+!*AppData/Local/nvim

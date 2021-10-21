@@ -1,3 +1,10 @@
+" Notes
+" C compiler is needed for treesitter to work (otherwise the is C compiler not found error.
+" TODO: Configure java debug.
+" TODO: Configure java syntax highlighting.
+" TODO: Configure java paths for different versions.
+" Coc statusline with function definition does not work.
+"
 set runtimepath^=~/.vim runtimepath+=~/.vim/after
 let &packpath = &runtimepath
 source ~/.vimrc
@@ -47,6 +54,8 @@ Plug 'ctrlpvim/ctrlp.vim'
 
 Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && yarn install'  }
 
+" More syntax highlighting.
+Plug 'nvim-treesitter/nvim-treesitter'
 
 call plug#end()
 
@@ -142,7 +151,8 @@ nmap <silent> ]e <Plug>(coc-diagnostic-next-error)
 
 " Code syntax tree operations
 nmap <silent> gd <Plug>(coc-definition)
-nmap <silent> gy <Plug>(coc-type-definition) " maybe I'll use this, if not remove
+" Maybe I'll use this, if not remove
+nmap <silent> gy <Plug>(coc-type-definition)
 nmap <silent> gi <Plug>(coc-implementation)
 nmap <silent> ga <Plug>(coc-references)
 nmap <silent> gm <Plug>(coc-rename)
@@ -266,3 +276,15 @@ autocmd FileType go nmap <leader>t  <Plug>(go-test)
 " For Omni-completion:
 " Close preview window after autocomple selection is made
 " au CompleteDone * pclose
+
+" --- Nvim treesitter ---
+lua <<EOF
+require'nvim-treesitter.configs'.setup {
+  ensure_installed = { "java" },
+  -- ignore_install = { "javascript" }, -- List of parsers to ignore installing
+  highlight = {
+    enable = true,              -- false will disable the whole extension
+    -- disable = { "c", "rust" },  -- list of language that will be disabled
+  },
+}
+EOF

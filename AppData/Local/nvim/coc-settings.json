@@ -5,5 +5,8 @@
             "rootPatterns": ["go.mod", ".vim/", ".git/", ".hg/"],
             "filetypes": ["go"]
         }
-    }
+    },
+    "java.enabled": true,
+    "java.trace.server": "verbose",
+    "java.jdt.ls.vmargs": "-javaagent:C:\\tools\\lombok.jar"
 }

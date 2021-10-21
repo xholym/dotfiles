@@ -17,7 +17,8 @@ set shiftwidth=4    " also make 4 spaces
 set expandtab       " convert tabs to spaces
 
 set nowrap		   	" dont wrap lines
-set smartcase       " ignore case during search unless there is a Capital letter
+set ignorecase      " ignore case by default
+set smartcase       " do not ignore case when uppercase is typed
 set incsearch       " incrementaly show search results
 set hlsearch        " highlight searches
 set showmatch       " hightlight matching braces
@@ -62,6 +63,10 @@ nnoremap <C-j> <C-w>j
 nnoremap <C-k> <C-w>k
 nnoremap + :vertical resize +5<CR>
 nnoremap _ :vertical resize -5<CR>
+
+" Wrapping
+nnoremap <leader>w :set wrap<CR>
+nnoremap <leader>W :set nowrap<CR>
 
 " Tabs navigation
 nnoremap <M-h> :tabp<CR>

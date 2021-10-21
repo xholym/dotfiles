@@ -1,8 +1,6 @@
 " Notes
 " C compiler is needed for treesitter to work (otherwise the is C compiler not found error.
 " TODO: Configure java debug.
-" TODO: Configure java syntax highlighting.
-" TODO: Configure java paths for different versions.
 " Coc statusline with function definition does not work.
 "
 set runtimepath^=~/.vim runtimepath+=~/.vim/after
@@ -280,11 +278,10 @@ autocmd FileType go nmap <leader>t  <Plug>(go-test)
 " --- Nvim treesitter ---
 lua <<EOF
 require'nvim-treesitter.configs'.setup {
-  ensure_installed = { "java" },
-  -- ignore_install = { "javascript" }, -- List of parsers to ignore installing
+  ensure_installed = { "java", "kotlin" },
   highlight = {
-    enable = true,              -- false will disable the whole extension
-    -- disable = { "c", "rust" },  -- list of language that will be disabled
+    enable = true,
+    -- disable = { "c", "rust" },  -- Disable for these.
   },
 }
 EOF

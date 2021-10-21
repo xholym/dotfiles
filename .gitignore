@@ -5,6 +5,7 @@
 !.gitignore
 !.vimrc
 !.ideavimrc
+!.bashrc
 
 # Except these in subdirs:
 !AppData/

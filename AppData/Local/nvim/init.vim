@@ -5,6 +5,8 @@
 " - copy ~/.vim/treesitter/<lang>-highlights.scm to the respective language syntax queries
 "
 " Notes:
+" TODO: Add spell checking for slovak and english.
+"  - this may be hard to do on windows.
 " TODO: Configure java debug.
 " TODO: configure queryDSL annnotation processor.
 " Coc statusline with function definition does not work.
@@ -83,13 +85,16 @@ set colorcolumn=80
 " Consider disabling TStypes this way.
 "hi link TSType NONE
 hi Comment ctermfg=Green guifg=Green
+" Do not highlight indented text in markdown
+hi clear markdownCodeBlock
 
 set noshowmode                          " dont show because of airline
 
 
 autocmd Filetype python setlocal expandtab tabstop=4 shiftwidth=4 softtabstop=4
-autocmd Filetype go setlocal tabstop=4 shiftwidth=4 softtabstop=4
-autocmd Filetype java setlocal tabstop=4 shiftwidth=4 softtabstop=4
+autocmd Filetype go setlocal expandtab tabstop=4 shiftwidth=4 softtabstop=4
+autocmd Filetype java setlocal expandtab tabstop=4 shiftwidth=4 softtabstop=4
+autocmd Filetype markdown setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
 
 
 set signcolumn=yes " column to show diagnostics and not appear and disappear
@@ -100,6 +105,23 @@ set updatetime=300
 "
 " Give more space for displaying messages.
 set cmdheight=2     " Try now and maybe remove later.
+
+" Spelling
+set spell
+set spelllang=en
+nnoremap <silent> <F11> :set spell!<cr>
+
+" Show nine spell checking candidates at most
+set spellsuggest=best,9
+hi clear SpellBad
+" Default spellbad colloring.
+" hi SpellBad cterm=underline ctermfg=204 gui=underline guifg=#E06C75
+hi SpellBad cterm=underline gui=underline
+
+" Notes:
+" Use [s, ]s to navigate spelling mistakes
+" Use zg to add to global spell file
+" Use zg to add to global spell file
 
 " ----- Plugin specific mappings -----
 

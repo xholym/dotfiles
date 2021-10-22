@@ -28,6 +28,8 @@ set noswapfile      " dont use swapfiles
 
 set splitright      " open next split on right side
 
+set scrolloff=2     " number of line to keep
+
 if (has('mouse'))
     set mouse=a
 endif

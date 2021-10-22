@@ -62,8 +62,6 @@ nnoremap <M-l> :tabn<CR>
 
 inoremap jj <ESC>
 
-nnoremap // :noh<CR>     " clear search
-
 " Keep visual selection when indenting
 vnoremap > >gv
 vnoremap < <gv
@@ -84,24 +82,27 @@ vnoremap zY "*Y
 
 " --- IDEA mappings ---
 
-nmap gf :action GotoFile<CR>
-nmap gb :action JumpToLastChange<CR>
-nmap gn :action GotoClass<CR>
-nmap gm :action RenameElement<CR>
-nmap <leader>f :action FileStructurePopup<CR>
-nmap <leader>p :action ParameterInfo<CR>
-nmap <leader>z :action ToggleDistractionFreeMode<CR>
-nmap <leader>e :action RecentFiles<CR>
+nnoremap [g :action GotoNextError<CR>
+nnoremap ]g :action GotoPreviousError<CR>
 
-nmap <leader>l :action ReformatCode<CR>
-nmap <leader>o :action OptimizeImports<CR>
-nmap <leader>i :action ImplementMethods<CR>
-nmap <leader>O :action OverrideMethods<CR>
+nnoremap gf :action GotoFile<CR>
+nnoremap gb :action JumpToLastChange<CR>
+nnoremap gn :action GotoClass<CR>
+nnoremap gm :action RenameElement<CR>
+nnoremap <leader>f :action FileStructurePopup<CR>
+nnoremap <leader>p :action ParameterInfo<CR>
+nnoremap <leader>z :action ToggleDistractionFreeMode<CR>
+nnoremap <leader>e :action RecentFiles<CR>
+
+nnoremap <leader>l :action ReformatCode<CR>
+nnoremap <leader>o :action OptimizeImports<CR>
+nnoremap <leader>i :action ImplementMethods<CR>
+nnoremap <leader>O :action OverrideMethods<CR>
 
 " nnoremap <M-h> :action PreviousTab<CR>
 " nnoremap <M-l> :action NextTab<CR>
 
-nmap <leader>/ :action FindInPath<cr>
+nnoremap <leader>/ :action FindInPath<cr>
 
 " View - tool windows
 " Must be configured in IDEA
@@ -112,5 +113,5 @@ nmap <leader>/ :action FindInPath<cr>
 "nmap <A-r> :action View.Run<CR>
 "nmap <A-f> :action View.Debug<CR>
 
-nmap <leader>r :action Run<CR>
-nmap <leader>d :action Debug<CR>
+nnoremap <leader>r :action Run<CR>
+nnoremap <leader>d :action Debug<CR>

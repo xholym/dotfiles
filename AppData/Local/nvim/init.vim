@@ -5,7 +5,7 @@
 " - copy ~/.vim/treesitter/<lang>-highlights.scm to the respective language syntax queries
 "
 " Notes:
-" TODO: Add spell checking for slovak and english.
+" TODO: Use font ligatures.
 "  - this may be hard to do on windows.
 " TODO: Configure java debug.
 " TODO: configure queryDSL annnotation processor.

@@ -1,3 +1,3 @@
-GuiFont FiraCode NF:h10
+GuiFont! FiraCode NF:h10
 GuiPopupmenu 0
 

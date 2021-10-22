@@ -9,6 +9,7 @@
 " TODO: configure queryDSL annnotation processor.
 " Coc statusline with function definition does not work.
 " May try to use treesitter statusline.
+" Figure out how to import sources for gradle and go to defintion in the lib source.
 "
 set runtimepath^=~/.vim runtimepath+=~/.vim/after
 let &packpath = &runtimepath

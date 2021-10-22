@@ -16,7 +16,8 @@ set softtabstop=4   " make soft tab 4 spaces
 set shiftwidth=4    " also make 4 spaces
 set expandtab       " convert tabs to spaces
 
-set nowrap		   	" dont wrap lines
+set nowrap		   	" don't wrap lines
+set textwidth=0 wrapmargin=0 " don't automatically insert line breaks at 80 column
 set ignorecase      " ignore case by default
 set smartcase       " do not ignore case when uppercase is typed
 set incsearch       " incrementaly show search results

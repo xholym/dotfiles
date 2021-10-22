@@ -20,5 +20,4 @@
     "java.enabled": true,
     "java.trace.server": "verbose",
     "java.jdt.ls.vmargs": "-javaagent:C:\\tools\\lombok.jar"
-    // "java.signatureHelp.enabled": true   // Enable signature help on '('
 }

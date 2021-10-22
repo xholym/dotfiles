@@ -8,8 +8,15 @@
 !.bashrc
 
 # Except these in subdirs:
+
+# */nvim
 !AppData/
 AppData/*
 !AppData/Local
 AppData/Local/*
 !*AppData/Local/nvim
+
+# treesitter highlights
+!.vim/
+.vim/*
+!.vim/treesitter

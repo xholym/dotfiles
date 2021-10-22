@@ -1,7 +1,14 @@
-" Notes
-" C compiler is needed for treesitter to work (otherwise the is C compiler not found error.
+" Requirements:
+" - C compiler is needed for treesitter to work (otherwise the is C compiler not found error.
+" - lombok in C:\tools\lombok.jar
+" - install coc-java, coc-kotlin
+" - copy ~/.vim/treesitter/<lang>-highlights.scm to the respective language syntax queries
+"
+" Notes:
 " TODO: Configure java debug.
+" TODO: configure queryDSL annnotation processor.
 " Coc statusline with function definition does not work.
+" May try to use treesitter statusline.
 "
 set runtimepath^=~/.vim runtimepath+=~/.vim/after
 let &packpath = &runtimepath
@@ -54,6 +61,7 @@ Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && yarn install'  }
 
 " More syntax highlighting.
 Plug 'nvim-treesitter/nvim-treesitter'
+Plug 'nvim-treesitter/playground'
 
 call plug#end()
 
@@ -69,8 +77,12 @@ colorscheme onedark
 let g:airline_theme = 'onedark'
 
 set colorcolumn=80
-" ColorColumn's color should be set automatically by colorscheme
-" highlight ColorColumn ctermbg=0 guibg=grey
+
+" TSTypes are disabled for java by editing java/highlights.scm.
+" Consider disabling TStypes this way.
+"hi link TSType NONE
+hi Comment ctermfg=Green guifg=Green
+
 set noshowmode                          " dont show because of airline
 
 

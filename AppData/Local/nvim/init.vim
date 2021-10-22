@@ -88,7 +88,7 @@ hi Comment ctermfg=Green guifg=Green
 " Do not highlight indented text in markdown
 hi clear markdownCodeBlock
 
-set noshowmode                          " dont show because of airline
+set noshowmode                          " don't show because of airline
 
 
 autocmd Filetype python setlocal expandtab tabstop=4 shiftwidth=4 softtabstop=4
@@ -108,7 +108,7 @@ set cmdheight=2     " Try now and maybe remove later.
 
 " Spelling
 set spell
-set spelllang=en
+set spelllang=en,sk
 nnoremap <silent> <F11> :set spell!<cr>
 
 " Show nine spell checking candidates at most

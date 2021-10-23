@@ -1,17 +1,41 @@
+"
 " Requirements:
 " - C compiler is needed for treesitter to work (otherwise the is C compiler not found error.
 " - lombok in C:\tools\lombok.jar
 " - install coc-java, coc-kotlin
 " - copy ~/.vim/treesitter/<lang>-highlights.scm to the respective language syntax queries
 "
+
+"
 " Notes:
 " TODO: Use font ligatures.
-"  - this may be hard to do on windows.
+"  - when nvim-qt will support them for windows.
+"  - https://github.com/equalsraf/neovim-qt/issues/166
 " TODO: Configure java debug.
 " TODO: configure queryDSL annnotation processor.
+"
+" TODO: Maybe try undotree with undofile if needed.
+"   - undofile persists undos after file close
+" TODO: Check out targets plugin
+"   - https://github.com/wellle/targets.vim
+" TODO: Replace DelimitMate with auto-pairs
+"   - https://github.com/jiangmiao/auto-pairs
+" TODO: Check out honza/vim-snippets
+" TODO: Check out ludovicchabant/vim-gutentags
+"
+" Go to definition does not work for java library sources.
+"  - https://github.com/neoclide/coc-java/issues/82
+"  - this bug comes from a escaping problem on windows,
+"      'You can't really escape anything but space on windows'
+"        - said guy in issue thread
+"  - https://github.com/neovim/neovim/issues/3912
+"  - https://github.com/neoclide/coc.nvim/issues/2748
+"
+" Starting neovim from gitbash breaks terminal.
+" See https://github.com/neovim/neovim/issues/14605
+"
 " Coc statusline with function definition does not work.
 " May try to use treesitter statusline.
-" Figure out how to import sources for gradle and go to defintion in the lib source.
 "
 " Useful commands to try:
 " *         - to search string under cursor
@@ -22,6 +46,7 @@
 " <C-^>     - go to last file
 " Use marks with m<reg> '<reg>.
 "
+
 set runtimepath^=~/.vim runtimepath+=~/.vim/after
 let &packpath = &runtimepath
 source ~/.vimrc
@@ -117,10 +142,11 @@ set updatetime=300
 set cmdheight=2     " Try now and maybe remove later.
 
 " Spelling
-set spell
-set spelllang=en,sk
+" Not using global for now.
+" set spell
+" set spelllang=en,sk
 " TODO: Maybe move mapping to ~/.vimrc
-nnoremap <silent> <F11> :set spell!<cr>
+nnoremap <silent> <F11> :setlocal spell! spelllang=en,sk<CR>
 nnoremap z+ 1z=
 
 " Show nine spell checking candidates at most
@@ -322,7 +348,13 @@ autocmd FileType go nmap <leader>t  <Plug>(go-test)
 " For Omni-completion:
 " Close preview window after autocomple selection is made
 " au CompleteDone * pclose
-
+if has('win32') || has('win64')
+  function Fnameescape(f)
+    return '`='.json_encode(a:f).'`'
+  endfunction
+else
+  let Fnameescape = function('fnameescape')
+endif
 " --- Nvim treesitter ---
 lua <<EOF
 require'nvim-treesitter.configs'.setup {

@@ -53,12 +53,11 @@ augroup trim_whitespace
 augroup end
 
 
-" ----- Custom mappings -----
+" ----- Mappings -----
 "
 nnoremap <SPACE> <Nop>
 let mapleader = " "
 
-" -- Navigation --
 " Splits navigation
 nnoremap <C-l> <C-w>l
 nnoremap <C-h> <C-w>h
@@ -67,18 +66,16 @@ nnoremap <C-k> <C-w>k
 nnoremap + :vertical resize +5<CR>
 nnoremap _ :vertical resize -5<CR>
 
-" Wrapping
-nnoremap <leader>w :set wrap<CR>
-nnoremap <leader>W :set nowrap<CR>
-
 " Tabs navigation
 nnoremap <M-h> :tabp<CR>
 nnoremap <M-l> :tabn<CR>
 
+" Wrapping
+nnoremap <leader>` :set wrap<CR>
+nnoremap <leader>~ :set nowrap<CR>
 
-" -- Main mappings --
-
-inoremap jj <ESC>
+" Rather remap Capslock to Escape
+"inoremap jj <ESC>
 
 " Clear search
 nnoremap // :noh<CR>
@@ -91,14 +88,29 @@ vnoremap < <gv
 nmap zj o<Esc>k
 nmap zk O<Esc>j
 
-" -- Yanking --
+" Yanking
 nnoremap Y y$
-
 " Copy from clipboard
-"set clipboard+=unnamed  " copy to system clipboard
 nnoremap zp "*p
 nnoremap zy "*y
 nnoremap zY "*Y
 nnoremap zP "*P
 vnoremap zy "*y
 vnoremap zY "*Y
+
+" Do not move cursor while joining
+"nnoremap J mzJ'z
+
+" Moving text
+vnoremap J :m '>+1<CR>gv=gv
+vnoremap K :m '>-2<CR>gv=gv
+" Probably not needed fo normal mode
+"nnoremap <leader>j :m .+1<CR>==
+"nnoremap <leader>k :m .-2<CR>==
+
+" Faster file saving and exiting
+nnoremap <leader>w :w<CR>
+nnoremap <leader>q :q<CR>
+
+" Search and replace template
+nnoremap <leader>\ :%s//gc<left><left><left>

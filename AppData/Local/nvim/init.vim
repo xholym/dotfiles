@@ -13,6 +13,15 @@
 " May try to use treesitter statusline.
 " Figure out how to import sources for gradle and go to defintion in the lib source.
 "
+" Useful commands to try:
+" *         - to search string under cursor
+" i_<C-o>    - execute command and go back to insert mode
+" :s//c     - count occurrences
+" @@        - execute last macro
+" g<C-a>    - increment sequentially
+" <C-^>     - go to last file
+" Use marks with m<reg> '<reg>.
+"
 set runtimepath^=~/.vim runtimepath+=~/.vim/after
 let &packpath = &runtimepath
 source ~/.vimrc
@@ -66,6 +75,7 @@ Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && yarn install'  }
 Plug 'nvim-treesitter/nvim-treesitter'
 Plug 'nvim-treesitter/playground'
 
+Plug 'tpope/vim-repeat'         " make surround repeatable with .
 call plug#end()
 
 
@@ -109,7 +119,9 @@ set cmdheight=2     " Try now and maybe remove later.
 " Spelling
 set spell
 set spelllang=en,sk
+" TODO: Maybe move mapping to ~/.vimrc
 nnoremap <silent> <F11> :set spell!<cr>
+nnoremap z+ 1z=
 
 " Show nine spell checking candidates at most
 set spellsuggest=best,9
@@ -190,9 +202,10 @@ nmap <silent> gi <Plug>(coc-implementation)
 nmap <silent> ga <Plug>(coc-references)
 nmap <silent> gm <Plug>(coc-rename)
 
-" Quick fixes - TODO: switch them if the other one is used more.
-nnoremap <leader>Q :CocFix<CR>
-nmap <leader>q <plug>(coc-fix-current)
+" Quick fixes
+" Using e not q, because Q is used for fast quit.
+nnoremap <leader>E :CocFix<CR>
+nmap <leader>e <plug>(coc-fix-current)
 
 nnoremap <leader>l <Plug>(coc-format)
 nnoremap <leader>L  <Plug>(coc-format-selected)

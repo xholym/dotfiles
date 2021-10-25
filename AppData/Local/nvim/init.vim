@@ -31,8 +31,6 @@
 " Starting neovim from gitbash breaks terminal.
 " See https://github.com/neovim/neovim/issues/14605
 "
-" Fzf does not work for nvim started from git bash.
-"
 " Coc statusline with function definition does not work.
 " May try to use treesitter statusline.
 "
@@ -87,8 +85,8 @@ Plug 'preservim/nerdtree'
 Plug 'tiagofumo/vim-nerdtree-syntax-highlight'
 
 " Fuzzy finder
-Plug 'junegunn/fzf', {  'do': { -> fzf#install() } }
-Plug 'junegunn/fzf.vim'
+Plug 'nvim-lua/plenary.nvim'
+Plug 'nvim-telescope/telescope.nvim'
 
 Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && yarn install'  }
 
@@ -175,13 +173,11 @@ command ToggleVerbose :call ToggleVerbose()
 " ----- Plugin specific mappings -----
 
 
-" --- Fuzzy search (FZF) ---
-" let $FZF_DEFAULT_COMMAND='rg --files'
-" let $FZF_DEFAULT_OPTS='-m --height 50% --border'
-nnoremap <leader>g :GFiles<CR>
-nnoremap <leader>f :Files<CR>
-nnoremap <leader>/ :Rg<Space>
-nnoremap <leader><Tab> :History<CR>
+" --- Fuzzy search ---
+nnoremap <leader>f <cmd>Telescope find_files<cr>
+nnoremap <leader>g <cmd>Telescope git_files<cr>
+nnoremap <leader>/ <cmd>Telescope live_grep<cr>
+nnoremap <leader><Tab> <cmd>Telescope oldfiles<CR>
 
 " --- COC ---
 

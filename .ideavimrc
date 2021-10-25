@@ -34,6 +34,7 @@ set shiftwidth=4    " also make 4 spaces
 set expandtab       " convert tabs to spaces
 
 set nowrap		   	" dont wrap lines
+set ignorecase
 set smartcase       " ignore case during search unless there is a Capital letter
 set incsearch       " incrementaly show search results
 set hlsearch        " highlight searches

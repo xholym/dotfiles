@@ -2,8 +2,9 @@
 " Requirements:
 " - C compiler is needed for treesitter to work (otherwise the is C compiler not found error.
 " - lombok in C:\tools\lombok.jar
-" - install coc-java, coc-kotlin
+" - install coc-java, coc-kotlin, coc-json
 " - copy ~/.vim/treesitter/<lang>-highlights.scm to the respective language syntax queries
+" - install ripgrep
 "
 
 "
@@ -16,10 +17,6 @@
 "
 " TODO: Maybe try undotree with undofile if needed.
 "   - undofile persists undos after file close
-" TODO: Check out targets plugin
-"   - https://github.com/wellle/targets.vim
-" TODO: Replace DelimitMate with auto-pairs
-"   - https://github.com/jiangmiao/auto-pairs
 " TODO: Check out honza/vim-snippets
 " TODO: Check out ludovicchabant/vim-gutentags
 "
@@ -33,6 +30,8 @@
 "
 " Starting neovim from gitbash breaks terminal.
 " See https://github.com/neovim/neovim/issues/14605
+"
+" Fzf does not work for nvim started from git bash.
 "
 " Coc statusline with function definition does not work.
 " May try to use treesitter statusline.
@@ -63,10 +62,9 @@ call plug#begin('~/.vim/plugged')    " initialize plugin system
 " Text edit
 Plug 'tpope/vim-surround'
 Plug 'tpope/vim-commentary'
-Plug 'vim-scripts/argtextobj.vim'
 Plug 'kana/vim-textobj-user'         " dependency of textobj-entire
 Plug 'kana/vim-textobj-entire'
-Plug 'Raimondi/delimitMate'          " automatically close ('`\"
+Plug 'jiangmiao/auto-pairs'          " automatically close ('`\"
 Plug 'vim-scripts/ReplaceWithRegister'
 
 Plug 'machakann/vim-highlightedyank'
@@ -89,10 +87,8 @@ Plug 'preservim/nerdtree'
 Plug 'tiagofumo/vim-nerdtree-syntax-highlight'
 
 " Fuzzy finder
-Plug 'ctrlpvim/ctrlp.vim'
-" FZF does not work now
-" Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
-" Plug 'junegunn/fzf.vim'
+Plug 'junegunn/fzf', {  'do': { -> fzf#install() } }
+Plug 'junegunn/fzf.vim'
 
 Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && yarn install'  }
 
@@ -101,8 +97,8 @@ Plug 'nvim-treesitter/nvim-treesitter'
 Plug 'nvim-treesitter/playground'
 
 Plug 'tpope/vim-repeat'         " make surround repeatable with .
+Plug 'wellle/targets.vim'       " adds more textobjects like args, separators (, . /) and so on
 call plug#end()
-
 
 if (has("nvim"))
    let $NVIM_TUI_ENABLE_TRUE_COLOR=1
@@ -161,19 +157,31 @@ hi SpellBad cterm=underline gui=underline
 " Use zg to add to global spell file
 " Use zg to add to global spell file
 
+" Verbose file for debug.
+function! ToggleVerbose()
+    if !&verbose
+        echo 'verbose file set'
+        set verbosefile=~/.vim/verbose.log
+        set verbose=15
+    else
+        echo 'verbose file unset'
+        set verbose=0
+        set verbosefile=
+    endif
+endfunction
+command ToggleVerbose :call ToggleVerbose()
+
+
 " ----- Plugin specific mappings -----
 
 
-" --- Fuzzy search ---
-" -- Ctrl-p --
-let g:ctrlp_working_path_mode = 'ra'
-let g:ctrlp_root_markers = ['pom.xml', 'build.gradle' ]
-
-" -- FZF --
-"nnoremap <C-p> :GFiles<CR>
-"nnoremap <leader>p :History<CR>
-" temporary, for trying new color schemes
-"nnoremap <leader>? :Colors<CR>
+" --- Fuzzy search (FZF) ---
+" let $FZF_DEFAULT_COMMAND='rg --files'
+" let $FZF_DEFAULT_OPTS='-m --height 50% --border'
+nnoremap <leader>g :GFiles<CR>
+nnoremap <leader>f :Files<CR>
+nnoremap <leader>/ :Rg<Space>
+nnoremap <leader><Tab> :History<CR>
 
 " --- COC ---
 

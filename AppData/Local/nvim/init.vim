@@ -4,11 +4,14 @@
 " - lombok in C:\tools\lombok.jar
 " - install coc-java, coc-kotlin, coc-json
 " - copy ~/.vim/treesitter/<lang>-highlights.scm to the respective language syntax queries
-" - install ripgrep
+" - install ripgrep for telescope
+" - install make for telescope-fzf-native
 "
 "
 " Todos:
 " TODO: Do not show telescope preview for some file extensions.
+"  - it wrote with default previewer 'binary cannot be previewed' on my work pc
+"       so this may work on its own.
 " TODO: Use font ligatures.
 "  - when nvim-qt will support them for windows.
 "  - https://github.com/equalsraf/neovim-qt/issues/166
@@ -207,10 +210,15 @@ nnoremap <leader>c <cmd>Telescope git_commits<cr>
 nnoremap <leader>/ <cmd>Telescope live_grep<cr>
 nnoremap <leader>? <cmd>lua require('telescope.builtin').grep_string { search = vim.fn.input("Grep for ") } <cr>
 
+" Vim help
+nnoremap <leader>m <cmd>Telescope marks<cr>
+
 " Telescope colorscheme is anther useful one.
 
 lua <<EOF
 local actions = require('telescope.actions')
+local previewers = require('telescope.previewers')
+
 require('telescope').setup {
   defaults = {
     file_ignore_patterns = {'build/.*', 'bin/.*'},
@@ -222,7 +230,7 @@ require('telescope').setup {
         ['<esc>'] = actions.close,
         ['jj'] = { '<esc>', type = 'command' },
       },
-    }
+    },
   },
   extensions = {
     fzf = {
@@ -245,6 +253,11 @@ let g:NERDTreeDirArrowExpandable = '▸'
 let g:NERDTreeDirArrowCollapsible = '▾'
 let NERDTreeShowHidden=1                    " Show hidden files
 let g:NERDTreeWinPos = "right"
+let NERDTreeQuitOnOpen=1
+" Refresh devicons so nerdtree does not show [] around icons
+if exists('g:loaded_webdevicons')
+  call webdevicons#refresh()
+endif
 
 " --- Undo tree ---
 nnoremap <leader>u <cmd>UndotreeToggle<cr>
@@ -385,7 +398,10 @@ augroup end
 " This does not work. TODO: Look into it.
 set statusline^=%{coc#status()}%{get(b:,'coc_current_function','')}
 
-" ----- Go -----
+" ----- Java ----
+command JavaProjektImport CocCommand java.projectConfiguration.update
+
+" ----- Go ------
 
 let g:go_def_mapping_enables = 0  " use gd from COC
 

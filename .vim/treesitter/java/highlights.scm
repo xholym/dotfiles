@@ -14,8 +14,9 @@
 (super) @function.builtin
 
 ; Parameters
-(formal_parameter
-  name: (identifier) @parameter)
+; Do not highlight function params.
+;(formal_parameter
+;  name: (identifier) @parameter)
 (catch_formal_parameter
   name: (identifier) @parameter)
 
@@ -78,19 +79,19 @@
 ] @operator
 
 ; Types
-; Commented to not highlight java type identifiers
+; Comment or uncommented to not highlight java type identifiers
 
-;(interface_declaration
-;  name: (identifier) @type)
-;(class_declaration
-;  name: (identifier) @type)
-;(record_declaration
-;  name: (identifier) @type)
-;(enum_declaration
-;  name: (identifier) @type)
-;(constructor_declaration
-;  name: (identifier) @type)
-; (type_identifier) @type
+(interface_declaration
+  name: (identifier) @type)
+(class_declaration
+  name: (identifier) @type)
+(record_declaration
+  name: (identifier) @type)
+(enum_declaration
+  name: (identifier) @type)
+(constructor_declaration
+  name: (identifier) @type)
+ (type_identifier) @type
 
 
 

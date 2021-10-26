@@ -182,14 +182,25 @@ command ToggleVerbose :call ToggleVerbose()
 " require'nvim-web-devicons'.setup {
 "  -- Globaly enable devicons, overrides `get_icons` option
 "  default = true;
-" }
+"
 " EOF
 
 " --- Fuzzy search ---
+
+" FIles
 nnoremap <leader>f <cmd>Telescope find_files<cr>
 nnoremap <leader>g <cmd>Telescope git_files<cr>
-nnoremap <leader>/ <cmd>Telescope live_grep<cr>
+nnoremap <leader>c <cmd>Telescope buffers<cr>
 nnoremap <leader><Tab> <cmd>Telescope oldfiles<CR>
+
+" Git
+nnoremap <leader>x <cmd>Telescope git_status<cr>
+nnoremap <leader>c <cmd>Telescope git_commits<cr>
+
+" Search in files
+nnoremap <leader>/ <cmd>Telescope live_grep<cr>
+nnoremap <leader>? :lua require('telescope.builtin').grep_string { search = vim.fn.input("Grep for ") } <cr>
+
 " Telescope colorscheme is anther useful one.
 
 lua <<EOF
@@ -202,7 +213,8 @@ require('telescope').setup {
     set_env = { ['COLORTERM'] = 'truecolor' },
     mappings = {
       i = {
-        ["<esc>"] = actions.close
+        ['<esc>'] = actions.close,
+        ['jj'] = { '<esc>', type = 'command' },
       },
     }
   },
@@ -377,7 +389,6 @@ let g:go_fmt_command = "goimports"
 let g:go_auto_type_info = 1
 
  " Map keys for most used commands.
- " Ex: `\b` for building, `\r` for running
 autocmd FileType go nmap <leader>r  <Plug>(go-run)
 autocmd FileType go nmap <leader>t  <Plug>(go-test)
 

@@ -9,6 +9,7 @@
 
 "
 " Notes:
+" TODO: Look into better fonts. Devicons in telescope do not work with FiraCode NF and Cascadia is ugly.
 " TODO: Use font ligatures.
 "  - when nvim-qt will support them for windows.
 "  - https://github.com/equalsraf/neovim-qt/issues/166
@@ -60,6 +61,7 @@ call plug#begin('~/.vim/plugged')    " initialize plugin system
 " Text edit
 Plug 'tpope/vim-surround'
 Plug 'tpope/vim-commentary'
+" Plug 'vim-scripts/argtextobj.vim'    " reconsider using intead of targets argtextobj
 Plug 'kana/vim-textobj-user'         " dependency of textobj-entire
 Plug 'kana/vim-textobj-entire'
 Plug 'jiangmiao/auto-pairs'          " automatically close ('`\"
@@ -74,9 +76,9 @@ Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
 Plug 'rafi/awesome-vim-colorschemes'
-Plug 'ryanoasis/vim-devicons'        " adds icons to plugins
 
 Plug 'mhinz/vim-startify'
+Plug 'ryanoasis/vim-devicons'        " adds icons to plugins
 
 " Git
 Plug 'tpope/vim-fugitive'
@@ -85,8 +87,11 @@ Plug 'preservim/nerdtree'
 Plug 'tiagofumo/vim-nerdtree-syntax-highlight'
 
 " Fuzzy finder
-Plug 'nvim-lua/plenary.nvim'
 Plug 'nvim-telescope/telescope.nvim'
+Plug 'nvim-lua/plenary.nvim'                    " telescope requirement
+Plug 'kyazdani42/nvim-web-devicons'             " devicons for telescope
+" Does not work, gives error: fzf not installed.
+"Plug 'nvim-telescope/telescope-fzf-native.nvim', { 'do': 'make' }
 
 Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && yarn install'  }
 
@@ -172,12 +177,37 @@ command ToggleVerbose :call ToggleVerbose()
 
 " ----- Plugin specific mappings -----
 
+" --- Devicons ---
+" lua <<EOF
+" require'nvim-web-devicons'.setup {
+"  -- Globaly enable devicons, overrides `get_icons` option
+"  default = true;
+" }
+" EOF
 
 " --- Fuzzy search ---
 nnoremap <leader>f <cmd>Telescope find_files<cr>
 nnoremap <leader>g <cmd>Telescope git_files<cr>
 nnoremap <leader>/ <cmd>Telescope live_grep<cr>
 nnoremap <leader><Tab> <cmd>Telescope oldfiles<CR>
+" Telescope colorscheme is anther useful one.
+
+lua <<EOF
+local actions = require('telescope.actions')
+require('telescope').setup {
+  defaults = {
+    file_ignore_patterns = {'build/.*', 'bin/.*'},
+    path_display = { truncate = 2 },
+    color_devicons = true,
+    set_env = { ['COLORTERM'] = 'truecolor' },
+    mappings = {
+      i = {
+        ["<esc>"] = actions.close
+      },
+    }
+  },
+}
+EOF
 
 " --- COC ---
 
@@ -359,6 +389,7 @@ if has('win32') || has('win64')
 else
   let Fnameescape = function('fnameescape')
 endif
+
 " --- Nvim treesitter ---
 lua <<EOF
 require'nvim-treesitter.configs'.setup {
@@ -369,3 +400,4 @@ require'nvim-treesitter.configs'.setup {
   },
 }
 EOF
+

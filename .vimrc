@@ -17,7 +17,7 @@ set shiftwidth=4    " also make 4 spaces
 set expandtab       " convert tabs to spaces
 
 set nowrap		   	" don't wrap lines
-set textwidth=0 wrapmargin=0 " don't automatically insert line breaks at 80 column
+set linebreak textwidth=0 wrapmargin=0 " don't automatically insert line breaks at 80 column, does not work.
 set ignorecase      " ignore case by default
 set smartcase       " do not ignore case when uppercase is typed
 set incsearch       " incrementaly show search results

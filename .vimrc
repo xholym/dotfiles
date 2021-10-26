@@ -16,14 +16,15 @@ set softtabstop=4   " make soft tab 4 spaces
 set shiftwidth=4    " also make 4 spaces
 set expandtab       " convert tabs to spaces
 
-set nowrap		   	" don't wrap lines
-let &showbreak = '> '   " show this string wrapped line
-set linebreak textwidth=0 wrapmargin=0 " don't automatically insert line breaks at 80 column, does not work.
+" Search
 set ignorecase      " ignore case by default
 set smartcase       " do not ignore case when uppercase is typed
 set incsearch       " incrementaly show search results
 set hlsearch        " highlight searches
 set showmatch       " hightlight matching braces
+" Clear search
+nnoremap // :noh<CR>
+
 
 set noswapfile      " dont use swapfiles
 
@@ -71,14 +72,14 @@ nnoremap _ :vertical resize -5<CR>
 nnoremap <M-h> :tabp<CR>
 nnoremap <M-l> :tabn<CR>
 
-" Wrapping
+" Toggle wrapping
+set nowrap		   	" don't wrap lines
+let &showbreak = '> '   " show this string wrapped line
+set linebreak textwidth=0 wrapmargin=0 " don't automatically insert line breaks at 80 column, does not work.
 nnoremap <leader>` <cmd>set wrap!<CR>
 
 " Rather remap Capslock to Escape
 "inoremap jj <ESC>
-
-" Clear search
-nnoremap // :noh<CR>
 
 " Keep visual selection when indenting
 vnoremap > >gv

@@ -91,7 +91,7 @@ Plug 'nvim-telescope/telescope.nvim'
 Plug 'nvim-lua/plenary.nvim'                    " telescope requirement
 Plug 'kyazdani42/nvim-web-devicons'             " devicons for telescope
 " Does not work, gives error: fzf not installed.
-"Plug 'nvim-telescope/telescope-fzf-native.nvim', { 'do': 'make' }
+Plug 'nvim-telescope/telescope-fzf-native.nvim', { 'do': 'make' }
 
 Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && yarn install'  }
 
@@ -206,7 +206,16 @@ require('telescope').setup {
       },
     }
   },
+  extensions = {
+    fzf = {
+      fuzzy = true,
+      override_generic_sorter = true,  -- overrides the generic sorter
+      override_file_sorter = true,     -- overrides the file sorter
+      case_mode = "smart_case",
+    }
+  }
 }
+require('telescope').load_extension('fzf')
 EOF
 
 " --- COC ---

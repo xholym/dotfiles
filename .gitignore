@@ -12,11 +12,12 @@
 # */nvim
 !AppData/
 AppData/*
-!AppData/Local
+!AppData/Local/
 AppData/Local/*
-!*AppData/Local/nvim
+!*AppData/Local/nvim/
 
 # treesitter highlights
 !.vim/
-.vim/*
-!.vim/treesitter
+.vim/plugged/
+.vim/verbose.log
+.vim/undodir

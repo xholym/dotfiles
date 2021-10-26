@@ -6,21 +6,43 @@
 " - copy ~/.vim/treesitter/<lang>-highlights.scm to the respective language syntax queries
 " - install ripgrep
 "
-
 "
-" Notes:
-" TODO: Look into better fonts. Devicons in telescope do not work with FiraCode NF and Cascadia is ugly.
+" Todos:
 " TODO: Use font ligatures.
 "  - when nvim-qt will support them for windows.
 "  - https://github.com/equalsraf/neovim-qt/issues/166
 " TODO: Configure java debug.
 " TODO: configure queryDSL annnotation processor.
+" TODO: Checkout https://github.com/ivalkeen/nerdtree-execute
+"   to execute file from nerdtree. Useful to open pdfs and so on.
 "
-" TODO: Maybe try undotree with undofile if needed.
-"   - undofile persists undos after file close
-" TODO: Check out honza/vim-snippets
-" TODO: Check out ludovicchabant/vim-gutentags
+" Consider using snippets. Check out honza/vim-snippets.
 "
+"
+" Notes:
+" Im writing this down, cause it help me to remember these mappings and use them.
+" Useful commands to try:
+" *         - to search string under cursor
+" i_<C-o>    - execute command and go back to insert mode
+" :s//c     - count occurrences
+" @@        - execute last macro
+" g<C-a>    - increment sequentially
+" <C-^>     - go to last file
+" Use marks with m<reg> '<reg>.
+"
+" Use [s, ]s to navigate spelling mistakes
+" Use zg to add to global spell file
+" Use zg to add to global spell file
+"
+" In nerdtree:
+" m     - select operations: delele, move, copy, create...
+" p     - go to parent
+" u     - make root go up a dir
+"
+
+"
+"
+" Bugs:
 " Go to definition does not work for java library sources.
 "  - https://github.com/neoclide/coc-java/issues/82
 "  - this bug comes from a escaping problem on windows,
@@ -34,15 +56,6 @@
 "
 " Coc statusline with function definition does not work.
 " May try to use treesitter statusline.
-"
-" Useful commands to try:
-" *         - to search string under cursor
-" i_<C-o>    - execute command and go back to insert mode
-" :s//c     - count occurrences
-" @@        - execute last macro
-" g<C-a>    - increment sequentially
-" <C-^>     - go to last file
-" Use marks with m<reg> '<reg>.
 "
 
 set runtimepath^=~/.vim runtimepath+=~/.vim/after
@@ -58,49 +71,52 @@ set autowrite
 
 call plug#begin('~/.vim/plugged')    " initialize plugin system
 
-" Text edit
+" Commands
 Plug 'tpope/vim-surround'
 Plug 'tpope/vim-commentary'
-" Plug 'vim-scripts/argtextobj.vim'    " reconsider using intead of targets argtextobj
-Plug 'kana/vim-textobj-user'         " dependency of textobj-entire
-Plug 'kana/vim-textobj-entire'
-Plug 'jiangmiao/auto-pairs'          " automatically close ('`\"
+Plug 'tpope/vim-repeat'         " make surround repeatable with .
 Plug 'vim-scripts/ReplaceWithRegister'
 
-Plug 'machakann/vim-highlightedyank'
+" Textobjects
+Plug 'kana/vim-textobj-user'         " dependency of textobj-entire
+Plug 'kana/vim-textobj-entire'
+Plug 'wellle/targets.vim'       " adds more textobjects like args, separators (, . /) and so on
+" Plug 'vim-scripts/argtextobj.vim'    " reconsider using intead of targets argtextobj
 
-Plug 'neoclide/coc.nvim', {'branch': 'release'}
-Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
+" Changes to behaviour
+Plug 'jiangmiao/auto-pairs'          " automatically close ('`\"
+Plug 'machakann/vim-highlightedyank'
 
 " Themes
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
 Plug 'rafi/awesome-vim-colorschemes'
-
-Plug 'mhinz/vim-startify'
 Plug 'ryanoasis/vim-devicons'        " adds icons to plugins
+Plug 'mhinz/vim-startify'
 
 " Git
 Plug 'tpope/vim-fugitive'
 
+" Working directory navigation
 Plug 'preservim/nerdtree'
 Plug 'tiagofumo/vim-nerdtree-syntax-highlight'
 
 " Fuzzy finder
 Plug 'nvim-telescope/telescope.nvim'
 Plug 'nvim-lua/plenary.nvim'                    " telescope requirement
-Plug 'kyazdani42/nvim-web-devicons'             " devicons for telescope
-" Does not work, gives error: fzf not installed.
-Plug 'nvim-telescope/telescope-fzf-native.nvim', { 'do': 'make' }
+Plug 'nvim-telescope/telescope-fzf-native.nvim', { 'do': 'make' } " better sort and search
+Plug 'kyazdani42/nvim-web-devicons'  " devicons for telescope
 
-Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && yarn install'  }
+Plug 'mbbill/undotree'
 
+" Language support
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
+Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
 " More syntax highlighting.
 Plug 'nvim-treesitter/nvim-treesitter'
 Plug 'nvim-treesitter/playground'
+Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && yarn install'  }
 
-Plug 'tpope/vim-repeat'         " make surround repeatable with .
-Plug 'wellle/targets.vim'       " adds more textobjects like args, separators (, . /) and so on
 call plug#end()
 
 if (has("nvim"))
@@ -145,7 +161,7 @@ set cmdheight=2     " Try now and maybe remove later.
 " set spell
 " set spelllang=en,sk
 " TODO: Maybe move mapping to ~/.vimrc
-nnoremap <silent> <F11> :setlocal spell! spelllang=en,sk<CR>
+nnoremap <silent> <F11> <cmd>setlocal spell! spelllang=en,sk<CR>
 nnoremap z+ 1z=
 
 " Show nine spell checking candidates at most
@@ -154,11 +170,6 @@ hi clear SpellBad
 " Default spellbad colloring.
 " hi SpellBad cterm=underline ctermfg=204 gui=underline guifg=#E06C75
 hi SpellBad cterm=underline gui=underline
-
-" Notes:
-" Use [s, ]s to navigate spelling mistakes
-" Use zg to add to global spell file
-" Use zg to add to global spell file
 
 " Verbose file for debug.
 function! ToggleVerbose()
@@ -172,18 +183,11 @@ function! ToggleVerbose()
         set verbosefile=
     endif
 endfunction
-command ToggleVerbose :call ToggleVerbose()
+command ToggleVerbose <cmd>call ToggleVerbose()
+command! -complete=file -nargs=1 Rm :echo 'Remove: '.'<f-args>'.' '.(delete(<f-args>) == 0 ? 'SUCCEEDED' : 'FAILED')
 
 
 " ----- Plugin specific mappings -----
-
-" --- Devicons ---
-" lua <<EOF
-" require'nvim-web-devicons'.setup {
-"  -- Globaly enable devicons, overrides `get_icons` option
-"  default = true;
-"
-" EOF
 
 " --- Fuzzy search ---
 
@@ -199,7 +203,7 @@ nnoremap <leader>c <cmd>Telescope git_commits<cr>
 
 " Search in files
 nnoremap <leader>/ <cmd>Telescope live_grep<cr>
-nnoremap <leader>? :lua require('telescope.builtin').grep_string { search = vim.fn.input("Grep for ") } <cr>
+nnoremap <leader>? <cmd>lua require('telescope.builtin').grep_string { search = vim.fn.input("Grep for ") } <cr>
 
 " Telescope colorscheme is anther useful one.
 
@@ -230,6 +234,35 @@ require('telescope').setup {
 require('telescope').load_extension('fzf')
 EOF
 
+" ----- Airline -----
+let g:airline_powerline_fonts = 1
+
+" ----- Nerdtree -----
+map <C-n> <cmd>NERDTreeToggle<CR>
+let g:NERDTreeDirArrowExpandable = '▸'
+let g:NERDTreeDirArrowCollapsible = '▾'
+let NERDTreeShowHidden=1                    " Show hidden files
+let g:NERDTreeWinPos = "right"
+
+" --- Undo tree ---
+nnoremap <leader>u <cmd>UndotreeToggle<cr>
+set undodir=~/.vim/undodir
+set undofile
+"let g:undotree_WindowLayout = 2  " bigger diff window
+let g:undotree_ShortIndicators = 1
+"let g:undotree_SetFocusWhenToggle = 0  " set focus on undotree
+
+"--- Nvim treesitter ---
+lua <<EOF
+require'nvim-treesitter.configs'.setup {
+  ensure_installed = { "java", "kotlin" },
+  highlight = {
+    enable = true,
+    -- disable = { "c", "rust" },  -- Disable for these.
+  },
+}
+EOF
+
 " --- COC ---
 
 " - Sets -
@@ -242,15 +275,6 @@ set shortmess+=c
 
 
 " - Autocompletion -
-" Use tab for trigger completion with characters ahead and navigate.
-" NOTE: Use command ':verbose imap <tab>' to make sure tab is not mapped by
-" other plugin before putting this into your config.
-inoremap <silent><expr> <TAB>
-      \ pumvisible() ? "\<C-n>" :
-      \ <SID>check_back_space() ? "\<TAB>" :
-      \ coc#refresh()
-inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<C-h>"
-
 function! s:check_back_space() abort
   let col = col('.') - 1
   return !col || getline('.')[col - 1]  =~# '\s'
@@ -285,16 +309,16 @@ nmap <silent> gm <Plug>(coc-rename)
 
 " Quick fixes
 " Using e not q, because Q is used for fast quit.
-nnoremap <leader>E :CocFix<CR>
+nnoremap <leader>E <cmd>CocFix<CR>
 nmap <leader>e <plug>(coc-fix-current)
 
 nnoremap <leader>l <Plug>(coc-format)
 nnoremap <leader>L  <Plug>(coc-format-selected)
 
-nnoremap <leader>o :call CocAction('runCommand', 'editor.action.organizeImport')'<CR>
+nnoremap <leader>o <cmd>call CocAction('runCommand', 'editor.action.organizeImport')'<CR>
 "
 " Use K to show documentation in preview window.
-nnoremap <silent> K :call <SID>show_documentation()<CR>
+nnoremap <silent> K <cmd>call <SID>show_documentation()<CR>
 
 function! s:show_documentation()
   if (index(['vim','help'], &filetype) >= 0)
@@ -345,9 +369,9 @@ xmap <silent> <C-s> <Plug>(coc-range-select)
 " - Other settings -
 
 " Adds commands from COC
-command! -nargs=0 Format :call CocAction('format')
-command! -nargs=? Fold :call CocAction('fold', <f-args>)
-command! -nargs=0 OptimizeImports :call CocAction('runCommand', 'editor.action.organizeImport')'
+command! -nargs=0 Format <cmd>call CocAction('format')
+command! -nargs=? Fold <cmd>call CocAction('fold', <f-args>)
+command! -nargs=0 OptimizeImports <cmd>call CocAction('runCommand', 'editor.action.organizeImport')'
 
 augroup signiturehelp
   autocmd!
@@ -358,16 +382,6 @@ augroup end
 " Show current function on statusline
 " This does not work. TODO: Look into it.
 set statusline^=%{coc#status()}%{get(b:,'coc_current_function','')}
-
-" ----- Airline -----
-let g:airline_powerline_fonts = 1
-
-" ----- Nerdtree -----
-map <C-n> :NERDTreeToggle<CR>
-let g:NERDTreeDirArrowExpandable = '▸'
-let g:NERDTreeDirArrowCollapsible = '▾'
-let NERDTreeShowHidden=1                    " Show hidden files
-let g:NERDTreeWinPos = "right"
 
 " ----- Go -----
 
@@ -394,8 +408,8 @@ autocmd FileType go nmap <leader>t  <Plug>(go-test)
 
 " Autocomplete on .
 " au filetype go inoremap <buffer> . .<C-x><C-o>
-" au filetype go nnoremap gm :GoRename
-" au filetype go nnoremap ga :GoReferrers<CR> <C-w>j
+" au filetype go nnoremap gm <cmd>GoRename
+" au filetype go nnoremap ga <cmd>GoReferrers<CR> <C-w>j
 " au filetype go inoremap <C-Space> <C-x><C-o>
 " au filetype go inoremap <C-@> <C-Space>
 
@@ -409,15 +423,4 @@ if has('win32') || has('win64')
 else
   let Fnameescape = function('fnameescape')
 endif
-
-" --- Nvim treesitter ---
-lua <<EOF
-require'nvim-treesitter.configs'.setup {
-  ensure_installed = { "java", "kotlin" },
-  highlight = {
-    enable = true,
-    -- disable = { "c", "rust" },  -- Disable for these.
-  },
-}
-EOF
 

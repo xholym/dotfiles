@@ -17,6 +17,7 @@ set shiftwidth=4    " also make 4 spaces
 set expandtab       " convert tabs to spaces
 
 set nowrap		   	" don't wrap lines
+let &showbreak = '> '   " show this string wrapped line
 set linebreak textwidth=0 wrapmargin=0 " don't automatically insert line breaks at 80 column, does not work.
 set ignorecase      " ignore case by default
 set smartcase       " do not ignore case when uppercase is typed
@@ -71,8 +72,7 @@ nnoremap <M-h> :tabp<CR>
 nnoremap <M-l> :tabn<CR>
 
 " Wrapping
-nnoremap <leader>` :set wrap<CR>
-nnoremap <leader>~ :set nowrap<CR>
+nnoremap <leader>` <cmd>set wrap!<CR>
 
 " Rather remap Capslock to Escape
 "inoremap jj <ESC>

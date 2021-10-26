@@ -84,8 +84,9 @@ Plug 'wellle/targets.vim'       " adds more textobjects like args, separators (,
 " Plug 'vim-scripts/argtextobj.vim'    " reconsider using intead of targets argtextobj
 
 " Changes to behaviour
-Plug 'jiangmiao/auto-pairs'          " automatically close ('`\"
 Plug 'machakann/vim-highlightedyank'
+" Autopairs is causing more problems than helping.
+"Plug 'jiangmiao/auto-pairs'          " automatically close ('`\"
 
 " Themes
 Plug 'vim-airline/vim-airline'

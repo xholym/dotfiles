@@ -8,6 +8,7 @@
 "
 "
 " Todos:
+" TODO: Do not show telescope preview for some file extensions.
 " TODO: Use font ligatures.
 "  - when nvim-qt will support them for windows.
 "  - https://github.com/equalsraf/neovim-qt/issues/166

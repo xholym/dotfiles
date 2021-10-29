@@ -32,7 +32,7 @@
     ],
     "suggest.echodocSupport": true,
     "signature.enable": true,
-    "java.format.settings.url": "../../../../../../.vim/eclipse-formatter.xml",
+    "java.format.settings.url": "https://raw.githubusercontent.com/xholym/dotfiles/master/.vim/eclipse-formatter.xml",
     "java.completion.favoriteStaticMembers": [
         "*"
     ],

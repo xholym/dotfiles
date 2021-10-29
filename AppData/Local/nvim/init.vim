@@ -134,6 +134,7 @@ Plug 'mbbill/undotree'
 " Language support
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
+Plug 'ElmCast/elm-vim'
 " More syntax highlighting.
 Plug 'nvim-treesitter/nvim-treesitter'
 Plug 'nvim-treesitter/playground'
@@ -455,14 +456,5 @@ autocmd FileType go nmap <leader>t  <Plug>(go-test)
 " au filetype go inoremap <C-Space> <C-x><C-o>
 " au filetype go inoremap <C-@> <C-Space>
 
-" For Omni-completion:
-" Close preview window after autocomple selection is made
-" au CompleteDone * pclose
-if has('win32') || has('win64')
-  function Fnameescape(f)
-    return '`='.json_encode(a:f).'`'
-  endfunction
-else
-  let Fnameescape = function('fnameescape')
-endif
-
+" ----- Elm -----
+let g:elm_setup_keybindings = 0

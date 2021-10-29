@@ -376,6 +376,9 @@ function! s:show_documentation()
   endif
 endfunction
 
+" Highlight the symbol and its references when holding the cursor.
+autocmd CursorHold * silent call CocActionAsync('highlight')
+
 " CodeActions
 
 " Apply codeAction to the selected region.

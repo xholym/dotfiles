@@ -32,12 +32,12 @@
     ],
     "suggest.echodocSupport": true,
     "signature.enable": true,
+    "java.format.settings.url": "../../../../../../.vim/eclipse-formatter.xml",
     "java.completion.favoriteStaticMembers": [
         "*"
     ],
     "java.signatureHelp.enabled": true,
     "java.enabled": true,
     "java.trace.server": "verbose",
-    "java.jdt.ls.vmargs": "-javaagent:C:\\tools\\lombok.jar",
-    "java.format.settings.url": "C:\\Users\\matej\\AppData\\Local\\coc\\extensions\\node_modules\\redhat.java\\eclipse-formatter.xml"
+    "java.jdt.ls.vmargs": "-javaagent:C:\\tools\\lombok.jar"
 }

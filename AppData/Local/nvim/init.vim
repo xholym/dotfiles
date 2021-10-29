@@ -6,9 +6,11 @@
 " - copy ~/.vim/treesitter/<lang>-highlights.scm to the respective language syntax queries
 " - install ripgrep for telescope
 " - install make for telescope-fzf-native
+" - install elm-language-server with npm install -g @elm-tooling/elm-language-server
 "
 "
 " Todos:
+" TODO: Remap :diffget //2 and diffget //3
 " TODO: Configure working with git.
 " TODO: Import static codeaction missing for java.
 " - https://github.com/neoclide/coc-java/issues/64
@@ -55,6 +57,8 @@
 " For diagnostic messages, use 'diagnostic.messageTarget': 'echo' in settings.json.
 " For signature help, use 'signature.target': 'echo' in settings.json.
 " For documentation on hover, use 'hover.target': 'echo' in settings.json.
+"
+"
 "
 
 "
@@ -134,7 +138,7 @@ Plug 'mbbill/undotree'
 " Language support
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
-Plug 'ElmCast/elm-vim'
+Plug 'ElmCast/elm-vim' " better syntax highliging
 " More syntax highlighting.
 Plug 'nvim-treesitter/nvim-treesitter'
 Plug 'nvim-treesitter/playground'
@@ -356,6 +360,8 @@ nmap <leader>L  <Plug>(coc-format-selected)
 vmap <leader>L  <Plug>(coc-format-selected)
 
 nnoremap <leader>o <cmd>call CocAction('runCommand', 'editor.action.organizeImport')'<CR>
+
+nnoremap <leader>h <cmd>call CocAction('doHover')<CR>
 "
 " Use K to show documentation in preview window.
 nnoremap <silent> K <cmd>call <SID>show_documentation()<CR>
@@ -458,3 +464,5 @@ autocmd FileType go nmap <leader>t  <Plug>(go-test)
 
 " ----- Elm -----
 let g:elm_setup_keybindings = 0
+let g:elm_format_autosave = 0       " Fuck this. Wasted so much time disabling this..
+let g:elm_format_fail_silently = 0

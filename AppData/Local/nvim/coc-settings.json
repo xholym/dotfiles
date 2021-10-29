@@ -1,14 +1,22 @@
 {
+    "coc.preferences.formatOnSaveFiletypes": [],
     "languageserver": {
-        "golang": {
+        "goLS": {
            "command": "gopls",
             "rootPatterns": ["go.mod", ".vim/", ".git/", ".hg/"],
             "filetypes": ["go"]
         },
-        "elm": {
-            "command": "elm-language-server",
+        "elmLS": {
+            "command": "elm-language-server.cmd",
             "filetypes": ["elm"],
-            "rootPatterns": ["elm.json"]
+            "rootPatterns": ["elm.json"],
+            "initializationOptions": {
+                "elmPath": "elm",
+                "elmFormatPath": "elm-format",
+                "elmTestPath": "elm-test",
+                "disableElmLSDiagnostics": false,
+                "skipInstallPackageConfirmation": false
+            }
         }
     },
     "java.configuration.runtimes": [

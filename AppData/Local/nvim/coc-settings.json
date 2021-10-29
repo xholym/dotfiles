@@ -17,6 +17,12 @@
         "path": "C:\\Program Files\\Java\\jdk-14.0.2"
       }
     ],
+    "suggest.echodocSupport": true,
+    "signature.enable": true,
+    "java.completion.favoriteStaticMembers": [
+        "*"
+    ],
+    "java.signatureHelp.enabled": true,
     "java.enabled": true,
     "java.trace.server": "verbose",
     "java.jdt.ls.vmargs": "-javaagent:C:\\tools\\lombok.jar",

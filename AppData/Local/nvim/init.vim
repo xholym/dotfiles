@@ -2,13 +2,20 @@
 " Requirements:
 " - C compiler is needed for treesitter to work (otherwise the is C compiler not found error.
 " - lombok in C:\tools\lombok.jar
-" - install coc-java, coc-kotlin, coc-json
+" - install coc-java, coc-kotlin, coc-json, coc-tsserver
 " - copy ~/.vim/treesitter/<lang>-highlights.scm to the respective language syntax queries
 " - install ripgrep for telescope
 " - install make for telescope-fzf-native
 "
 "
 " Todos:
+" TODO: Configure working with git.
+" TODO: Import static codeaction missing for java.
+" - https://github.com/neoclide/coc-java/issues/64
+" TODO: Fix java formatting settings.
+" TODO: Shorten filename in tabs.
+" - https://stackoverflow.com/questions/2468939/how-to-let-tab-display-only-file-name-rather-than-the-full-path-in-vim
+" TODO: Trying out syntax highlighting for java types, so consider keeping it.
 " TODO: Do not show telescope preview for some file extensions.
 "  - it wrote with default previewer 'binary cannot be previewed' on my work pc
 "       so this may work on its own.
@@ -16,11 +23,10 @@
 "  - when nvim-qt will support them for windows.
 "  - https://github.com/equalsraf/neovim-qt/issues/166
 " TODO: Configure java debug.
-" TODO: configure queryDSL annnotation processor.
 " TODO: Checkout https://github.com/ivalkeen/nerdtree-execute
 "   to execute file from nerdtree. Useful to open pdfs and so on.
 "
-" Consider using snippets. Check out honza/vim-snippets.
+" TODO: Consider using snippets. Check out honza/vim-snippets.
 "
 "
 " Notes:
@@ -43,10 +49,21 @@
 " p     - go to parent
 " u     - make root go up a dir
 "
+" Coc config:
+" https://github.com/neoclide/coc.nvim/blob/master/data/schema.json
+" For documentation of completion, use 'suggest.floatEnable': false in settings.json.
+" For diagnostic messages, use 'diagnostic.messageTarget': 'echo' in settings.json.
+" For signature help, use 'signature.target': 'echo' in settings.json.
+" For documentation on hover, use 'hover.target': 'echo' in settings.json.
+"
 
 "
 "
-" Bugs:
+" Bugs_or_Restrictions:
+"
+" Gradle annotation processing does not work by default.
+" It must be configured in build.gradle of project with plugin 'net.ltgt.apt-eclipse'.
+"
 " Go to definition does not work for java library sources.
 "  - https://github.com/neoclide/coc-java/issues/82
 "  - this bug comes from a escaping problem on windows,
@@ -124,6 +141,7 @@ Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && yarn install'  }
 
 call plug#end()
 
+" ----- Theme ------
 if (has("nvim"))
    let $NVIM_TUI_ENABLE_TRUE_COLOR=1
 endif
@@ -132,7 +150,10 @@ if (has("termguicolors"))
  endif
 " Colorschemes
 colorscheme onedark
-let g:airline_theme = 'onedark'
+" Airline theme should be automatically selected.
+" let g:airline_theme = 'onedark'
+let g:airline_stl_path_style = 'short'
+let g:airline_section_c_only_filename = 1
 
 set colorcolumn=80
 
@@ -144,22 +165,19 @@ hi Comment ctermfg=Green guifg=Green
 hi clear markdownCodeBlock
 
 set noshowmode                          " don't show because of airline
-
+set signcolumn=yes " column to show diagnostics and not appear and disappear
+" Give more space for displaying messages.
+set cmdheight=2     " Try now and maybe remove later.
 
 autocmd Filetype python setlocal expandtab tabstop=4 shiftwidth=4 softtabstop=4
 autocmd Filetype go setlocal expandtab tabstop=4 shiftwidth=4 softtabstop=4
 autocmd Filetype java setlocal expandtab tabstop=4 shiftwidth=4 softtabstop=4
 autocmd Filetype markdown setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
 
-
-set signcolumn=yes " column to show diagnostics and not appear and disappear
-
 " Having longer updatetime (default is 4000 ms = 4 s) leads to noticeable
 " " delays and poor user experience.
 set updatetime=300
 "
-" Give more space for displaying messages.
-set cmdheight=2     " Try now and maybe remove later.
 
 " Spelling
 " Not using global for now.
@@ -199,11 +217,11 @@ command! -complete=file -nargs=1 Rm :echo 'Remove: '.'<f-args>'.' '.(delete(<f-a
 " FIles
 nnoremap <leader>f <cmd>Telescope find_files<cr>
 nnoremap <leader>g <cmd>Telescope git_files<cr>
-nnoremap <leader>c <cmd>Telescope buffers<cr>
+nnoremap <leader>b <cmd>Telescope buffers<cr>
 nnoremap <leader><Tab> <cmd>Telescope oldfiles<CR>
 
 " Git
-nnoremap <leader>x <cmd>Telescope git_status<cr>
+nnoremap <leader>s <cmd>Telescope git_status<cr>
 nnoremap <leader>c <cmd>Telescope git_commits<cr>
 
 " Search in files
@@ -211,7 +229,10 @@ nnoremap <leader>/ <cmd>Telescope live_grep<cr>
 nnoremap <leader>? <cmd>lua require('telescope.builtin').grep_string { search = vim.fn.input("Grep for ") } <cr>
 
 " Vim help
+" Search for marks
 nnoremap <leader>m <cmd>Telescope marks<cr>
+" Quickly go to some my config file
+command Dotfiles :lua require('telescope.builtin').git_files { cwd = '~' } <cr>
 
 " Telescope colorscheme is anther useful one.
 
@@ -248,12 +269,14 @@ EOF
 let g:airline_powerline_fonts = 1
 
 " ----- Nerdtree -----
-map <C-n> <cmd>NERDTreeToggle<CR>
+nnoremap <C-n> <cmd>NERDTreeToggle<CR>
+nnoremap <leader>r <cmd>NERDTreeFind<CR>
 let g:NERDTreeDirArrowExpandable = '▸'
 let g:NERDTreeDirArrowCollapsible = '▾'
 let NERDTreeShowHidden=1                    " Show hidden files
 let g:NERDTreeWinPos = "right"
 let NERDTreeQuitOnOpen=1
+:let g:NERDTreeWinSize=60           " Maybe do this just for some file types.
 " Refresh devicons so nerdtree does not show [] around icons
 if exists('g:loaded_webdevicons')
   call webdevicons#refresh()
@@ -270,7 +293,7 @@ let g:undotree_ShortIndicators = 1
 "--- Nvim treesitter ---
 lua <<EOF
 require'nvim-treesitter.configs'.setup {
-  ensure_installed = { "java", "kotlin" },
+  ensure_installed = { "java", "kotlin", "typescript" },
   highlight = {
     enable = true,
     -- disable = { "c", "rust" },  -- Disable for these.
@@ -327,8 +350,9 @@ nmap <silent> gm <Plug>(coc-rename)
 nnoremap <leader>E <cmd>CocFix<CR>
 nmap <leader>e <plug>(coc-fix-current)
 
-nnoremap <leader>l <Plug>(coc-format)
-nnoremap <leader>L  <Plug>(coc-format-selected)
+nmap <leader>l <Plug>(coc-format)
+nmap <leader>L  <Plug>(coc-format-selected)
+vmap <leader>L  <Plug>(coc-format-selected)
 
 nnoremap <leader>o <cmd>call CocAction('runCommand', 'editor.action.organizeImport')'<CR>
 "

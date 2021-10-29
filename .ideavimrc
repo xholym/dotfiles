@@ -86,11 +86,10 @@ vnoremap zY "*Y
 nnoremap [g :action GotoNextError<CR>
 nnoremap ]g :action GotoPreviousError<CR>
 
-nnoremap gf :action GotoFile<CR>
-nnoremap gb :action JumpToLastChange<CR>
-nnoremap gn :action GotoClass<CR>
+nnoremap <leader>f :action GotoFile<CR>
+nnoremap <leader>g :action GotoClass<CR>
 nnoremap gm :action RenameElement<CR>
-nnoremap <leader>f :action FileStructurePopup<CR>
+nnoremap <leader>. :action FileStructurePopup<CR>
 nnoremap <leader>p :action ParameterInfo<CR>
 nnoremap <leader>z :action ToggleDistractionFreeMode<CR>
 nnoremap <leader>e :action RecentFiles<CR>

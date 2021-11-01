@@ -193,8 +193,10 @@ if exists(':GuiFont')
     noremap <M-_> :call AdjustFontSize(-1)<CR>
 endif
 " -- Neovide --
-"let g:neovide_fullscreen=v:true
+let g:neovide_fullscreen=v:true
 let neovide_remember_window_size = v:true
+command -nargs=0 NeovideToggleFullscreen :let g:neovide_fullscreen = !g:neovide_fullscreen
+nnoremap <C-+> <cmd>NeovideToggleFullscreen<CR>
 
 set noshowmode                          " don't show because of airline
 set signcolumn=yes " column to show diagnostics and not appear and disappear
@@ -208,7 +210,7 @@ let g:airline_stl_path_style = 'short'
 let g:airline_section_c_only_filename = 1
 let g:airline_powerline_fonts = 1
 let g:airline#extensions#tabline#enabled = 1
-let g:airline#extensions#tabline#formatter = 'unique_tail_improved'
+let g:airline#extensions#tabline#formatter = 'unique_tail'
 let g:airline#extensions#tabline#left_sep = ' '
 let g:airline#extensions#tabline#left_alt_sep = '|'
 

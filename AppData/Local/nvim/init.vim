@@ -155,10 +155,6 @@ if (has("termguicolors"))
  endif
 " Colorschemes
 colorscheme onedark
-" Airline theme should be automatically selected.
-" let g:airline_theme = 'onedark'
-let g:airline_stl_path_style = 'short'
-let g:airline_section_c_only_filename = 1
 
 set colorcolumn=80
 
@@ -169,10 +165,52 @@ hi Comment ctermfg=Green guifg=Green
 " Do not highlight indented text in markdown
 hi clear markdownCodeBlock
 
+
+set guifont=FiraCode\ NF:h14
+function! AdjustFontSize(amount)
+  let g:fontsize = g:fontsize+a:amount
+  :execute "set guifont=FiraCode\ NF:h" . g:fontsize
+  " This echo statment does not work.
+  :execute "echo \"Fontsize adjusted to \"" . g:fontsize
+endfunction
+
+noremap <M-+> :call AdjustFontSize(1)<CR>
+noremap <M-_> :call AdjustFontSize(-1)<CR>
+if exists(':GuiFont')
+    " If client is nvim-qt.
+    GuiFont! FiraCode NF:h10
+    GuiPopupmenu 0
+
+    let g:fontsize = 10
+    function! AdjustFontSize(amount)
+      let g:fontsize = g:fontsize+a:amount
+      :execute "GuiFont! FiraCode NF:h" . g:fontsize
+      " This echo statment does not work.
+      :execute "echo \"Fontsize adjusted to \"" . g:fontsize
+    endfunction
+
+    noremap <M-+> :call AdjustFontSize(1)<CR>
+    noremap <M-_> :call AdjustFontSize(-1)<CR>
+endif
+" -- Neovide --
+"let g:neovide_fullscreen=v:true
+let neovide_remember_window_size = v:true
+
 set noshowmode                          " don't show because of airline
 set signcolumn=yes " column to show diagnostics and not appear and disappear
 " Give more space for displaying messages.
 set cmdheight=2     " Try now and maybe remove later.
+
+" ----- Airline -----
+" Airline theme should be automatically selected.
+" let g:airline_theme = 'onedark'
+let g:airline_stl_path_style = 'short'
+let g:airline_section_c_only_filename = 1
+let g:airline_powerline_fonts = 1
+let g:airline#extensions#tabline#enabled = 1
+let g:airline#extensions#tabline#formatter = 'unique_tail_improved'
+let g:airline#extensions#tabline#left_sep = ' '
+let g:airline#extensions#tabline#left_alt_sep = '|'
 
 autocmd Filetype python setlocal expandtab tabstop=4 shiftwidth=4 softtabstop=4
 autocmd Filetype go setlocal expandtab tabstop=4 shiftwidth=4 softtabstop=4
@@ -182,7 +220,6 @@ autocmd Filetype markdown setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=
 " Having longer updatetime (default is 4000 ms = 4 s) leads to noticeable
 " " delays and poor user experience.
 set updatetime=300
-"
 
 " Spelling
 " Not using global for now.
@@ -270,8 +307,6 @@ require('telescope').setup {
 require('telescope').load_extension('fzf')
 EOF
 
-" ----- Airline -----
-let g:airline_powerline_fonts = 1
 
 " ----- Nerdtree -----
 nnoremap <C-n> <cmd>NERDTreeToggle<CR>

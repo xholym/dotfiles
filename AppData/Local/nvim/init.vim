@@ -11,7 +11,6 @@
 "
 " Todos:
 " TODO: Remap :diffget //2 and diffget //3
-" TODO: Configure working with git.
 " TODO: Import static codeaction missing for java.
 " - https://github.com/neoclide/coc-java/issues/64
 " TODO: Fix java formatting settings.
@@ -21,14 +20,9 @@
 " TODO: Do not show telescope preview for some file extensions.
 "  - it wrote with default previewer 'binary cannot be previewed' on my work pc
 "       so this may work on its own.
-" TODO: Use font ligatures.
-"  - when nvim-qt will support them for windows.
-"  - https://github.com/equalsraf/neovim-qt/issues/166
 " TODO: Configure java debug.
 " TODO: Checkout https://github.com/ivalkeen/nerdtree-execute
 "   to execute file from nerdtree. Useful to open pdfs and so on.
-"
-" TODO: Consider using snippets. Check out honza/vim-snippets.
 "
 "
 " Notes:
@@ -137,8 +131,10 @@ Plug 'mbbill/undotree'
 
 " Language support
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
+Plug 'honza/vim-snippets'
 Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
 Plug 'ElmCast/elm-vim' " better syntax highliging
+Plug 'udalov/kotlin-vim'
 " More syntax highlighting.
 Plug 'nvim-treesitter/nvim-treesitter'
 Plug 'nvim-treesitter/playground'
@@ -166,7 +162,8 @@ hi Comment ctermfg=Green guifg=Green
 hi clear markdownCodeBlock
 
 
-set guifont=FiraCode\ NF:h14
+set guifont=FiraCode\ NF:h10
+let g:fontsize = 10
 function! AdjustFontSize(amount)
   let g:fontsize = g:fontsize+a:amount
   :execute "set guifont=FiraCode\ NF:h" . g:fontsize
@@ -178,19 +175,7 @@ noremap <M-+> :call AdjustFontSize(1)<CR>
 noremap <M-_> :call AdjustFontSize(-1)<CR>
 if exists(':GuiFont')
     " If client is nvim-qt.
-    GuiFont! FiraCode NF:h10
     GuiPopupmenu 0
-
-    let g:fontsize = 10
-    function! AdjustFontSize(amount)
-      let g:fontsize = g:fontsize+a:amount
-      :execute "GuiFont! FiraCode NF:h" . g:fontsize
-      " This echo statment does not work.
-      :execute "echo \"Fontsize adjusted to \"" . g:fontsize
-    endfunction
-
-    noremap <M-+> :call AdjustFontSize(1)<CR>
-    noremap <M-_> :call AdjustFontSize(-1)<CR>
 endif
 " -- Neovide --
 let g:neovide_fullscreen=v:true
@@ -335,10 +320,10 @@ let g:undotree_ShortIndicators = 1
 "--- Nvim treesitter ---
 lua <<EOF
 require'nvim-treesitter.configs'.setup {
-  ensure_installed = { "java", "kotlin", "typescript" },
+  ensure_installed = { "java", "typescript" },
   highlight = {
     enable = true,
-    -- disable = { "c", "rust" },  -- Disable for these.
+    disable = { "kotlin" },
   },
 }
 EOF

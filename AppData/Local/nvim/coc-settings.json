@@ -14,8 +14,10 @@
                 "elmPath": "elm",
                 "elmFormatPath": "elm-format",
                 "elmTestPath": "elm-test",
+                "elmReviewPath": "elm-review",
                 "disableElmLSDiagnostics": false,
-                "skipInstallPackageConfirmation": false
+                "skipInstallPackageConfirmation": false,
+                "onlyUpdateDiagnosticsOnSave": false
             }
         }
     },

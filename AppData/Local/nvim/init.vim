@@ -131,6 +131,14 @@ Plug 'mbbill/undotree'
 
 " Language support
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
+let g:coc_global_extensions = ['coc-tsserver',
+\ 'coc-json',
+\ 'coc-html-css-support',
+\ 'coc-css',
+\ 'coc-java',
+\ 'coc-kotlin',
+\ 'coc-json',
+\ 'coc-tsserver']
 Plug 'honza/vim-snippets'
 Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
 Plug 'ElmCast/elm-vim' " better syntax highliging

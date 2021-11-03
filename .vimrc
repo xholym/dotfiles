@@ -86,6 +86,9 @@ nnoremap ; :
 " And use : as ; to go to next f/t hit.
 nnoremap : ;
 
+" Open vimrc on new tab
+nnoremap <leader>v <cmd>tabe $MYVIMRC<CR>:vs ~/.vimrc<CR><C-w>h
+
 " Keep visual selection when indenting
 vnoremap > >gv
 vnoremap < <gv

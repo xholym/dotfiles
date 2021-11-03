@@ -191,7 +191,7 @@ endif
 " -- Neovide --
 let g:neovide_fullscreen=v:true
 let neovide_remember_window_size = v:true
-command -nargs=0 NeovideToggleFullscreen :let g:neovide_fullscreen = !g:neovide_fullscreen
+command! -nargs=0 NeovideToggleFullscreen :let g:neovide_fullscreen = !g:neovide_fullscreen
 nnoremap <C-+> <cmd>NeovideToggleFullscreen<CR>
 
 set noshowmode                          " don't show because of airline
@@ -246,12 +246,15 @@ function! ToggleVerbose()
         set verbosefile=
     endif
 endfunction
-command ToggleVerbose <cmd>call ToggleVerbose()
+command! ToggleVerbose <cmd>call ToggleVerbose()
 command! -complete=file -nargs=1 Rm :echo 'Remove: '.'<f-args>'.' '.(delete(<f-args>) == 0 ? 'SUCCEEDED' : 'FAILED')
 
 
 " ----- Plugin specific mappings -----
 
+" --- Git ---
+" https://dpwright.com/posts/2018/04/06/graphical-log-with-vimfugitive/
+command! -nargs=* Glg Git! log --graph --abbrev-commit --decorate --format=format:'%s %C(bold yellow)%d%C(reset) %C(bold green)(%ar)%C(reset) %C(dim white)<%an>%C(reset) %C(bold blue)%h%C(reset)' --all<args>
 " --- Fuzzy search ---
 
 " FIles
@@ -275,7 +278,7 @@ nnoremap <leader>, <cmd>Telescope resume<cr>
 " Search for marks
 nnoremap <leader>m <cmd>Telescope marks<cr>
 " Quickly go to some my config file
-command Dotfiles :lua require('telescope.builtin').git_files { cwd = '~' } <cr>
+command! Dotfiles :lua require('telescope.builtin').git_files { cwd = '~' } <cr>
 
 " Telescope colorscheme is anther useful one.
 

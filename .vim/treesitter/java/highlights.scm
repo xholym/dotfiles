@@ -17,16 +17,16 @@
 ; Do not highlight function params.
 ;(formal_parameter
 ;  name: (identifier) @parameter)
-(catch_formal_parameter
-  name: (identifier) @parameter)
+;(catch_formal_parameter
+;  name: (identifier) @parameter)
 
-(spread_parameter
- (variable_declarator) @parameter) ; int... foo
+;(spread_parameter
+; (variable_declarator) @parameter) ; int... foo
 
 ;; Lambda parameter
-(inferred_parameters (identifier) @parameter) ; (x,y) -> ...
-(lambda_expression
-    parameters: (identifier) @parameter) ; x -> ...
+;(inferred_parameters (identifier) @parameter) ; (x,y) -> ...
+;(lambda_expression
+;    parameters: (identifier) @parameter) ; x -> ...
 
 
 ; Annotations

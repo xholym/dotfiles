@@ -81,6 +81,11 @@ nnoremap <leader>` <cmd>set wrap!<CR>
 " Rather remap Capslock to Escape
 "inoremap jj <ESC>
 
+" Don't hit Shift to start command mode.
+nnoremap ; :
+" And use : as ; to go to next f/t hit.
+nnoremap : ;
+
 " Keep visual selection when indenting
 vnoremap > >gv
 vnoremap < <gv
@@ -108,10 +113,6 @@ vnoremap K :m '>-2<CR>gv=gv
 " Probably not needed fo normal mode
 "nnoremap <leader>j :m .+1<CR>==
 "nnoremap <leader>k :m .-2<CR>==
-
-" Faster file saving and exiting
-nnoremap <leader>w :w<CR>
-nnoremap <leader>q :q<CR>
 
 " Search and replace template
 nnoremap <leader>\ :%s//gc<left><left><left>

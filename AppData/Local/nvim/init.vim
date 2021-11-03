@@ -10,6 +10,7 @@
 "
 "
 " Todos:
+" TODO: Make vim airline shorter or act different with vertical splits.
 " TODO: Remap :diffget //2 and diffget //3
 " TODO: Import static codeaction missing for java.
 " - https://github.com/neoclide/coc-java/issues/64
@@ -95,6 +96,8 @@ Plug 'tpope/vim-surround'
 Plug 'tpope/vim-commentary'
 Plug 'tpope/vim-repeat'         " make surround repeatable with .
 Plug 'vim-scripts/ReplaceWithRegister'
+" Plug 'justinmk/vim-sneak'     " add after I'm good with f/t
+Plug 'AndrewRadev/switch.vim'
 
 " Textobjects
 Plug 'kana/vim-textobj-user'         " dependency of textobj-entire
@@ -264,6 +267,9 @@ nnoremap <leader>c <cmd>Telescope git_commits<cr>
 " Search in files
 nnoremap <leader>/ <cmd>Telescope live_grep<cr>
 nnoremap <leader>? <cmd>lua require('telescope.builtin').grep_string { search = vim.fn.input("Grep for ") } <cr>
+
+" Resume last search
+nnoremap <leader>, <cmd>Telescope resume<cr>
 
 " Vim help
 " Search for marks
@@ -464,6 +470,13 @@ set statusline^=%{coc#status()}%{get(b:,'coc_current_function','')}
 
 " ----- Java ----
 command JavaProjektImport CocCommand java.projectConfiguration.update
+" Switch for java properties <-> getters usages.
+autocmd FileType java let b:switch_custom_definitions =  [
+    \   {
+    \     '\.\(get\)\@!\(\k\)\(\k*\)\>': '\.get\u\2\3\(\)',
+    \     '\.\get\(\k\)\(\k*\)\>()':     '.\l\1\2',
+    \   }
+    \ ]
 
 " ----- Go ------
 

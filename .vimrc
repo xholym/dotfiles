@@ -106,6 +106,8 @@ nnoremap zY "*Y
 nnoremap zP "*P
 vnoremap zy "*y
 vnoremap zY "*Y
+" TODO: go to end of pasted text
+inoremap <C-v> <C-O>"*p
 
 " Do not move cursor while joining
 "nnoremap J mzJ'z

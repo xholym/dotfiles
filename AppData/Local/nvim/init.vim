@@ -189,7 +189,7 @@ if exists(':GuiFont')
     GuiPopupmenu 0
 endif
 " -- Neovide --
-let g:neovide_fullscreen=v:true
+"let g:neovide_fullscreen=v:true
 let neovide_remember_window_size = v:true
 command! -nargs=0 NeovideToggleFullscreen :let g:neovide_fullscreen = !g:neovide_fullscreen
 nnoremap <C-+> <cmd>NeovideToggleFullscreen<CR>

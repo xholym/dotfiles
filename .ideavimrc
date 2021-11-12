@@ -60,8 +60,7 @@ nnoremap <M-h> :tabp<CR>
 nnoremap <M-l> :tabn<CR>
 
 " -- Main mappings --
-
-inoremap jj <ESC>
+nnoremap ; :
 
 " Keep visual selection when indenting
 vnoremap > >gv

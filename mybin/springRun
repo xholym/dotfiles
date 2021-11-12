@@ -1,0 +1,30 @@
+#!/usr/bin/env sh
+
+# TODO: Add option to choose maven or gradle and default to gralde.
+
+while [ True ]; do
+    if [ "$1" = "--profile" -o "$1" = "-p" ]; then
+        echo "setting profile arg"
+        profile="--args=\"--spring.profiles.active=$2\""
+        shift 2
+    elif [ "$1" = "--console-plain" -o "$1" = "-c" ]; then
+        console="--console plain"
+        shift 1
+    else
+        break
+    fi
+done
+
+# Set parameter defaults.
+if [ -z "$console" ]
+then
+    console=""
+fi
+if [ -z "$profile" ]
+then
+    profile=""
+fi
+
+echo "Running spring boot app with profile='$profile' and console='$console'."
+
+./gradlew bootRun $profile $console

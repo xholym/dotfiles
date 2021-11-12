@@ -1,0 +1,8 @@
+#!/usr/bin/env sh
+
+git fetch
+git pull origin master:master
+
+branch=$(git branch --show-current)
+git checkout master
+git branch -D ${branch}

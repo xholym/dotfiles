@@ -7,9 +7,11 @@
 " - install ripgrep for telescope
 " - install make for telescope-fzf-native
 " - install elm-language-server with npm install -g @elm-tooling/elm-language-server
+" - install MikTex and SumatraPDF for latex.
 "
 "
 " Todos:
+" TODO: Consider hi default CocUnderline cterm=underline gui=undercurl
 " TODO: Make vim airline shorter or act different with vertical splits.
 " TODO: Remap :diffget //2 and diffget //3
 " TODO: Import static codeaction missing for java.
@@ -134,18 +136,21 @@ Plug 'mbbill/undotree'
 
 " Language support
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
-let g:coc_global_extensions = ['coc-tsserver',
+let g:coc_global_extensions = [
 \ 'coc-json',
 \ 'coc-html-css-support',
 \ 'coc-css',
 \ 'coc-java',
 \ 'coc-kotlin',
 \ 'coc-json',
-\ 'coc-tsserver']
+\ 'coc-tsserver',
+\ 'coc-texlab',
+\ 'coc-vimtex']
 Plug 'honza/vim-snippets'
 Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
 Plug 'ElmCast/elm-vim' " better syntax highliging
 Plug 'udalov/kotlin-vim'
+Plug 'lervag/vimtex'
 " More syntax highlighting.
 Plug 'nvim-treesitter/nvim-treesitter'
 Plug 'nvim-treesitter/playground'
@@ -362,11 +367,8 @@ function! s:check_back_space() abort
   return !col || getline('.')[col - 1]  =~# '\s'
 endfunction
 " Use <c-space> to trigger completion.
-if has('nvim')
-    inoremap <silent><expr> <c-space> coc#refresh()
-  else
-    inoremap <silent><expr> <c-@> coc#refresh()
-endif
+inoremap <silent><expr> <c-space> coc#refresh()
+inoremap <silent><expr> <c-@> coc#refresh()
 
 " Make <CR> auto-select the first completion item and notify coc.nvim to
 " format on enter, <cr> could be remapped by other vim plugin
@@ -515,3 +517,10 @@ autocmd FileType go nmap <leader>t  <Plug>(go-test)
 let g:elm_setup_keybindings = 0
 let g:elm_format_autosave = 0       " Fuck this. Wasted so much time disabling this..
 let g:elm_format_fail_silently = 0
+
+" ----- Latex -----
+" Set previewer to SumatraPDF
+let g:vimtex_view_general_viewer = 'SumatraPDF'
+let g:vimtex_view_general_options
+    \ = '-reuse-instance -forward-search @tex @line @pdf'
+let g:vimtex_view_general_options_latexmk = '-reuse-instance'

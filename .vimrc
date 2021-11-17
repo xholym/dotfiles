@@ -83,8 +83,9 @@ nnoremap <leader>` <cmd>set wrap!<CR>
 
 " Don't hit Shift to start command mode.
 nnoremap ; :
-" And use : as ; to go to next f/t hit.
-nnoremap : ;
+" And use , as ; to go to next f/t hit and : as , to go to previous.
+nnoremap , ;
+nnoremap : ,
 
 " Open vimrc on new tab
 nnoremap <leader>v <cmd>tabe $MYVIMRC<CR>:vs ~/.vimrc<CR><C-w>h

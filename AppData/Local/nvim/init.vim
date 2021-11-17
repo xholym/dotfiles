@@ -11,7 +11,7 @@
 "
 "
 " Todos:
-" TODO: Consider hi default CocUnderline cterm=underline gui=undercurl
+" TODO: Consider
 " TODO: Make vim airline shorter or act different with vertical splits.
 " TODO: Remap :diffget //2 and diffget //3
 " TODO: Import static codeaction missing for java.
@@ -109,8 +109,10 @@ Plug 'wellle/targets.vim'       " adds more textobjects like args, separators (,
 
 " Changes to behaviour
 Plug 'machakann/vim-highlightedyank'
+Plug 'tpope/vim-speeddating'         " <C-a> increment for dates and such, vim not seeing '-' as minus
 " Autopairs is causing more problems than helping.
 "Plug 'jiangmiao/auto-pairs'          " automatically close ('`\"
+Plug 'Raimondi/delimitMate'          " automatically close ('`\"
 
 " Themes
 Plug 'vim-airline/vim-airline'
@@ -176,6 +178,8 @@ set colorcolumn=80
 hi Comment ctermfg=Green guifg=Green
 " Do not highlight indented text in markdown
 hi clear markdownCodeBlock
+" I like undercurl better here.
+hi CocUnderline cterm=underline gui=undercurl
 
 
 set guifont=FiraCode\ NF:h10
@@ -393,8 +397,8 @@ nmap <silent> gm <Plug>(coc-rename)
 
 " Quick fixes
 " Using e not q, because Q is used for fast quit.
-nnoremap <leader>E <cmd>CocFix<CR>
-nmap <leader>e <plug>(coc-fix-current)
+nnoremap <leader>e <cmd>CocFix<CR>
+nmap <leader>E <plug>(coc-fix-current)
 
 nmap <leader>l <Plug>(coc-format)
 nmap <leader>L  <Plug>(coc-format-selected)

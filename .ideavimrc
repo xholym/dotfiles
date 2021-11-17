@@ -61,6 +61,7 @@ nnoremap <M-l> :tabn<CR>
 
 " -- Main mappings --
 nnoremap ; :
+nnoremap : ;
 
 " Keep visual selection when indenting
 vnoremap > >gv

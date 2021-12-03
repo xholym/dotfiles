@@ -95,8 +95,11 @@ vnoremap > >gv
 vnoremap < <gv
 
 " Create new lines in and stay in normal mode
-nmap zj o<Esc>k
-nmap zk O<Esc>j
+nnoremap zj o<Esc>k
+nnoremap zk O<Esc>j
+" Put space behind or after cursor
+nnoremap z9 i <Esc>
+nnoremap z0 a <Esc>
 
 " Yanking
 nnoremap Y y$

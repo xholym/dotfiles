@@ -193,13 +193,14 @@ endfunction
 
 noremap <M-+> :call AdjustFontSize(1)<CR>
 noremap <M-_> :call AdjustFontSize(-1)<CR>
-if exists(':GuiFont')
-    " If client is nvim-qt.
-    GuiPopupmenu 0
-endif
+
 " -- Neovide --
 "let g:neovide_fullscreen=v:true
 let neovide_remember_window_size = v:true
+let g:neovide_refresh_rate=100
+let g:neovide_no_idle=v:true
+let g:neovide_cursor_animation_length=0
+let g:neovide_cursor_trail_length=0
 command! -nargs=0 NeovideToggleFullscreen :let g:neovide_fullscreen = !g:neovide_fullscreen
 nnoremap <C-+> <cmd>NeovideToggleFullscreen<CR>
 
@@ -226,7 +227,7 @@ autocmd Filetype markdown setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=
 
 " Having longer updatetime (default is 4000 ms = 4 s) leads to noticeable
 " " delays and poor user experience.
-set updatetime=300
+set updatetime=100
 
 " Spelling
 " Not using global for now.
@@ -500,7 +501,8 @@ let g:go_highlight_function_calls = 1
 let g:go_highlight_operators = 1
 
  " Auto formatting and importing
-"let g:go_fmt_autosave = 1
+let g:go_fmt_autosave = 0
+let g:go_imports_autosave = 0
 let g:go_fmt_command = "goimports"
 
 " Status line types/signatures

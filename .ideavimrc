@@ -79,17 +79,20 @@ nnoremap zY "*Y
 nnoremap zP "*P
 vnoremap zy "*y
 vnoremap zY "*Y
+vnoremap zp "*p
 
 
 " --- IDEA mappings ---
 
 nnoremap [g :action GotoNextError<CR>
 nnoremap ]g :action GotoPreviousError<CR>
+nnoremap [e :action GotoNextError<CR>
+nnoremap ]e :action GotoPreviousError<CR>
 
 nnoremap <leader>f :action GotoFile<CR>
 nnoremap <leader>g :action GotoClass<CR>
 nnoremap gm :action RenameElement<CR>
-nnoremap <leader>. :action FileStructurePopup<CR>
+nnoremap <leader>; :action FileStructurePopup<CR>
 nnoremap <leader>p :action ParameterInfo<CR>
 nnoremap <leader>z :action ToggleDistractionFreeMode<CR>
 nnoremap <leader>e :action RecentFiles<CR>
@@ -98,6 +101,7 @@ nnoremap <leader>l :action ReformatCode<CR>
 nnoremap <leader>o :action OptimizeImports<CR>
 nnoremap <leader>i :action ImplementMethods<CR>
 nnoremap <leader>O :action OverrideMethods<CR>
+nnoremap <leader>e :action ShowIntentionActions<CR>
 
 " nnoremap <M-h> :action PreviousTab<CR>
 " nnoremap <M-l> :action NextTab<CR>

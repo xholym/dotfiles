@@ -8,6 +8,7 @@
 " - install make for telescope-fzf-native
 " - install elm-language-server with npm install -g @elm-tooling/elm-language-server
 " - install MikTex and SumatraPDF for latex.
+" - install ccls (On windows using choco install ccls)
 "
 "
 " Todos:
@@ -153,6 +154,7 @@ Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
 Plug 'ElmCast/elm-vim' " better syntax highliging
 Plug 'udalov/kotlin-vim'
 Plug 'lervag/vimtex'
+Plug 'jackguo380/vim-lsp-cxx-highlight'
 " More syntax highlighting.
 Plug 'nvim-treesitter/nvim-treesitter'
 Plug 'nvim-treesitter/playground'
@@ -182,14 +184,15 @@ hi clear markdownCodeBlock
 hi CocUnderline cterm=underline gui=undercurl
 
 
-set guifont=FiraCode\ NF:h10
-let g:fontsize = 10
-function! AdjustFontSize(amount)
-  let g:fontsize = g:fontsize+a:amount
-  :execute "set guifont=FiraCode\ NF:h" . g:fontsize
-  " This echo statment does not work.
-  :execute "echo \"Fontsize adjusted to \"" . g:fontsize
-endfunction
+" Use this for something else than nvim-qt
+" set guifont=FiraCode\ NF:h10
+" let g:fontsize = 10
+" function! AdjustFontSize(amount)
+"   let g:fontsize = g:fontsize+a:amount
+"   :execute "set guifont=FiraCode\ NF:h" . g:fontsize
+"   " This echo statment does not work.
+"   :execute "echo \"Fontsize adjusted to \"" . g:fontsize
+" endfunction
 
 noremap <M-+> :call AdjustFontSize(1)<CR>
 noremap <M-_> :call AdjustFontSize(-1)<CR>
@@ -220,10 +223,15 @@ let g:airline#extensions#tabline#formatter = 'unique_tail'
 let g:airline#extensions#tabline#left_sep = ' '
 let g:airline#extensions#tabline#left_alt_sep = '|'
 
-autocmd Filetype python setlocal expandtab tabstop=4 shiftwidth=4 softtabstop=4
-autocmd Filetype go setlocal expandtab tabstop=4 shiftwidth=4 softtabstop=4
-autocmd Filetype java setlocal expandtab tabstop=4 shiftwidth=4 softtabstop=4
-autocmd Filetype markdown setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
+augroup my_spaces
+    au!
+    autocmd Filetype python setlocal expandtab tabstop=4 shiftwidth=4 softtabstop=4
+    autocmd Filetype go setlocal expandtab tabstop=4 shiftwidth=4 softtabstop=4
+    autocmd Filetype java setlocal expandtab tabstop=4 shiftwidth=4 softtabstop=4
+    autocmd Filetype markdown setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
+    autocmd Filetype tex setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
+    autocmd Filetype json setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
+augroup end
 
 " Having longer updatetime (default is 4000 ms = 4 s) leads to noticeable
 " " delays and poor user experience.
@@ -306,6 +314,9 @@ require('telescope').setup {
       i = {
         ['<esc>'] = actions.close,
         ['jj'] = { '<esc>', type = 'command' },
+        -- Use same horizontal and vertical mappings as Nerdtree.
+        ["<C-i>"] = actions.select_horizontal,
+        ["<C-s>"] = actions.select_vertical,
       },
     },
   },
@@ -330,7 +341,7 @@ let g:NERDTreeDirArrowCollapsible = '▾'
 let NERDTreeShowHidden=1                    " Show hidden files
 let g:NERDTreeWinPos = "right"
 let NERDTreeQuitOnOpen=1
-:let g:NERDTreeWinSize=60           " Maybe do this just for some file types.
+let g:NERDTreeWinSize=60           " Maybe do this just for some file types.
 " Refresh devicons so nerdtree does not show [] around icons
 if exists('g:loaded_webdevicons')
   call webdevicons#refresh()
@@ -488,9 +499,12 @@ autocmd FileType java let b:switch_custom_definitions =  [
     \   }
     \ ]
 
-" ----- Go ------
+nnoremap <silent><nowait> <space>a  :<C-u>CocList diagnostics<cr>
+
+" ----- Golang ------
 
 let g:go_def_mapping_enables = 0  " use gd from COC
+let g:go_doc_keywordprg_enabled = 0 " use K from COC
 
 " Go syntax highlighting
 let g:go_highlight_fields = 1
@@ -508,10 +522,6 @@ let g:go_fmt_command = "goimports"
 " Status line types/signatures
 let g:go_auto_type_info = 1
 
- " Map keys for most used commands.
-autocmd FileType go nmap <leader>r  <Plug>(go-run)
-autocmd FileType go nmap <leader>t  <Plug>(go-test)
-
 " Autocomplete on .
 " au filetype go inoremap <buffer> . .<C-x><C-o>
 " au filetype go nnoremap gm <cmd>GoRename
@@ -526,7 +536,22 @@ let g:elm_format_fail_silently = 0
 
 " ----- Latex -----
 " Set previewer to SumatraPDF
+let g:tex_flavor='latex'
+let g:vimtex_quickfix_mode=0
+
 let g:vimtex_view_general_viewer = 'SumatraPDF'
 let g:vimtex_view_general_options
     \ = '-reuse-instance -forward-search @tex @line @pdf'
 let g:vimtex_view_general_options_latexmk = '-reuse-instance'
+
+augroup my_latex
+    au!
+    autocmd FileType tex set wrap
+augroup end
+
+" ----- C++ -------
+let g:cpp_class_scope_highlight = 1
+let g:cpp_member_variable_highlight = 1
+let g:cpp_class_decl_highlight = 1
+" For more highlights run
+" :help vim-lsp-cxx-highlight

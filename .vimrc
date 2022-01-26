@@ -47,6 +47,8 @@ set showcmd         " show partial commnand in the bottom
 
 set noerrorbells
 
+set matchtime=0      " time in tenths of seconds to jump to previous pair when closing
+
 
 " ----- Other settings -----
 augroup trim_whitespace
@@ -111,7 +113,7 @@ nnoremap zP "*P
 vnoremap zy "*y
 vnoremap zY "*Y
 " TODO: go to end of pasted text
-inoremap <C-v> <C-O>"*p
+inoremap <C-v> <C-o>"*P
 
 " Do not move cursor while joining
 "nnoremap J mzJ'z

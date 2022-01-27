@@ -108,10 +108,10 @@ nnoremap Y y$
 " Copy from clipboard
 nnoremap zp "*p
 nnoremap zy "*y
-nnoremap zY "*Y
+nnoremap zY "*y$
 nnoremap zP "*P
 vnoremap zy "*y
-vnoremap zY "*Y
+vnoremap zY "*y$
 " TODO: go to end of pasted text
 inoremap <C-v> <C-o>"*P
 

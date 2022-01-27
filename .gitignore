@@ -22,3 +22,6 @@ AppData/Local/*
 .vim/plugged/
 .vim/verbose.log
 .vim/undodir
+
+# git templates
+!.git-templates/

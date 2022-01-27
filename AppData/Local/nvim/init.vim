@@ -268,6 +268,9 @@ command! ToggleVerbose <cmd>call ToggleVerbose()
 command! -complete=file -nargs=1 Rm :echo 'Remove: '.'<f-args>'.' '.(delete(<f-args>) == 0 ? 'SUCCEEDED' : 'FAILED')
 
 
+command! Qother execute '%bdelete | edit # | normal `"'
+command! Qo execute '%bdelete | edit # | normal `"'
+
 " ----- Plugin specific mappings -----
 
 " --- Git ---
@@ -555,3 +558,9 @@ let g:cpp_member_variable_highlight = 1
 let g:cpp_class_decl_highlight = 1
 " For more highlights run
 " :help vim-lsp-cxx-highlight
+
+augroup cpp_comments
+    au!
+    "  Prefer // for c++ files and not /* which is the default.
+    autocmd FileType cpp setlocal commentstring=//\ %s
+augroup end

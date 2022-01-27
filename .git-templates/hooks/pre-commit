@@ -1,0 +1,17 @@
+#!/bin/bash
+
+# Don't commit if nocheckin is found
+# and show how many files contain nocheckin.
+
+files=$(git diff -i --diff-filter=d --cached --name-only -G nocheckin)
+
+count=$(echo $files | wc -l)
+if [ $count -gt 0 ]; then
+    echo "Commit canceled! nocheckin found in $count files:"
+    for f in $files
+    do
+        echo "- $f"
+    done
+    exit 1
+fi
+exit 0

@@ -91,8 +91,11 @@ nnoremap ]g :action GotoPreviousError<CR>
 nnoremap [e :action GotoNextError<CR>
 nnoremap ]e :action GotoPreviousError<CR>
 
+" navigation
 nnoremap <leader>f :action GotoFile<CR>
 nnoremap <leader>g :action GotoClass<CR>
+nnoremap <leader><tab> :action RecentFiles<CR>
+
 nnoremap gm :action RenameElement<CR>
 nnoremap <leader>; :action FileStructurePopup<CR>
 nnoremap <leader>p :action ParameterInfo<CR>
@@ -109,6 +112,7 @@ nnoremap <leader>e :action ShowIntentionActions<CR>
 " nnoremap <M-l> :action NextTab<CR>
 
 nnoremap <leader>/ :action FindInPath<cr>
+nnoremap <leader>? :action ReplaceInPath<cr>
 
 " View - tool windows
 " Must be configured in IDEA
@@ -121,3 +125,6 @@ nnoremap <leader>/ :action FindInPath<cr>
 
 nnoremap <leader>r :action Run<CR>
 nnoremap <leader>d :action Debug<CR>
+
+command! Qother execute 'action CloseAllEditorsButActive'
+command! Qo execute 'action CloseAllEditorsButActive'

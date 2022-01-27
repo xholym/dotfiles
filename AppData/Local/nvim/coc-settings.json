@@ -25,14 +25,12 @@
           "rootPatterns": [".ccls-root", "compile_commands.json"],
           "initializationOptions": {
             "cache": {
-              "directory": ".ccls-cache"
+              "directory": "C:\\tools\\ccls\\.ccls_cache"
             },
             "client": {
               "snippetSupport": true
             },
-            // Re-index a file on buffer change, this is a performance hit.
             "index": { "onChange": true },
-            // For highlighting by vim-lsp-cxx-highlight
             "highlight": { "lsRanges" : true }
           }
         }

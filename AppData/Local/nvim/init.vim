@@ -12,7 +12,7 @@
 "
 "
 " Todos:
-" TODO: Consider
+" TODO: Checkout easy align plugin https://www.giters.com/junegunn/vim-easy-align
 " TODO: Make vim airline shorter or act different with vertical splits.
 " TODO: Remap :diffget //2 and diffget //3
 " TODO: Import static codeaction missing for java.
@@ -141,12 +141,14 @@ Plug 'mbbill/undotree'
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 let g:coc_global_extensions = [
 \ 'coc-json',
+\ 'coc-html',
 \ 'coc-html-css-support',
 \ 'coc-css',
 \ 'coc-java',
 \ 'coc-kotlin',
 \ 'coc-json',
 \ 'coc-tsserver',
+\ 'coc-tslint-plugin',
 \ 'coc-texlab',
 \ 'coc-vimtex']
 Plug 'honza/vim-snippets'

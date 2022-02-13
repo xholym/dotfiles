@@ -42,6 +42,10 @@ set showmatch       " hightlight matching braces
 
 set showcmd         " show partial commnand in the bottom
 
+" Source vimrc
+command! SourceVimrc execute 'action IdeaVim.ReloadVimRc.reload'
+command! So execute 'action IdeaVim.ReloadVimRc.reload'
+
 " This does not get sourced from vimrc
 nnoremap // :noh<CR>
 
@@ -86,6 +90,8 @@ vnoremap zp "*p
 
 " --- IDEA mappings ---
 
+nnoremap [[ :action MethodUp<CR>
+nnoremap ]] :action MethodDown<CR>
 nnoremap [g :action GotoNextError<CR>
 nnoremap ]g :action GotoPreviousError<CR>
 nnoremap [e :action GotoNextError<CR>
@@ -128,3 +134,7 @@ nnoremap <leader>d :action Debug<CR>
 
 command! Qother execute 'action CloseAllEditorsButActive'
 command! Qo execute 'action CloseAllEditorsButActive'
+command! Qleft execute 'action CloseAllToTheLeft'
+command! Ql execute 'action CloseAllToTheLeft'
+command! Qright execute 'action CloseAllToTheLeft'
+command! Qr execute 'action CloseAllToTheRight'

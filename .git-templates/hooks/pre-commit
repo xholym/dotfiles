@@ -5,7 +5,7 @@
 
 files=$(git diff -i --diff-filter=d --cached --name-only -G nocheckin)
 
-count=$(echo $files | wc -l)
+count=$(echo $files |  grep -c '.')
 if [ $count -gt 0 ]; then
     echo "Commit canceled! nocheckin found in $count files:"
     for f in $files

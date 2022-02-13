@@ -97,6 +97,7 @@ call plug#begin('~/.vim/plugged')    " initialize plugin system
 " Commands
 Plug 'tpope/vim-surround'
 Plug 'tpope/vim-commentary'
+Plug 'JoosepAlviste/nvim-ts-context-commentstring'  " set commentstring base on treesitter context
 Plug 'tpope/vim-repeat'         " make surround repeatable with .
 Plug 'vim-scripts/ReplaceWithRegister'
 " Plug 'justinmk/vim-sneak'     " add after I'm good with f/t
@@ -149,6 +150,7 @@ let g:coc_global_extensions = [
 \ 'coc-json',
 \ 'coc-tsserver',
 \ 'coc-tslint-plugin',
+\ 'coc-emmet',
 \ 'coc-texlab',
 \ 'coc-vimtex']
 Plug 'honza/vim-snippets'
@@ -161,7 +163,6 @@ Plug 'jackguo380/vim-lsp-cxx-highlight'
 Plug 'nvim-treesitter/nvim-treesitter'
 Plug 'nvim-treesitter/playground'
 Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && yarn install'  }
-
 call plug#end()
 
 " ----- Theme ------
@@ -227,12 +228,19 @@ let g:airline#extensions#tabline#left_alt_sep = '|'
 
 augroup my_spaces
     au!
-    autocmd Filetype python setlocal expandtab tabstop=4 shiftwidth=4 softtabstop=4
-    autocmd Filetype go setlocal expandtab tabstop=4 shiftwidth=4 softtabstop=4
-    autocmd Filetype java setlocal expandtab tabstop=4 shiftwidth=4 softtabstop=4
-    autocmd Filetype markdown setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
-    autocmd Filetype tex setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
-    autocmd Filetype json setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
+    autocmd Filetype python          setlocal expandtab tabstop=4 shiftwidth=4 softtabstop=4
+    autocmd Filetype go              setlocal expandtab tabstop=4 shiftwidth=4 softtabstop=4
+    autocmd Filetype java            setlocal expandtab tabstop=4 shiftwidth=4 softtabstop=4
+    autocmd Filetype markdown        setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
+    autocmd Filetype tex             setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
+    autocmd Filetype json            setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
+    autocmd Filetype typescript      setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
+    autocmd Filetype typescriptreact setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
+augroup end
+
+augroup my_comments
+    au!
+    autocmd FileType cpp setlocal commentstring=//\ %s
 augroup end
 
 " Having longer updatetime (default is 4000 ms = 4 s) leads to noticeable
@@ -363,11 +371,14 @@ let g:undotree_ShortIndicators = 1
 "--- Nvim treesitter ---
 lua <<EOF
 require'nvim-treesitter.configs'.setup {
-  ensure_installed = { "java", "typescript" },
+  ensure_installed = { "java", "javascript", "typescript", "tsx" },
   highlight = {
     enable = true,
     disable = { "kotlin" },
   },
+  context_commentstring = {
+    enable = true
+  }
 }
 EOF
 
@@ -560,9 +571,3 @@ let g:cpp_member_variable_highlight = 1
 let g:cpp_class_decl_highlight = 1
 " For more highlights run
 " :help vim-lsp-cxx-highlight
-
-augroup cpp_comments
-    au!
-    "  Prefer // for c++ files and not /* which is the default.
-    autocmd FileType cpp setlocal commentstring=//\ %s
-augroup end

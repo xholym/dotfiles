@@ -9,4 +9,3 @@ function! AdjustFontSize(amount)
   :execute "echo \"Fontsize adjusted to \"" . g:fontsize
 endfunction
 
-hi CocUnderline cterm=underline gui=underline

@@ -120,6 +120,8 @@ Plug 'Raimondi/delimitMate'          " automatically close ('`\"
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
 Plug 'rafi/awesome-vim-colorschemes'
+Plug 'ap/vim-css-color'
+Plug 'savq/melange'
 Plug 'ryanoasis/vim-devicons'        " adds icons to plugins
 Plug 'mhinz/vim-startify'
 
@@ -140,19 +142,21 @@ Plug 'mbbill/undotree'
 
 " Language support
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
+" \ 'coc-java', " disable for now
 let g:coc_global_extensions = [
 \ 'coc-json',
 \ 'coc-html',
 \ 'coc-html-css-support',
 \ 'coc-css',
-\ 'coc-java',
 \ 'coc-kotlin',
 \ 'coc-json',
 \ 'coc-tsserver',
 \ 'coc-tslint-plugin',
 \ 'coc-emmet',
 \ 'coc-texlab',
-\ 'coc-vimtex']
+\ 'coc-vimtex',
+\ 'coc-yaml',
+\ 'coc-prettier']
 Plug 'honza/vim-snippets'
 Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
 Plug 'ElmCast/elm-vim' " better syntax highliging
@@ -165,69 +169,64 @@ Plug 'nvim-treesitter/playground'
 Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && yarn install'  }
 call plug#end()
 
-" ----- Theme ------
+" ------ Highlighting --------
+"
 if (has("nvim"))
    let $NVIM_TUI_ENABLE_TRUE_COLOR=1
 endif
 if (has("termguicolors"))
    set termguicolors
  endif
+
 " Colorschemes
-colorscheme onedark
+colorscheme melange
+" colorscheme onedark
+
+" Disable italics for melange colorscheme
+hi Comment gui=NONE
+hi String gui=NONE
+hi Todo gui=NONE
+hi TSVariableBuiltin gui=NONE
+hi TSConstBuiltin gui=NONE
 
 set colorcolumn=80
 
-" TSTypes are disabled for java by editing java/highlights.scm.
-" Consider disabling TStypes this way.
-"hi link TSType NONE
 hi Comment ctermfg=Green guifg=Green
+" consider String color change for melange
+" hi String ctermfg=DarkGreen guifg=#69764D
+
+" For melange colorscheme
+" hi Function guifg=#EBC06D " This is the default fo melange
+" hi Function guifg=#FFE88D
+hi Function guifg=#ECDFA0
+" This is the normal default
+" hi Normal guifg=#ECE1D7
+" Consider making normal little brighter
+" hi Normal guifg=#FCF1E7
+hi Identifier ctermfg=LightMagenta guifg=#FFD0FA
+" hi Delimiter guifg=#8E733F " This is the default.
+" Making Delimiter a little brighter.
+hi Delimiter guifg=#AE935F
+
+
 " Do not highlight indented text in markdown
 hi clear markdownCodeBlock
-" I like undercurl better here.
-hi CocUnderline cterm=underline gui=undercurl
 
+" hi CocUnderline cterm=underline gui=underline
 
-" Use this for something else than nvim-qt
-" set guifont=FiraCode\ NF:h10
-" let g:fontsize = 10
-" function! AdjustFontSize(amount)
-"   let g:fontsize = g:fontsize+a:amount
-"   :execute "set guifont=FiraCode\ NF:h" . g:fontsize
-"   " This echo statment does not work.
-"   :execute "echo \"Fontsize adjusted to \"" . g:fontsize
-" endfunction
+" Show nine spell checking candidates at most
+set spellsuggest=best,9
+hi clear SpellBad
+" Default spellbad colloring.
+" hi SpellBad cterm=underline ctermfg=204 gui=underline guifg=#E06C75
+hi SpellBad cterm=underline gui=underline
 
 noremap <M-+> :call AdjustFontSize(1)<CR>
 noremap <M-_> :call AdjustFontSize(-1)<CR>
 
-" -- Neovide --
-"let g:neovide_fullscreen=v:true
-let neovide_remember_window_size = v:true
-let g:neovide_refresh_rate=100
-let g:neovide_no_idle=v:true
-let g:neovide_cursor_animation_length=0
-let g:neovide_cursor_trail_length=0
-command! -nargs=0 NeovideToggleFullscreen :let g:neovide_fullscreen = !g:neovide_fullscreen
-nnoremap <C-+> <cmd>NeovideToggleFullscreen<CR>
-
-set noshowmode                          " don't show because of airline
-set signcolumn=yes " column to show diagnostics and not appear and disappear
-" Give more space for displaying messages.
-set cmdheight=2     " Try now and maybe remove later.
-
-" ----- Airline -----
-" Airline theme should be automatically selected.
-" let g:airline_theme = 'onedark'
-let g:airline_stl_path_style = 'short'
-let g:airline_section_c_only_filename = 1
-let g:airline_powerline_fonts = 1
-let g:airline#extensions#tabline#enabled = 1
-let g:airline#extensions#tabline#formatter = 'unique_tail'
-let g:airline#extensions#tabline#left_sep = ' '
-let g:airline#extensions#tabline#left_alt_sep = '|'
-
-augroup my_spaces
+augroup my_syntax
     au!
+    " Indent sizes
     autocmd Filetype python          setlocal expandtab tabstop=4 shiftwidth=4 softtabstop=4
     autocmd Filetype go              setlocal expandtab tabstop=4 shiftwidth=4 softtabstop=4
     autocmd Filetype java            setlocal expandtab tabstop=4 shiftwidth=4 softtabstop=4
@@ -236,12 +235,44 @@ augroup my_spaces
     autocmd Filetype json            setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
     autocmd Filetype typescript      setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
     autocmd Filetype typescriptreact setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
+
+
+    " Use my highlights for these languages
+    autocmd Filetype java            setlocal syntax=java
+    autocmd Filetype typescript      setlocal syntax=typescript
+    autocmd Filetype typescriptreact setlocal syntax=typescript
+
+    autocmd FileType cpp setlocal commentstring=//\ %s
+
+    " Custom switch definitions
+    autocmd FileType java let b:switch_custom_definitions =  [
+        \   {
+        \     '\.\(get\)\@!\(\k\)\(\k*\)\>': '\.get\u\2\3\(\)',
+        \     '\.\get\(\k\)\(\k*\)\>()':     '.\l\1\2',
+        \   }
+        \ ]
 augroup end
 
-augroup my_comments
-    au!
-    autocmd FileType cpp setlocal commentstring=//\ %s
-augroup end
+set noshowmode                          " don't show because of airline
+set signcolumn=yes " column to show diagnostics and not appear and disappear
+" Give more space for displaying messages.
+set cmdheight=2     " Try now and maybe remove later.
+
+" ----- Airline -----
+" Airline theme should be automatically selected.
+" let g:airline_theme = 'base16_espresso'
+" let g:airline_theme = 'minimalist'
+" let g:airline_theme = 'monochrome'
+" let g:airline_theme = 'term'
+let g:airline_theme = 'tomorrow'
+" let g:airline_theme = 'transparent'
+let g:airline_stl_path_style = 'short'
+let g:airline_section_c_only_filename = 1
+let g:airline_powerline_fonts = 1
+let g:airline#extensions#tabline#enabled = 1
+let g:airline#extensions#tabline#formatter = 'unique_tail'
+let g:airline#extensions#tabline#left_sep = ' '
+let g:airline#extensions#tabline#left_alt_sep = '|'
 
 " Having longer updatetime (default is 4000 ms = 4 s) leads to noticeable
 " " delays and poor user experience.
@@ -254,13 +285,6 @@ set updatetime=100
 " TODO: Maybe move mapping to ~/.vimrc
 nnoremap <silent> <F11> <cmd>setlocal spell! spelllang=en,sk<CR>
 nnoremap z+ 1z=
-
-" Show nine spell checking candidates at most
-set spellsuggest=best,9
-hi clear SpellBad
-" Default spellbad colloring.
-" hi SpellBad cterm=underline ctermfg=204 gui=underline guifg=#E06C75
-hi SpellBad cterm=underline gui=underline
 
 " Verbose file for debug.
 function! ToggleVerbose()
@@ -354,7 +378,7 @@ let g:NERDTreeDirArrowCollapsible = '▾'
 let NERDTreeShowHidden=1                    " Show hidden files
 let g:NERDTreeWinPos = "right"
 let NERDTreeQuitOnOpen=1
-let g:NERDTreeWinSize=60           " Maybe do this just for some file types.
+let g:NERDTreeWinSize=50           " Maybe do this just for some file types.
 " Refresh devicons so nerdtree does not show [] around icons
 if exists('g:loaded_webdevicons')
   call webdevicons#refresh()
@@ -371,12 +395,15 @@ let g:undotree_ShortIndicators = 1
 "--- Nvim treesitter ---
 lua <<EOF
 require'nvim-treesitter.configs'.setup {
-  ensure_installed = { "java", "javascript", "typescript", "tsx" },
+  ensure_installed = { "c", "cpp", "java", "javascript", "typescript", "tsx", "css", "html" },
   highlight = {
     enable = true,
-    disable = { "kotlin" },
+    disable = { "kotlin" }, -- kotlin syntax highlight does not work correctly.
   },
   context_commentstring = {
+    enable = true
+  },
+  playground = {
     enable = true
   }
 }
@@ -414,6 +441,7 @@ nmap <silent> [g <Plug>(coc-diagnostic-prev)
 nmap <silent> ]g <Plug>(coc-diagnostic-next)
 nmap <silent> [e <Plug>(coc-diagnostic-prev-error)
 nmap <silent> ]e <Plug>(coc-diagnostic-next-error)
+nnoremap <silent><nowait> <space>a  :<C-u>CocList diagnostics<cr>
 
 " Code syntax tree operations
 nmap <silent> gd <Plug>(coc-definition)
@@ -428,9 +456,9 @@ nmap <silent> gm <Plug>(coc-rename)
 nnoremap <leader>e <cmd>CocFix<CR>
 nmap <leader>E <plug>(coc-fix-current)
 
-nmap <leader>l <Plug>(coc-format)
-nmap <leader>L  <Plug>(coc-format-selected)
-vmap <leader>L  <Plug>(coc-format-selected)
+nmap <leader>l  <Plug>(coc-format-selected)
+nmap <leader>L <Plug>(coc-format)
+vmap <leader>l  <Plug>(coc-format-selected)
 
 nnoremap <leader>o <cmd>call CocAction('runCommand', 'editor.action.organizeImport')'<CR>
 
@@ -450,7 +478,10 @@ function! s:show_documentation()
 endfunction
 
 " Highlight the symbol and its references when holding the cursor.
-autocmd CursorHold * silent call CocActionAsync('highlight')
+augroup my_cursorHighlight
+    au!
+    autocmd CursorHold * silent call CocActionAsync('highlight')
+augroup end
 
 " CodeActions
 
@@ -463,14 +494,14 @@ nmap <leader>A  <Plug>(coc-codeaction)
 " Map function and class text objects
 " " NOTE: Requires 'textDocument.documentSymbol' support from the language
 " server.
-xnoremap if <Plug>(coc-funcobj-i)
-onoremap if <Plug>(coc-funcobj-i)
-xnoremap af <Plug>(coc-funcobj-a)
-onoremap af <Plug>(coc-funcobj-a)
-xnoremap ic <Plug>(coc-classobj-i)
-onoremap ic <Plug>(coc-classobj-i)
-xnoremap ac <Plug>(coc-classobj-a)
-onoremap ac <Plug>(coc-classobj-a)
+xmap if <Plug>(coc-funcobj-i)
+omap if <Plug>(coc-funcobj-i)
+xmap af <Plug>(coc-funcobj-a)
+omap af <Plug>(coc-funcobj-a)
+xmap ic <Plug>(coc-classobj-i)
+omap ic <Plug>(coc-classobj-i)
+xmap ac <Plug>(coc-classobj-a)
+omap ac <Plug>(coc-classobj-a)
 
 " Remap <C-f> and <C-b> for scroll float windows/popups.
 if has('nvim-0.4.0') || has('patch-8.2.0750')
@@ -507,15 +538,7 @@ set statusline^=%{coc#status()}%{get(b:,'coc_current_function','')}
 
 " ----- Java ----
 command JavaProjektImport CocCommand java.projectConfiguration.update
-" Switch for java properties <-> getters usages.
-autocmd FileType java let b:switch_custom_definitions =  [
-    \   {
-    \     '\.\(get\)\@!\(\k\)\(\k*\)\>': '\.get\u\2\3\(\)',
-    \     '\.\get\(\k\)\(\k*\)\>()':     '.\l\1\2',
-    \   }
-    \ ]
 
-nnoremap <silent><nowait> <space>a  :<C-u>CocList diagnostics<cr>
 
 " ----- Golang ------
 
@@ -571,3 +594,6 @@ let g:cpp_member_variable_highlight = 1
 let g:cpp_class_decl_highlight = 1
 " For more highlights run
 " :help vim-lsp-cxx-highlight
+
+" ------ Typescript -----
+

@@ -2,6 +2,7 @@ set nocompatible
 set encoding=utf-8
 
 syntax on
+syntax enable
 
 set number		    " make current line number not relative
 set relativenumber	" enable relative line numbers

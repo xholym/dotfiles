@@ -106,6 +106,7 @@ Plug 'AndrewRadev/switch.vim'
 " Textobjects
 Plug 'kana/vim-textobj-user'         " dependency of textobj-entire
 Plug 'kana/vim-textobj-entire'
+Plug 'kana/vim-textobj-line'
 Plug 'wellle/targets.vim'       " adds more textobjects like args, separators (, . /) and so on
 " Plug 'vim-scripts/argtextobj.vim'    " reconsider using intead of targets argtextobj
 
@@ -115,6 +116,8 @@ Plug 'tpope/vim-speeddating'         " <C-a> increment for dates and such, vim n
 " Autopairs is causing more problems than helping.
 "Plug 'jiangmiao/auto-pairs'          " automatically close ('`\"
 Plug 'Raimondi/delimitMate'          " automatically close ('`\"
+
+Plug 'alvan/vim-closetag'
 
 " Themes
 Plug 'vim-airline/vim-airline'
@@ -131,6 +134,7 @@ Plug 'tpope/vim-fugitive'
 " Working directory navigation
 Plug 'preservim/nerdtree'
 Plug 'tiagofumo/vim-nerdtree-syntax-highlight'
+Plug 'ivalkeen/nerdtree-execute'
 
 " Fuzzy finder
 Plug 'nvim-telescope/telescope.nvim'
@@ -209,8 +213,14 @@ hi Identifier ctermfg=LightMagenta guifg=#FFD0FA
 hi Delimiter guifg=#AE935F
 
 
-" Do not highlight indented text in markdown
 hi clear markdownCodeBlock
+
+hi link gitCommitSummary Normal
+hi link gitCommitOverflow SpellBad
+
+hi link tsxAttrib Normal
+hi link tsxTag TSConstructor
+hi link tsxTagName TSConstructor
 
 " hi CocUnderline cterm=underline gui=underline
 
@@ -236,11 +246,14 @@ augroup my_syntax
     autocmd Filetype typescript      setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
     autocmd Filetype typescriptreact setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
 
-
     " Use my highlights for these languages
-    autocmd Filetype java            setlocal syntax=java
-    autocmd Filetype typescript      setlocal syntax=typescript
-    autocmd Filetype typescriptreact setlocal syntax=typescript
+    autocmd Filetype java             setlocal syntax=java
+    " autocmd Filetype typescript       setlocal syntax=typescript
+    " autocmd Filetype typescriptreact  setlocal syntax=typescript
+
+    autocmd BufNewFile,BufRead *.ts  set syntax=typescript
+    autocmd BufNewFile,BufRead *.tsx set syntax=typescriptreact
+
 
     autocmd FileType cpp setlocal commentstring=//\ %s
 
@@ -477,12 +490,6 @@ function! s:show_documentation()
   endif
 endfunction
 
-" Highlight the symbol and its references when holding the cursor.
-augroup my_cursorHighlight
-    au!
-    autocmd CursorHold * silent call CocActionAsync('highlight')
-augroup end
-
 " CodeActions
 
 " Apply codeAction to the selected region.
@@ -518,6 +525,26 @@ endif
 " TODO: Delete if I won't use it.
 nmap <silent> <C-s> <Plug>(coc-range-select)
 xmap <silent> <C-s> <Plug>(coc-range-select)
+
+" --- close tag ---
+let g:closetag_filenames = '*.html,*.xhtml,*.jsx,*.tsx'
+let g:closetag_xhtml_filenames = '*.xml,*.xhtml,*.jsx,*.tsx'
+let g:closetag_filetypes = 'html,xhtml,jsx,tsx'
+let g:closetag_xhtml_filetypes = 'xhtml,jsx,tsx,typescriptreact,typescript'
+let g:closetag_emptyTags_caseSensitive = 1
+let g:closetag_regions = {
+    \ 'typescriptreact': 'jsxRegion,tsxRegion',
+    \ 'javascriptreact': 'jsxRegion',
+    \ }
+let g:closetag_shortcut = '>'
+let g:closetag_close_shortcut = '<leader>>'
+
+augroup my_current_word_highlight
+    " Highlight the symbol and its references when holding the cursor.
+    autocmd CursorHold * silent call CocActionAsync('highlight')
+    "use to change color of current word highlight IngoMeyer441/coc_current_word
+augroup end
+
 
 " - Other settings -
 
@@ -594,6 +621,3 @@ let g:cpp_member_variable_highlight = 1
 let g:cpp_class_decl_highlight = 1
 " For more highlights run
 " :help vim-lsp-cxx-highlight
-
-" ------ Typescript -----
-

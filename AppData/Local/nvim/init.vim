@@ -2,8 +2,6 @@
 " Requirements:
 " - C compiler is needed for treesitter to work (otherwise the is C compiler not found error.
 " - lombok in C:\tools\lombok.jar
-" - install coc-java, coc-kotlin, coc-json, coc-tsserver
-" - copy ~/.vim/treesitter/<lang>-highlights.scm to the respective language syntax queries
 " - install ripgrep for telescope
 " - install make for telescope-fzf-native
 " - install elm-language-server with npm install -g @elm-tooling/elm-language-server
@@ -13,41 +11,22 @@
 "
 " Todos:
 " TODO: Checkout easy align plugin https://www.giters.com/junegunn/vim-easy-align
-" TODO: Make vim airline shorter or act different with vertical splits.
 " TODO: Remap :diffget //2 and diffget //3
 " TODO: Import static codeaction missing for java.
 " - https://github.com/neoclide/coc-java/issues/64
 " TODO: Fix java formatting settings.
-" TODO: Shorten filename in tabs.
 " - https://stackoverflow.com/questions/2468939/how-to-let-tab-display-only-file-name-rather-than-the-full-path-in-vim
-" TODO: Trying out syntax highlighting for java types, so consider keeping it.
 " TODO: Do not show telescope preview for some file extensions.
 "  - it wrote with default previewer 'binary cannot be previewed' on my work pc
 "       so this may work on its own.
 " TODO: Configure java debug.
-" TODO: Checkout https://github.com/ivalkeen/nerdtree-execute
-"   to execute file from nerdtree. Useful to open pdfs and so on.
 "
 "
 " Notes:
 " Im writing this down, cause it help me to remember these mappings and use them.
-" Useful commands to try:
-" *         - to search string under cursor
-" i_<C-o>    - execute command and go back to insert mode
-" :s//c     - count occurrences
-" @@        - execute last macro
-" g<C-a>    - increment sequentially
-" <C-^>     - go to last file
-" Use marks with m<reg> '<reg>.
-"
-" Use [s, ]s to navigate spelling mistakes
-" Use zg to add to global spell file
-" Use zg to add to global spell file
 "
 " In nerdtree:
-" m     - select operations: delele, move, copy, create...
 " p     - go to parent
-" u     - make root go up a dir
 "
 " Coc config:
 " https://github.com/neoclide/coc.nvim/blob/master/data/schema.json
@@ -56,11 +35,7 @@
 " For signature help, use 'signature.target': 'echo' in settings.json.
 " For documentation on hover, use 'hover.target': 'echo' in settings.json.
 "
-"
-"
 
-"
-"
 " Bugs_or_Restrictions:
 "
 " Gradle annotation processing does not work by default.
@@ -97,7 +72,6 @@ call plug#begin('~/.vim/plugged')    " initialize plugin system
 " Commands
 Plug 'tpope/vim-surround'
 Plug 'tpope/vim-commentary'
-Plug 'JoosepAlviste/nvim-ts-context-commentstring'  " set commentstring base on treesitter context
 Plug 'tpope/vim-repeat'         " make surround repeatable with .
 Plug 'vim-scripts/ReplaceWithRegister'
 " Plug 'justinmk/vim-sneak'     " add after I'm good with f/t
@@ -126,15 +100,19 @@ Plug 'rafi/awesome-vim-colorschemes'
 Plug 'ap/vim-css-color'
 Plug 'savq/melange'
 Plug 'ryanoasis/vim-devicons'        " adds icons to plugins
-Plug 'mhinz/vim-startify'
+Plug 'mhinz/vim-startify'       " better info about buffer change in statusline
 
 " Git
 Plug 'tpope/vim-fugitive'
+Plug 'airblade/vim-gitgutter'
 
 " Working directory navigation
 Plug 'preservim/nerdtree'
 Plug 'tiagofumo/vim-nerdtree-syntax-highlight'
 Plug 'ivalkeen/nerdtree-execute'
+
+" Distraction free mode
+Plug 'junegunn/goyo.vim'
 
 " Fuzzy finder
 Plug 'nvim-telescope/telescope.nvim'
@@ -146,7 +124,7 @@ Plug 'mbbill/undotree'
 
 " Language support
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
-" \ 'coc-java', " disable for now
+" \ 'coc-java', " java jump to definition does not work for jars in windows
 let g:coc_global_extensions = [
 \ 'coc-json',
 \ 'coc-html',
@@ -170,6 +148,9 @@ Plug 'jackguo380/vim-lsp-cxx-highlight'
 " More syntax highlighting.
 Plug 'nvim-treesitter/nvim-treesitter'
 Plug 'nvim-treesitter/playground'
+Plug 'JoosepAlviste/nvim-ts-context-commentstring'  " set commentstring base on treesitter context
+" Plug 'SmiteshP/nvim-gps' " needs lualine not airline
+
 Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && yarn install'  }
 call plug#end()
 
@@ -186,50 +167,54 @@ if (has("termguicolors"))
 colorscheme melange
 " colorscheme onedark
 
-" Disable italics for melange colorscheme
-hi Comment gui=NONE
-hi String gui=NONE
-hi Todo gui=NONE
-hi TSVariableBuiltin gui=NONE
-hi TSConstBuiltin gui=NONE
+function! s:my_highlights()
+    " Disable italics for melange colorscheme
+    hi Comment gui=NONE
+    hi String gui=NONE
+    hi Todo gui=NONE
+    hi TSVariableBuiltin gui=NONE
+    hi TSConstBuiltin gui=NONE
 
-set colorcolumn=80
+    set colorcolumn=80
 
-hi Comment ctermfg=Green guifg=Green
-" consider String color change for melange
-" hi String ctermfg=DarkGreen guifg=#69764D
+    hi Comment ctermfg=Green guifg=Green
+    " consider String color change for melange
+    " hi String ctermfg=DarkGreen guifg=#69764D
 
-" For melange colorscheme
-" hi Function guifg=#EBC06D " This is the default fo melange
-" hi Function guifg=#FFE88D
-hi Function guifg=#ECDFA0
-" This is the normal default
-" hi Normal guifg=#ECE1D7
-" Consider making normal little brighter
-" hi Normal guifg=#FCF1E7
-hi Identifier ctermfg=LightMagenta guifg=#FFD0FA
-" hi Delimiter guifg=#8E733F " This is the default.
-" Making Delimiter a little brighter.
-hi Delimiter guifg=#AE935F
+    " For melange colorscheme
+    " hi Function guifg=#EBC06D " This is the default fo melange
+    " hi Function guifg=#FFE88D
+    hi Function guifg=#ECDFA0
+    " This is the normal default
+    " hi Normal guifg=#ECE1D7
+    " Consider making normal little brighter
+    " hi Normal guifg=#FCF1E7
+    hi Identifier ctermfg=LightMagenta guifg=#EFC0EA
+    " hi Delimiter guifg=#8E733F " This is the default.
+    " Making Delimiter a little brighter.
+    hi Delimiter guifg=#AE935F
 
 
-hi clear markdownCodeBlock
+    hi clear markdownCodeBlock
 
-hi link gitCommitSummary Normal
-hi link gitCommitOverflow SpellBad
+    hi link gitCommitSummary Normal
+    hi link gitCommitOverflow SpellBad
 
-hi link tsxAttrib Normal
-hi link tsxTag TSConstructor
-hi link tsxTagName TSConstructor
+    hi link tsxAttrib Normal
+    hi link tsxTag TSConstructor
+    hi link tsxTagName TSConstructor
 
-" hi CocUnderline cterm=underline gui=underline
+    " hi CocUnderline cterm=underline gui=underline
 
+    hi clear SpellBad
+    " Default spellbad colloring.
+    " hi SpellBad cterm=underline ctermfg=204 gui=underline guifg=#E06C75
+    hi SpellBad cterm=underline gui=underline
+
+endfunction
+call s:my_highlights()
 " Show nine spell checking candidates at most
 set spellsuggest=best,9
-hi clear SpellBad
-" Default spellbad colloring.
-" hi SpellBad cterm=underline ctermfg=204 gui=underline guifg=#E06C75
-hi SpellBad cterm=underline gui=underline
 
 noremap <M-+> :call AdjustFontSize(1)<CR>
 noremap <M-_> :call AdjustFontSize(-1)<CR>
@@ -284,9 +269,15 @@ let g:airline_section_c_only_filename = 1
 let g:airline_powerline_fonts = 1
 let g:airline#extensions#tabline#enabled = 1
 let g:airline#extensions#tabline#formatter = 'unique_tail'
-let g:airline#extensions#tabline#left_sep = ' '
-let g:airline#extensions#tabline#left_alt_sep = '|'
+" let g:airline#extensions#tabline#left_sep = ' '
+" let g:airline#extensions#tabline#left_alt_sep = '|'
 
+function! s:update_highlights()
+    " For tomorrow airline theme
+    "hi airline_tab guifg=#4D453E
+    hi airline_tab guifg=#9D958E
+endfunction
+autocmd User AirlineAfterTheme call s:update_highlights()
 " Having longer updatetime (default is 4000 ms = 4 s) leads to noticeable
 " " delays and poor user experience.
 set updatetime=100
@@ -405,6 +396,19 @@ set undofile
 let g:undotree_ShortIndicators = 1
 "let g:undotree_SetFocusWhenToggle = 0  " set focus on undotree
 
+" --- Git gutter ---
+let g:gitgutter_signs = 0
+nnoremap <leader>hh <cmd>GitGutterSignsToggle<cr>
+
+" --- Goyo ---
+nnoremap <leader>z <cmd>Goyo<cr>
+let g:goyo_linenr=1
+let g:goyo_width=120
+augroup my_goyo
+    au!
+    autocmd! User GoyoLeave nested call <SID>my_highlights()
+augroup end
+
 "--- Nvim treesitter ---
 lua <<EOF
 require'nvim-treesitter.configs'.setup {
@@ -421,7 +425,6 @@ require'nvim-treesitter.configs'.setup {
   }
 }
 EOF
-
 " --- COC ---
 
 " - Sets -
@@ -475,8 +478,6 @@ vmap <leader>l  <Plug>(coc-format-selected)
 
 nnoremap <leader>o <cmd>call CocAction('runCommand', 'editor.action.organizeImport')'<CR>
 
-nnoremap <leader>h <cmd>call CocAction('doHover')<CR>
-"
 " Use K to show documentation in preview window.
 nnoremap <silent> K <cmd>call <SID>show_documentation()<CR>
 
@@ -559,12 +560,13 @@ augroup signiturehelp
   autocmd User CocJumpPlaceholder call CocActionAsync('showSignatureHelp')
 augroup end
 
-" Show current function on statusline
-" This does not work. TODO: Look into it.
-set statusline^=%{coc#status()}%{get(b:,'coc_current_function','')}
+command! Coc execute 'echo coc#status()'
+" set statusline^=%{coc#status()}
+" let g:airline#extensions#coc#enabled = 1
+" let g:airline#extensions#coc#show_coc_status = 1
 
 " ----- Java ----
-command JavaProjektImport CocCommand java.projectConfiguration.update
+command! JavaProjektImport CocCommand java.projectConfiguration.update
 
 
 " ----- Golang ------

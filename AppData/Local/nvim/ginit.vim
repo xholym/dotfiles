@@ -1,4 +1,5 @@
 GuiPopupmenu 0
+GuiTabline 0
 call GuiWindowMaximized(1)
 GuiFont! FiraCode\ NF:h10
 let g:fontsize = 10

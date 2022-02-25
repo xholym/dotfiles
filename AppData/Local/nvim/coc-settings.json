@@ -47,6 +47,8 @@
       }
     ],
     "suggest.echodocSupport": true,
+    "suggest.enablePreselect": false,
+    "suggest.autoTrigger": "trigger",
     "signature.enable": true,
     "java.format.settings.url": "https://raw.githubusercontent.com/xholym/dotfiles/master/.vim/eclipse-formatter.xml",
     "java.completion.favoriteStaticMembers": [

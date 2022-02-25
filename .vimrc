@@ -113,8 +113,9 @@ nnoremap zY "*y$
 nnoremap zP "*P
 vnoremap zy "*y
 vnoremap zY "*y$
-" TODO: go to end of pasted text
 inoremap <C-v> <C-o>"*P
+" Yuick paste without leaving insert mode.
+inoremap <c-p> <C-o>P
 
 " Do not move cursor while joining
 "nnoremap J mzJ'z
@@ -128,3 +129,9 @@ vnoremap K :m '>-2<CR>gv=gv
 
 " Search and replace template
 nnoremap <leader>\ :%s//gc<left><left><left>
+
+" quickfix, location lists
+nnoremap [g <cmd>cprev<cr>
+nnoremap ]g <cmd>cnext<cr>
+nnoremap [l <cmd>lprev<cr>
+nnoremap ]l <cmd>lnext<cr>

@@ -90,6 +90,9 @@ nnoremap ; :
 nnoremap , ;
 nnoremap : ,
 
+" Rerun last command
+nnoremap <leader>; :<up><CR>
+
 " Open vimrc on new tab
 nnoremap <leader>v <cmd>tabe $MYVIMRC<CR>:vs ~/.vimrc<CR><C-w>h
 

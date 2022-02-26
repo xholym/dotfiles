@@ -17,14 +17,12 @@
 "       - example https://github.com/kabinspace/AstroVim/blob/main/lua/configs/toggleterm.lua
 " TODO: Checkout easy align plugin https://www.giters.com/junegunn/vim-easy-align
 " TODO: Checkout smooth scrolling karb94/neoscroll.nvim
+" TODO: Checkout some lsp status line.
 " TODO: Remap :diffget //2 and diffget //3
-" TODO: Import static codeaction missing for java.
-" - https://github.com/neoclide/coc-java/issues/64
 " TODO: Fix java formatting settings.
 " - https://stackoverflow.com/questions/2468939/how-to-let-tab-display-only-file-name-rather-than-the-full-path-in-vim
 " TODO: Do not show telescope preview for some file extensions.
-"  - it wrote with default previewer 'binary cannot be previewed' on my work pc
-"       so this may work on its own.
+"  - it wrote with default previewer 'binary cannot be previewed' on my work pc so this may work on its own.
 " TODO: Configure java debug.
 "
 "
@@ -34,31 +32,15 @@
 " In nerdtree:
 " p     - go to parent
 "
-" Coc config:
-" https://github.com/neoclide/coc.nvim/blob/master/data/schema.json
-" For documentation of completion, use 'suggest.floatEnable': false in settings.json.
-" For diagnostic messages, use 'diagnostic.messageTarget': 'echo' in settings.json.
-" For signature help, use 'signature.target': 'echo' in settings.json.
-" For documentation on hover, use 'hover.target': 'echo' in settings.json.
-"
 
 " Bugs_or_Restrictions:
 "
 " Gradle annotation processing does not work by default.
 " It must be configured in build.gradle of project with plugin 'net.ltgt.apt-eclipse'.
 "
-" Go to definition does not work for java library sources.
-"  - https://github.com/neoclide/coc-java/issues/82
-"  - this bug comes from a escaping problem on windows,
-"      'You can't really escape anything but space on windows'
-"        - said guy in issue thread
-"  - https://github.com/neovim/neovim/issues/3912
-"  - https://github.com/neoclide/coc.nvim/issues/2748
-"
 " Starting neovim from gitbash breaks terminal.
 " See https://github.com/neovim/neovim/issues/14605
 "
-" Coc statusline with function definition does not work.
 " May try to use treesitter statusline.
 "
 
@@ -132,26 +114,6 @@ Plug 'kyazdani42/nvim-web-devicons'  " devicons for telescope
 
 Plug 'mbbill/undotree'
 
-" Plug 'SirVer/ultisnips' | Plug 'honza/vim-snippets'
-
-" Language support
-" Plug 'neoclide/coc.nvim', {'branch': 'release'}
-" \ 'coc-java', " java jump to definition does not work for jars in windows
-
-" let g:coc_global_extensions = [
-" \ 'coc-json',
-" \ 'coc-html',
-" \ 'coc-html-css-support',
-" \ 'coc-css',
-" \ 'coc-kotlin',
-" \ 'coc-json',
-" \ 'coc-tsserver',
-" \ 'coc-tslint-plugin',
-" \ 'coc-emmet',
-" \ 'coc-texlab',
-" \ 'coc-vimtex',
-" \ 'coc-yaml',
-" \ 'coc-prettier']
 Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
 Plug 'ElmCast/elm-vim' " better syntax highliging
 Plug 'udalov/kotlin-vim'
@@ -209,8 +171,9 @@ function! s:my_highlights()
     " hi Normal guifg=#ECE1D7
     " Consider making normal little brighter
     " hi Normal guifg=#FCF1E7
-    hi MyIdentifier ctermfg=LightMagenta guifg=#EFC0EA
+    hi MyIdentifier ctermfg=LightMagenta guifg=#B075A5
     hi link yamlTSField MyIdentifier
+    hi link elmType MyIdentifier
     " hi Delimiter guifg=#8E733F " This is the default.
     " Making Delimiter a little brighter.
     hi Delimiter guifg=#AE935F
@@ -225,8 +188,6 @@ function! s:my_highlights()
     hi link tsxAttrib Normal
     hi link tsxTag TSConstructor
     hi link tsxTagName TSConstructor
-
-    " hi CocUnderline cterm=underline gui=underline
 
     hi clear SpellBad
     " Default spellbad colloring.
@@ -259,7 +220,7 @@ noremap <M-_> :call AdjustFontSize(-1)<CR>
 augroup my_syntax
     au!
     " Indent sizes
-    " nocheckin fix this, vim stil uses 4 spaces
+    " TODO: fix this, vim stil uses 4 spaces
     autocmd Filetype vim             setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
     autocmd Filetype python          setlocal expandtab tabstop=4 shiftwidth=4 softtabstop=4
     autocmd Filetype go              setlocal expandtab tabstop=4 shiftwidth=4 softtabstop=4
@@ -557,130 +518,11 @@ require'nvim-treesitter.configs'.setup {
   }
 }
 EOF
-" --- COC ---
 
-" - Sets -
-" These sets are COC specific.
-
-" TextEdit might fail if hidden is not set.
+" Buffers can stay hidden in background after closing, good for lsps.
 set hidden
 " Don't show annoying completion messages on autocompletion.
 set shortmess+=c
-
-
-" - Autocompletion -
-" Use <c-space> to trigger completion.
-" inoremap <silent><expr> <c-space> coc#refresh()
-
-" Make <CR> auto-select the first completion item and notify coc.nvim to
-" format on enter, <cr> could be remapped by other vim plugin
-" inoremap <silent><expr> <cr> pumvisible() ? coc#_select_confirm()
-"                               \: "\<C-g>u\<CR>\<c-r>=coc#on_enter()\<CR>"
-" let g:coc_suggest_disable = 1
-
-" - Mappings -
-
-" Diagnostic navigation
-" nmap <silent> [g <Plug>(coc-diagnostic-prev)
-" nmap <silent> ]g <Plug>(coc-diagnostic-next)
-" nmap <silent> [e <Plug>(coc-diagnostic-prev-error)
-" nmap <silent> ]e <Plug>(coc-diagnostic-next-error)
-" nnoremap <silent><nowait> <leader>]g  :<C-u>CocList diagnostics<cr>
-
-" " Code syntax tree operations
-" nmap <silent> gd <Plug>(coc-definition)
-" " Maybe I'll use this, if not remove
-" nmap <silent> gy <Plug>(coc-type-definition)
-" nmap <silent> gi <Plug>(coc-implementation)
-" nmap <silent> ga <Plug>(coc-references)
-" nmap <silent> gm <Plug>(coc-rename)
-
-" " Quick fixes
-" " Using e not q, because Q is used for fast quit.
-" nnoremap <leader>e <cmd>CocFix<CR>
-" nmap <leader>E <plug>(coc-fix-current)
-
-" nmap <leader>l  <Plug>(coc-format-selected)
-" nmap <leader>L <Plug>(coc-format)
-" vmap <leader>l  <Plug>(coc-format-selected)
-
-" nnoremap <leader>o <cmd>call CocAction('runCommand', 'editor.action.organizeImport')'<CR>
-
-" " Use K to show documentation in preview window.
-" nnoremap <silent> K <cmd>call <SID>show_documentation()<CR>
-
-" function! s:show_documentation()
-"   if (index(['vim','help'], &filetype) >= 0)
-"     execute 'h '.expand('<cword>')
-"   elseif (coc#rpc#ready())
-"     call CocActionAsync('doHover')
-"   else
-"     execute '!' . &keywordprg . " " . expand('<cword>')
-"   endif
-" endfunction
-
-" " CodeActions
-
-" " Apply codeAction to the selected region.
-" xmap <leader>a  <Plug>(coc-codeaction-selected)
-" nmap <leader>a  <Plug>(coc-codeaction-selected)
-" " Apply codeAction to the current buffer.
-" nmap <leader>A  <Plug>(coc-codeaction)
-
-" " Map function and class text objects
-" " " NOTE: Requires 'textDocument.documentSymbol' support from the language
-" " server.
-" xmap if <Plug>(coc-funcobj-i)
-" omap if <Plug>(coc-funcobj-i)
-" xmap af <Plug>(coc-funcobj-a)
-" omap af <Plug>(coc-funcobj-a)
-" xmap ic <Plug>(coc-classobj-i)
-" omap ic <Plug>(coc-classobj-i)
-" xmap ac <Plug>(coc-classobj-a)
-" omap ac <Plug>(coc-classobj-a)
-
-" " Remap <C-f> and <C-b> for scroll float windows/popups.
-" if has('nvim-0.4.0') || has('patch-8.2.0750')
-"   nnoremap <silent><nowait><expr> <C-f> coc#float#has_scroll() ? coc#float#scroll(1) : "\<C-f>"
-"   nnoremap <silent><nowait><expr> <C-b> coc#float#has_scroll() ? coc#float#scroll(0) : "\<C-b>"
-"   inoremap <silent><nowait><expr> <C-f> coc#float#has_scroll() ? "\<c-r>=coc#float#scroll(1)\<cr>" : "\<Right>"
-"   inoremap <silent><nowait><expr> <C-b> coc#float#has_scroll() ? "\<c-r>=coc#float#scroll(0)\<cr>" : "\<Left>"
-"   vnoremap <silent><nowait><expr> <C-f> coc#float#has_scroll() ? coc#float#scroll(1) : "\<C-f>"
-"   vnoremap <silent><nowait><expr> <C-b> coc#float#has_scroll() ? coc#float#scroll(0) : "\<C-b>"
-" endif
-
-" " Use CTRL-S for selections ranges.
-" " Requires 'textDocument/selectionRange' support of language server.
-" " TODO: Delete if I won't use it.
-" nmap <silent> <C-s> <Plug>(coc-range-select)
-" xmap <silent> <C-s> <Plug>(coc-range-select)
-
-"augroup my_current_word_highlight
-"    " Highlight the symbol and its references when holding the cursor.
-"    autocmd CursorHold * silent call CocActionAsync('highlight')
-"    "use to change color of current word highlight IngoMeyer441/coc_current_word
-"augroup end
-
-
-" - Other settings -
-
-" Adds commands from COC
-" command! -nargs=0 Format <cmd>call CocAction('format')
-" command! -nargs=? Fold <cmd>call CocAction('fold', <f-args>)
-" command! -nargs=0 OptimizeImports <cmd>call CocAction('runCommand', 'editor.action.organizeImport')'
-
-" augroup signiturehelp
-"   autocmd!
-  " Update signature help on jump placeholder.
-  " autocmd User CocJumpPlaceholder call CocActionAsync('showSignatureHelp')
-" augroup end
-
-" command! Coc execute 'echo coc#status()'
-" set statusline^=%{coc#status()}
-" let g:airline#extensions#coc#enabled = 1
-" let g:airline#extensions#coc#show_coc_status = 1
-
-" command! JavaProjektImport CocCommand java.projectConfiguration.update
 
 
 " ----- Golang ------
@@ -703,13 +545,6 @@ let g:go_fmt_command = "goimports"
 
 " Status line types/signatures
 let g:go_auto_type_info = 1
-
-" Autocomplete on .
-" au filetype go inoremap <buffer> . .<C-x><C-o>
-" au filetype go nnoremap gm <cmd>GoRename
-" au filetype go nnoremap ga <cmd>GoReferrers<CR> <C-w>j
-" au filetype go inoremap <C-Space> <C-x><C-o>
-" au filetype go inoremap <C-@> <C-Space>
 
 " ----- Elm -----
 let g:elm_setup_keybindings = 0
@@ -756,6 +591,7 @@ nnoremap <silent> [e <cmd>lua vim.diagnostic.goto_prev({severity = vim.diagnosti
 nnoremap <silent> ]e <cmd>lua vim.diagnostic.goto_next({severity = vim.diagnostic.severity.ERROR})<cr>
 lua <<EOF
 Lsp_on_attach = function (client, bufnr)
+    if client.name == "elmls" then print("attaching elmls") end
 
   local opts = { noremap=true, silent=true }
   vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gD', '<cmd>lua vim.lsp.buf.declaration()<CR>', opts)
@@ -808,7 +644,7 @@ lsp_installer.on_server_ready(function(server)
   config = coq.lsp_ensure_capabilities(config)
 
   if server.name == "tsserver" then
-    local ts_config = {
+    local ts_cfg = {
       handlers = {
         ["textDocument/publishDiagnostics"] = function(err, result, ctx, config)
             if result ~= nil and result.diagnostics ~= nil then
@@ -825,7 +661,6 @@ lsp_installer.on_server_ready(function(server)
             end
           vim.lsp.diagnostic.on_publish_diagnostics(err, result, ctx, config)
         end,
-        -- nocheckin remove
         -- TODO: create code action with only quick fix items, but each lsp has it's own kind's.
         --["textDocument/codeAction"] = function(err, result, ctx, ...)
             --print('code action called'
@@ -835,7 +670,23 @@ lsp_installer.on_server_ready(function(server)
         --end
       }
     }
-    config = vim.tbl_deep_extend("force", ts_config, config)
+    config = vim.tbl_deep_extend("force", ts_cfg, config)
+  elseif server.name == "elmls" then
+    local elm_cfg = {
+      command = "elm-language-server.cmd",
+      filetypes = {"elm"},
+      root_patterns = {"elm.json"},
+      initialization_options = {
+        elm_path = "elm",
+        elm_format_path = "elm-format",
+        elm_test_path = "elm-test",
+        elm_review_path = "elm-review",
+        disable_elmls_diagnostics = false,
+        skip_install_package_confirmation = false,
+        only_update_diagnostics_on_save = false
+      }
+    }
+    config = vim.tbl_deep_extend("force", elm_cfg, config)
   end
 
   server:setup(config)
@@ -894,9 +745,6 @@ local config = {
 vim.diagnostic.config(config)
 EOF
 
-
-" nocheckin continue:
-"  remove coc comments
 
 lua <<EOF
 local kind_icons = {
@@ -964,99 +812,3 @@ ino <silent><expr> <C-c>   pumvisible() ? "\<C-e><C-c>" : "\<C-c>"
 ino <silent><expr> <BS>    pumvisible() ? "\<C-e><BS>"  : "\<BS>"
 ino <silent><expr> <CR>    pumvisible() ? (complete_info().selected == -1 ? "\<C-e><CR>" : "\<C-y>") : "\<CR>"
 command! COQmySnipEdit execute 'tabe ~/.vim/plugged/coq_nvim/.vars/clients/snippets/users+v2.json'
-
-" hi link CmpItemAbbr Normal
-" hi link CmpItemKind Label
-" hi link CmpItemMenu Ignore
-" nocheckin experiment
-lua <<EOF
--- local on_attach = function(client, bufnr)
---   -- Enable completion triggered by <c-x><c-o>
---   vim.api.nvim_buf_set_option(bufnr, 'omnifunc', 'v:lua.vim.lsp.omnifunc')
---
---   -- Mappings.
---   -- See `:help vim.lsp.*` for documentation on any of the below functions
---   vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gD', '<cmd>lua vim.lsp.buf.declaration()<CR>', opts)
---   vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gd', '<cmd>lua vim.lsp.buf.definition()<CR>', opts)
---   vim.api.nvim_buf_set_keymap(bufnr, 'n', 'K', '<cmd>lua vim.lsp.buf.hover()<CR>', opts)
---   vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<CR>', opts)
---   vim.api.nvim_buf_set_keymap(bufnr, 'n', '<C-k>', '<cmd>lua vim.lsp.buf.signature_help()<CR>', opts)
---   vim.api.nvim_buf_set_keymap(bufnr, 'n', '<space>wa', '<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>', opts)
---   vim.api.nvim_buf_set_keymap(bufnr, 'n', '<space>wr', '<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>', opts)
---   vim.api.nvim_buf_set_keymap(bufnr, 'n', '<space>wl', '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>', opts)
---   vim.api.nvim_buf_set_keymap(bufnr, 'n', '<space>D', '<cmd>lua vim.lsp.buf.type_definition()<CR>', opts)
---   vim.api.nvim_buf_set_keymap(bufnr, 'n', '<space>rn', '<cmd>lua vim.lsp.buf.rename()<CR>', opts)
---   vim.api.nvim_buf_set_keymap(bufnr, 'n', '<space>ca', '<cmd>lua vim.lsp.buf.code_action()<CR>', opts)
---   vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gr', '<cmd>lua vim.lsp.buf.references()<CR>', opts)
---   vim.api.nvim_buf_set_keymap(bufnr, 'n', '<space>f', '<cmd>lua vim.lsp.buf.formatting()<CR>', opts)
--- end
--- local servers = {'jdtls'}
--- for _, lsp in pairs(servers) do
---   require('lspconfig')[lsp].setup {
---     on_attach = on_attach,
---   }
--- end
-EOF
-
-" nocheckin make sure everything in this config works the same
-"{
-"    "languageserver": {
-"        "goLS": {
-"           "command": "gopls",
-"            "rootPatterns": ["go.mod", ".vim/", ".git/", ".hg/"],
-"            "filetypes": ["go"]
-"        },
-"        "elmLS": {
-"            "command": "elm-language-server.cmd",
-"            "filetypes": ["elm"],
-"            "rootPatterns": ["elm.json"],
-"            "initializationOptions": {
-"                "elmPath": "elm",
-"                "elmFormatPath": "elm-format",
-"                "elmTestPath": "elm-test",
-"                "elmReviewPath": "elm-review",
-"                "disableElmLSDiagnostics": false,
-"                "skipInstallPackageConfirmation": false,
-"                "onlyUpdateDiagnosticsOnSave": false
-"            }
-"        },
-"        "ccls": {
-"          "command": "ccls",
-"          "filetypes": ["c", "cpp", "cuda", "objc", "objcpp"],
-"          "rootPatterns": [".ccls-root", "compile_commands.json"],
-"          "initializationOptions": {
-"            "cache": {
-"              "directory": "C:\\tools\\ccls\\.ccls_cache"
-"            },
-"            "client": {
-"              "snippetSupport": true
-"            },
-"            "index": { "onChange": true },
-"            "highlight": { "lsRanges" : true }
-"          }
-"        }
-"    },
-"    "java.configuration.runtimes": [
-"      {
-"        "name": "JavaSE-11",
-"        "path": "C:\\Program Files\\Java\\jdk-11.0.2",
-"        "default": true
-"      },
-"      {
-"        "name": "JavaSE-14",
-"        "path": "C:\\Program Files\\Java\\jdk-14.0.2"
-"      }
-"    ],
-"    "suggest.echodocSupport": true,
-"    "suggest.enablePreselect": false,
-"    "suggest.autoTrigger": "trigger",
-"    "signature.enable": true,
-"    "java.format.settings.url": "https://raw.githubusercontent.com/xholym/dotfiles/master/.vim/eclipse-formatter.xml",
-"    "java.completion.favoriteStaticMembers": [
-"        "*"
-"    ],
-"    "java.signatureHelp.enabled": true,
-"    "java.enabled": true,
-"    "java.trace.server": "verbose",
-"    "java.jdt.ls.vmargs": "-javaagent:C:\\tools\\lombok.jar"
-"}

@@ -13,7 +13,10 @@
 "
 "
 " Todos:
+" TODO: Setup git bash in toggle terminal https://github.com/akinsho/toggleterm.nvim
+"       - example https://github.com/kabinspace/AstroVim/blob/main/lua/configs/toggleterm.lua
 " TODO: Checkout easy align plugin https://www.giters.com/junegunn/vim-easy-align
+" TODO: Checkout smooth scrolling karb94/neoscroll.nvim
 " TODO: Remap :diffget //2 and diffget //3
 " TODO: Import static codeaction missing for java.
 " - https://github.com/neoclide/coc-java/issues/64
@@ -90,8 +93,10 @@ Plug 'wellle/targets.vim'       " adds more textobjects like args, separators (,
 " Changes to behaviour
 Plug 'machakann/vim-highlightedyank'
 Plug 'tpope/vim-speeddating'         " <C-a> increment for dates and such, vim not seeing '-' as minus
-" Autopairs is causing more problems than helping.
-"Plug 'jiangmiao/auto-pairs'          " automatically close ('`\"
+"
+" Autopairs may be causing more problems than helping.
+" TODO: Try https://github.com/windwp/nvim-autopairs
+"   here is an example config https://github.com/kabinspace/AstroVim/blob/main/lua/configs/autopairs.lua
 Plug 'Raimondi/delimitMate'          " automatically close ('`\"
 Plug 'AndrewRadev/bufferize.vim' " put command output in tmp buffer
 Plug 'alvan/vim-closetag'
@@ -104,9 +109,10 @@ Plug 'ap/vim-css-color'
 Plug 'savq/melange'
 Plug 'ryanoasis/vim-devicons'        " adds icons to plugins
 Plug 'mhinz/vim-startify'       " better info about buffer change in statusline
+Plug 'lukas-reineke/indent-blankline.nvim'
 
 " Git
-Plug 'tpope/vim-fugitive'
+Plug 'tpope/vim-fugitive' " rival is https://github.com/lewis6991/gitsigns.nvim
 Plug 'airblade/vim-gitgutter'
 Plug 'junegunn/gv.vim'
 
@@ -181,6 +187,8 @@ if (has("termguicolors"))
 colorscheme melange
 " colorscheme onedark
 
+set colorcolumn=80
+
 function! s:my_highlights()
     " Disable italics for melange colorscheme
     hi Comment gui=NONE
@@ -188,8 +196,6 @@ function! s:my_highlights()
     hi Todo gui=NONE
     hi TSVariableBuiltin gui=NONE
     hi TSConstBuiltin gui=NONE
-
-    set colorcolumn=80
 
     hi Comment ctermfg=Green guifg=Green
     " consider String color change for melange
@@ -209,6 +215,7 @@ function! s:my_highlights()
     " Making Delimiter a little brighter.
     hi Delimiter guifg=#AE935F
 
+    hi ColorColumn guibg=#2E2822
 
     hi clear markdownCodeBlock
 
@@ -237,11 +244,10 @@ function! s:my_highlights()
     hi link LspReferenceRead  MyLspCursorWord
     hi link LspReferenceWrite MyLspCursorWord
 
-    " defaults
-    "hi default link WildMenu NormalFloat
-    "hi WildMenu ctermfg=0 ctermbg=11 guifg=Black guibg=Yellow
-
-    hi WildMenu ctermfg=0 ctermbg=11 guifg=Brown guibg=Yellow
+    " this is melange background color
+    hi Background guifg=#2A2520
+    " Whitespace is #4D453E
+    hi IndentGuide guifg=#3A3029
 endfunction
 call s:my_highlights()
 " Show nine spell checking candidates at most
@@ -289,28 +295,6 @@ set signcolumn=yes " column to show diagnostics and not appear and disappear
 " Give more space for displaying messages.
 set cmdheight=2     " Try now and maybe remove later.
 
-" ----- Airline -----
-" Airline theme should be automatically selected.
-" let g:airline_theme = 'base16_espresso'
-" let g:airline_theme = 'minimalist'
-" let g:airline_theme = 'monochrome'
-" let g:airline_theme = 'term'
-let g:airline_theme = 'tomorrow'
-" let g:airline_theme = 'transparent'
-let g:airline_stl_path_style = 'short'
-let g:airline_section_c_only_filename = 1
-let g:airline_powerline_fonts = 1
-let g:airline#extensions#tabline#enabled = 1
-let g:airline#extensions#tabline#formatter = 'unique_tail'
-" let g:airline#extensions#tabline#left_sep = ' '
-" let g:airline#extensions#tabline#left_alt_sep = '|'
-
-function! s:update_highlights()
-    " For tomorrow airline theme
-    "hi airline_tab guifg=#4D453E
-    hi airline_tab guifg=#9D958E
-endfunction
-autocmd User AirlineAfterTheme call s:update_highlights()
 " Having longer updatetime (default is 4000 ms = 4 s) leads to noticeable
 " " delays and poor user experience.
 set updatetime=100
@@ -353,7 +337,62 @@ EOF
 
 " ----- Plugin specific mappings -----
 
+" ----- Airline -----
+" Airline theme should be automatically selected.
+" let g:airline_theme = 'base16_espresso'
+" let g:airline_theme = 'minimalist'
+" let g:airline_theme = 'monochrome'
+" let g:airline_theme = 'term'
+let g:airline_theme = 'tomorrow'
+" let g:airline_theme = 'transparent'
+let g:airline_stl_path_style = 'short'
+let g:airline_section_c_only_filename = 1
+let g:airline_powerline_fonts = 1
+let g:airline#extensions#tabline#enabled = 1
+let g:airline#extensions#tabline#formatter = 'unique_tail'
+" let g:airline#extensions#tabline#left_sep = ' '
+" let g:airline#extensions#tabline#left_alt_sep = '|'
+
+function! s:update_highlights()
+    " For tomorrow airline theme
+    "hi airline_tab guifg=#4D453E
+    hi airline_tab guifg=#9D958E
+endfunction
+autocmd User AirlineAfterTheme call s:update_highlights()
 command! BufMessages execute 'Bufferize messages'
+
+" --- Indent blank line ---
+lua<<EOF
+vim.g.indent_blankline_show_trailing_blankline_indent = false
+vim.g.indent_blankline_show_first_indent_level = false
+vim.g.indent_blankline_use_treesitter = true
+vim.g.indent_blankline_buftype_exclude = {
+"nofile",
+"terminal",
+"lsp-installer",
+"lspinfo",
+}
+vim.g.indent_blankline_filetype_exclude = {
+    "nerdtree",
+    "help",
+    "startify"
+}
+require("indent_blankline").setup {
+    indent_blankline_use_treesitter = true,
+    char_highlight_list = {
+        "IndentGuide",
+        "IndentGuide",
+        "IndentGuide",
+        "IndentGuide",
+        "IndentGuide",
+        "IndentGuide",
+        "IndentGuide",
+        "IndentGuide",
+        "IndentGuide",
+        "IndentGuide",
+    },
+}
+EOF
 
 " --- Git ---
 " https://dpwright.com/posts/2018/04/06/graphical-log-with-vimfugitive/
@@ -429,7 +468,8 @@ nnoremap <leader>? <cmd>lua require('telescope.builtin').grep_string { search = 
 " Maybe temporary mappings
 " May change this mappind. <leader>g can have multiple key mappings, since it's easy to press.
 nnoremap <leader>gm <cmd>Telescope marks<cr>
-nnoremap <leader>gh <cmd>Telescope help_tags<cr>
+nnoremap <leader>gH <cmd>Telescope help_tags<cr>
+nnoremap <leader>gh <cmd>Telescope highlights<cr>
 nnoremap <leader>g, <cmd>Telescope resume<cr>
 nnoremap <leader>gb <cmd>Telescope git_branches<cr>
 
@@ -737,25 +777,27 @@ Lsp_on_attach = function (client, bufnr)
   --vim.api.nvim_buf_set_keymap(bufnr, 'n', '<space>wl', '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>', opts)
   vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>a', '<cmd>lua vim.lsp.buf.code_action()<cr>', opts)
 
-  if client.name == "tsserver" then
-    P(client.resolved_capabilities.code_action.codeActionKinds)
+  if client.resolved_capabilities.document_highlight then
+    if client.name ~= "vimls" then
+      vim.api.nvim_exec(
+        [[
+        augroup lsp_document_highlight
+          autocmd! * <buffer>
+          autocmd CursorHold <buffer> lua vim.lsp.buf.document_highlight()
+          autocmd CursorMoved <buffer> lua vim.lsp.buf.clear_references()
+        augroup END
+      ]],
+        false
+      )
+    end
   end
-  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>e', '<cmd>lua vim.lsp.buf.code_action({ only = "quickfix"})<cr>', opts)
-  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>E', '<cmd>lua vim.lsp.buf.range_code_action({ only = "quickfix"})<cr>', opts)
 
-  --P(client.resolved_capabilities)
-  --if client.resolved_capabilities.document_highlight then
-  --  vim.api.nvim_exec(
-  --    [[
-  --    augroup my_highlight_cursor
-  --      au! * <buffer>
-  --      autocmd CursorHold <buffer> lua vim.lsp.buf.document_highlight()
-  --      autocmd CursorMoved <buffer> lua vim.lsp.buf.clear_references()
-  --    augroup end
-  --    ]],
-  --    false
-  --  )
+  --if client.name == "tsserver" then
+    --P(client.resolved_capabilities.code_action.codeActionKinds)
   --end
+  --vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>e', '<cmd>lua vim.lsp.buf.code_action({ only = "quickfix"})<cr>', opts)
+  --vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>E', '<cmd>lua vim.lsp.buf.range_code_action({ only = "quickfix"})<cr>', opts)
+
 end
 
 
@@ -805,6 +847,7 @@ local lspconfig = require'lspconfig'
 lspconfig.ccls.setup {
   filetypes = {"c", "cpp", "cuda", "objc", "objcpp"},
   rootPatterns = { "compile_commands.json", ".ccls-root", ".ccls", ".git"},
+  ls_ranges = true,
   init_options = {
     cache = {
       directory = "C:\\tools\\ccls\\.ccls_cache"
@@ -884,7 +927,6 @@ local kind_icons = {
   TypeParameter = "",
 }
 
--- nocheckin fix replace on enter
 vim.g.coq_settings = {
   auto_start = true,
   keymap = {
@@ -893,7 +935,9 @@ vim.g.coq_settings = {
     jump_to_mark = "<c-,>"
     --bigger_preview = "<C-k>"
   }, -- use the recommended keymap
-  completion = { always = true }, -- auto trigger completion
+  -- auto trigger completion
+  -- Did not find a seeting to change replace on confirm behaviour.
+  completion = { always = true, smart = true },
   display = {
     ghost_text = { enabled = false },
     pum = {
@@ -909,7 +953,7 @@ vim.g.coq_settings = {
     snippets = { enabled = true, short_name = "snip", weight_adjust = 1.2 },
     paths = { short_name = "path", path_seps = { "/" } }, -- always use / even in Windows
     buffers = { short_name = "buf" },
-    tree_sitter = { short_name = "ts", weight_adjust = -2},
+    tree_sitter = { enabled = false, short_name = "ts", weight_adjust = -2},
     --snippets = { user_path = "~/.vim/snip"} -- put here custom snippets
   }
 }

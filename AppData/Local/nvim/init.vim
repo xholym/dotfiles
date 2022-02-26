@@ -8,6 +8,8 @@
 " - install MikTex and SumatraPDF for latex.
 " - install ccls (On windows using choco install ccls)
 " - install tar (lsp-installer requires it)
+" - if coq snipets do not work copy coq.artifacts/coq+snippets+v2
+"     to coq_nvim/.vars/clients/snippets/users+v2.json
 "
 "
 " Todos:
@@ -106,6 +108,7 @@ Plug 'mhinz/vim-startify'       " better info about buffer change in statusline
 " Git
 Plug 'tpope/vim-fugitive'
 Plug 'airblade/vim-gitgutter'
+Plug 'junegunn/gv.vim'
 
 " Working directory navigation
 Plug 'preservim/nerdtree'
@@ -156,20 +159,12 @@ Plug 'JoosepAlviste/nvim-ts-context-commentstring'  " set commentstring base on 
 
 Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && yarn install'  }
 
-" nocheckin
 Plug 'neovim/nvim-lspconfig'
 Plug 'williamboman/nvim-lsp-installer'
 Plug 'mfussenegger/nvim-jdtls'
-" Plug 'hrsh7th/cmp-nvim-lsp'
-" Plug 'hrsh7th/cmp-buffer'
-" Plug 'hrsh7th/cmp-path'
-" Plug 'hrsh7th/cmp-cmdline'
-" Plug 'hrsh7th/nvim-cmp'
-"Plug 'quangnguyen30192/cmp-nvim-ultisnips'
-"Plug 'onsails/lspkind-nvim'
 
-Plug 'ms-jpq/coq_nvim', {'branch': 'coq'} "nocheckin remove nvim-cmp and use this instead?
-Plug 'ms-jpq/coq.thirdparty', {'branch': '3p'}
+Plug 'ms-jpq/coq_nvim', {'branch': 'coq'}
+" Plug 'ms-jpq/coq.thirdparty', {'branch': '3p'}
 Plug 'ms-jpq/coq.artifacts', {'branch': 'artifacts'}
 call plug#end()
 
@@ -241,6 +236,12 @@ function! s:my_highlights()
     hi link LspReferenceText  MyLspCursorWord
     hi link LspReferenceRead  MyLspCursorWord
     hi link LspReferenceWrite MyLspCursorWord
+
+    " defaults
+    "hi default link WildMenu NormalFloat
+    "hi WildMenu ctermfg=0 ctermbg=11 guifg=Black guibg=Yellow
+
+    hi WildMenu ctermfg=0 ctermbg=11 guifg=Brown guibg=Yellow
 endfunction
 call s:my_highlights()
 " Show nine spell checking candidates at most
@@ -341,6 +342,15 @@ command! -complete=file -nargs=1 Rm :echo 'Remove: '.'<f-args>'.' '.(delete(<f-a
 command! Qother execute '%bdelete | edit # | normal `"'
 command! Qo execute '%bdelete | edit # | normal `"'
 
+" Lua utils
+lua << EOF
+-- easily print lua table
+P = function(thing)
+    print(vim.inspect(thing))
+    return thing
+end
+EOF
+
 " ----- Plugin specific mappings -----
 
 command! BufMessages execute 'Bufferize messages'
@@ -348,31 +358,8 @@ command! BufMessages execute 'Bufferize messages'
 " --- Git ---
 " https://dpwright.com/posts/2018/04/06/graphical-log-with-vimfugitive/
 command! -nargs=* Glg Git! log --graph --abbrev-commit --decorate --format=format:'%s %C(bold yellow)%d%C(reset) %C(bold green)(%ar)%C(reset) %C(dim white)<%an>%C(reset) %C(bold blue)%h%C(reset)' --all<args>
-" --- Fuzzy search ---
 
-" FIles
-nnoremap <leader>f <cmd>lua require('telescope.builtin').find_files(require('telescope.themes').get_dropdown{ previewer = false })<cr>
-nnoremap <leader>g <cmd>Telescope git_files<cr>
-nnoremap <leader>b <cmd>Telescope buffers<cr>
-nnoremap <leader><Tab> <cmd>lua require('telescope.builtin').oldfiles(require('telescope.themes').get_dropdown{ previewer = false })<cr>
-" TODO: maybe remove this
-nnoremap <leader>B <cmd>Telescope git_branches<cr>
-
-" Search in files
-nnoremap <leader>/ <cmd>Telescope live_grep<cr>
-nnoremap <leader>? <cmd>lua require('telescope.builtin').grep_string { search = vim.fn.input("Grep for ") } <cr>
-
-" Resume last search
-nnoremap <leader>, <cmd>Telescope resume<cr>
-
-" Vim help
-" Search for marks
-nnoremap <leader>m <cmd>Telescope marks<cr>
-" Quickly go to some my config file
-command! Dotfiles :lua require('telescope.builtin').git_files { cwd = '~' } <cr>
-
-" Telescope colorscheme is anther useful one.
-
+" --- Telescope ---
 lua <<EOF
 local actions = require('telescope.actions')
 local previewers = require('telescope.previewers')
@@ -403,7 +390,53 @@ require('telescope').setup {
   }
 }
 require('telescope').load_extension('fzf')
+
+-- This is not needed, since Telescope does this by default with find_files
+--Home_git = vim.fn.fnamemodify(vim.fn.expand('$homepath/.git'), ':p'):gsub("\\", "/"):sub(1, -2)
+--Project_files = function(theme)
+--    local current_git_dir = vim.fn.fnamemodify(vim.fn.system('git rev-parse --absolute-git-dir'), ':p')
+--    local view = {}
+--    if theme == "files_only" then
+--      view = require('telescope.themes').get_dropdown{ previewer = false }
+--    end
+--
+--    if current_git_dir ~= "" then
+--        current_git_dir = current_git_dir:gsub("\n", "")
+--        if current_git_dir ~= Home_git then
+--            require'telescope.builtin'.git_files(view)
+--            return
+--        end
+--    end
+--    require'telescope.builtin'.find_files(view)
+--end
+--vim.api.nvim_set_keymap('n', '<leader>f', '<cmd>lua Project_files("files_only")<cr>', {})
+--vim.api.nvim_set_keymap('n', '<leader>F', '<cmd>lua Project_files()<cr>', {})
 EOF
+
+" --- Fuzzy search ---
+
+" FIles
+nnoremap <leader>f <cmd>lua require('telescope.builtin').find_files(require('telescope.themes').get_dropdown{ previewer = false })<cr>
+nnoremap <leader>F <cmd>lua require('telescope.builtin').find_files()<cr>
+nnoremap <leader>b <cmd>Telescope buffers<cr>
+nnoremap <leader><Tab> <cmd>lua require('telescope.builtin').oldfiles(require('telescope.themes').get_dropdown{ previewer = false })<cr>
+
+" Search in files
+nnoremap <leader>/ <cmd>Telescope live_grep<cr>
+nnoremap <leader>? <cmd>lua require('telescope.builtin').grep_string { search = vim.fn.input("Grep for ") } <cr>
+
+
+" Maybe temporary mappings
+" May change this mappind. <leader>g can have multiple key mappings, since it's easy to press.
+nnoremap <leader>gm <cmd>Telescope marks<cr>
+nnoremap <leader>gh <cmd>Telescope help_tags<cr>
+nnoremap <leader>g, <cmd>Telescope resume<cr>
+nnoremap <leader>gb <cmd>Telescope git_branches<cr>
+
+" Quickly go to some my config file
+command! Dotfiles :lua require('telescope.builtin').git_files { cwd = '~' } <cr>
+
+" Telescope colorscheme is anther useful one.
 
 
 " ----- Nerdtree -----
@@ -753,7 +786,7 @@ lsp_installer.on_server_ready(function(server)
         -- nocheckin remove
         -- TODO: create code action with only quick fix items, but each lsp has it's own kind's.
         --["textDocument/codeAction"] = function(err, result, ctx, ...)
-            --print('code action called')
+            --print('code action called'
             --P(result)
             --P(ctx)
             --vim.lsp.buf.code_action(err, result, ctx, ...)
@@ -765,6 +798,26 @@ lsp_installer.on_server_ready(function(server)
 
   server:setup(config)
 end)
+
+-- Setup ccls manually since, lsp-installer does not support it on windows (even though it works).
+local lspconfig = require'lspconfig'
+-- ccls uses cmake or .ccls file to recognize sources
+lspconfig.ccls.setup {
+  filetypes = {"c", "cpp", "cuda", "objc", "objcpp"},
+  rootPatterns = { "compile_commands.json", ".ccls-root", ".ccls", ".git"},
+  init_options = {
+    cache = {
+      directory = "C:\\tools\\ccls\\.ccls_cache"
+    },
+    client = {
+      snippet_support = true
+    },
+    index = { on_change = true },
+    highlight = { ls_ranges = true }
+  },
+
+  on_attach = Lsp_on_attach
+}
 
 
 -- Diagnostics
@@ -796,110 +849,13 @@ local config = {
   },
 }
 vim.diagnostic.config(config)
--- Nvim-cmp
-
--- local cmp = require'cmp'
--- local cmp_ultisnips_mappings = require("cmp_nvim_ultisnips.mappings")
--- local lspkind = require('lspkind')
---
--- cmp.setup({
---   --completion = {
---     --autocomplete = true -- can disable and invoke manually
---   --},
---   snippet = {
---     expand = function(args)
---       for i,v in ipairs(args) do print(i,v) end
---       vim.fn["UltiSnips#Anon"](args.body)
---     end,
---   },
---   mapping = {
---     ['<C-p>'] = cmp.mapping.select_prev_item(),
---     ['<C-n>'] = cmp.mapping.select_next_item(),
---     ['<C-d>'] = cmp.mapping.scroll_docs(-4),
---     ['<C-f>'] = cmp.mapping.scroll_docs(4),
---     ['<C-Space>'] = cmp.mapping.complete(),
---     ['<C-e>'] = cmp.mapping.close(),
---     -- Try C-y instead fo <CR>
---     --['<C-y>'] = cmp.mapping.confirm({
---       --select = true,
---       --behavior = cmp.ConfirmBehavior.Insert,
---     --}),
---     ['<CR>'] = cmp.mapping.confirm({
---       select = true, -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
---       behavior = cmp.ConfirmBehavior.Insert,
---     }),
---     ["<Tab>"] = cmp.mapping(
---       function(fallback)
---         cmp_ultisnips_mappings.expand_or_jump_forwards(fallback)
---       end,
---       { "i", "s" }
---     ),
---     ["<S-Tab>"] = cmp.mapping(
---       function(fallback)
---         cmp_ultisnips_mappings.jump_backwards(fallback)
---       end,
---       { "i", "s" }
---     ),
---   },
---   sources = cmp.config.sources({
---     { name = 'nvim_lsp' },
---     { name = 'ultisnips' },
---   }, {
---     { name = 'buffer', keyword_length = 5 },
---     { name = 'path' },
---   }),
---   formatting = {
---     format = lspkind.cmp_format({
---         with_text = false,
---         mode = 'symbol',
---         menu = {
---           buffer    = '{buf}',
---           nvim_lsp  = '{lsp}',
---           path      = '{path}',
---           utlisnips = '{snip}',
---         },
---     }),
---   },
---   view = {
---     entries = "custom",
---   },
---   experimental = {
---     native_menu = false,
---     --ghost_text = { hl_group = 'Ignore'},
---   }
--- })
---
--- -- Use cmdline & path source for ':' (if you enabled `native_menu`, this won't work anymore).
--- cmp.setup.cmdline(':', {
---   sources = cmp.config.sources({
---     { name = 'path' }
---   }, {
---     { name = 'cmdline' }
---   }),
---   preselect = cmp.PreselectMode.Item
--- })
--- -- Setup lspconfig.
--- local capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
--- -- Replace <YOUR_LSP_SERVER> with each lsp server you've enabled.
--- --require('lspconfig')['<YOUR_LSP_SERVER>'].setup {
---   --capabilities = capabilities
--- --}
 EOF
 
 
 " nocheckin continue:
-"  coq needs python 3 venv and sqlite
-"  snippets
-"  third party
-"  lsps - setup lsp-installer
 "  remove coc comments
-lua <<EOF
--- easily print lua table
-P = function(thing)
-    print(vim.inspect(thing))
-    return thing
-end
 
+lua <<EOF
 local kind_icons = {
   Text = "",
   Method = "m",
@@ -928,6 +884,7 @@ local kind_icons = {
   TypeParameter = "",
 }
 
+-- nocheckin fix replace on enter
 vim.g.coq_settings = {
   auto_start = true,
   keymap = {
@@ -948,8 +905,8 @@ vim.g.coq_settings = {
     icons = { mode = "short", spacing = 1, mappings = kind_icons },
   },
   clients = {
-    lsp = { short_name = "lsp", weight_adjust = 2 },
-    snippets = { enabled = true, short_name = "snip", weight_adjust = 1.5 },
+    lsp = { short_name = "lsp", weight_adjust = 1.5 },
+    snippets = { enabled = true, short_name = "snip", weight_adjust = 1.2 },
     paths = { short_name = "path", path_seps = { "/" } }, -- always use / even in Windows
     buffers = { short_name = "buf" },
     tree_sitter = { short_name = "ts", weight_adjust = -2},
@@ -962,6 +919,7 @@ ino <silent><expr> <Esc>   pumvisible() ? "\<C-e><Esc>" : "\<Esc>"
 ino <silent><expr> <C-c>   pumvisible() ? "\<C-e><C-c>" : "\<C-c>"
 ino <silent><expr> <BS>    pumvisible() ? "\<C-e><BS>"  : "\<BS>"
 ino <silent><expr> <CR>    pumvisible() ? (complete_info().selected == -1 ? "\<C-e><CR>" : "\<C-y>") : "\<CR>"
+command! COQmySnipEdit execute 'tabe ~/.vim/plugged/coq_nvim/.vars/clients/snippets/users+v2.json'
 
 " hi link CmpItemAbbr Normal
 " hi link CmpItemKind Label

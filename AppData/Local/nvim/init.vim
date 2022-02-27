@@ -75,13 +75,10 @@ Plug 'wellle/targets.vim'       " adds more textobjects like args, separators (,
 Plug 'machakann/vim-highlightedyank'
 Plug 'tpope/vim-speeddating'         " <C-a> increment for dates and such, vim not seeing '-' as minus
 Plug 'karb94/neoscroll.nvim'
-"
-" Autopairs may be causing more problems than helping.
-" TODO: Try https://github.com/windwp/nvim-autopairs
-"   here is an example config https://github.com/kabinspace/AstroVim/blob/main/lua/configs/autopairs.lua
-Plug 'Raimondi/delimitMate'          " automatically close ('`\"
+
+Plug 'windwp/nvim-autopairs'
 Plug 'AndrewRadev/bufferize.vim' " put command output in tmp buffer
-Plug 'alvan/vim-closetag'
+Plug 'windwp/nvim-ts-autotag'
 
 " Themes
 Plug 'vim-airline/vim-airline'
@@ -333,15 +330,15 @@ lua << EOF
 require('neoscroll').setup()
 -- speed it up compared to defaults.
 require('neoscroll.config').set_mappings({
-  ['<C-u>'] = {'scroll', {'-vim.wo.scroll', 'true', '50'}},
-  ['<C-d>'] = {'scroll', { 'vim.wo.scroll', 'true', '50'}},
-  ['<C-b>'] = {'scroll', {'-vim.api.nvim_win_get_height(0)', 'true', '100'}},
-  ['<C-f>'] = {'scroll', { 'vim.api.nvim_win_get_height(0)', 'true', '100'}},
-  ['<C-y>'] = {'scroll', {'-0.10', 'false', '15'}},
-  ['<C-e>'] = {'scroll', { '0.10', 'false', '15'}},
-  ['zt']    = {'zt', {'35'}},
-  ['zz']    = {'zz', {'35'}},
-  ['zb']    = {'zb', {'35'}}
+  ['<C-u>'] = {'scroll', {'-vim.wo.scroll', 'true', '30'}},
+  ['<C-d>'] = {'scroll', { 'vim.wo.scroll', 'true', '30'}},
+  ['<C-b>'] = {'scroll', {'-vim.api.nvim_win_get_height(0)', 'true', '60'}},
+  ['<C-f>'] = {'scroll', { 'vim.api.nvim_win_get_height(0)', 'true', '60'}},
+  ['<C-y>'] = {'scroll', {'-0.10', 'false', '5'}},
+  ['<C-e>'] = {'scroll', { '0.10', 'false', '5'}},
+  ['zt']    = {'zt', {'20'}},
+  ['zz']    = {'zz', {'20'}},
+  ['zb']    = {'zb', {'20'}}
 })
 EOF
 " --- Indent blank line ---
@@ -375,6 +372,24 @@ require("indent_blankline").setup {
         "IndentGuide",
     },
 }
+EOF
+" --- Autopairs ---
+lua << EOF
+require('nvim-autopairs').setup({
+  check_ts = true,
+  ts_config = {
+    lua = { "string", "source" },
+    javascript = { "string", "template_string" },
+    java = false,
+  },
+})
+-- TODO: add rule to insert in this sitution
+--   before: function ((|) -> press: ) -> after: function ((|))
+--   now it just moves right
+EOF
+" --- Autotags ---
+lua << EOF
+require('nvim-ts-autotag').setup()
 EOF
 
 " --- Git ---
@@ -511,19 +526,6 @@ let g:UltiSnipsJumpForwardTrigger="<tab>"
 let g:UltiSnipsJumpBackwardTrigger="<S-tab>"
 let g:UltiSnipsEditSplit="tabdo"
 
-" --- close tag ---
-let g:closetag_filenames = '*.html,*.xhtml,*.jsx,*.tsx'
-let g:closetag_xhtml_filenames = '*.xml,*.xhtml,*.jsx,*.tsx'
-let g:closetag_filetypes = 'html,xhtml,jsx,tsx'
-let g:closetag_xhtml_filetypes = 'xhtml,jsx,tsx,typescriptreact,typescript'
-let g:closetag_emptyTags_caseSensitive = 1
-let g:closetag_regions = {
-    \ 'typescriptreact': 'jsxRegion,tsxRegion',
-    \ 'javascriptreact': 'jsxRegion',
-    \ }
-let g:closetag_shortcut = '>'
-let g:closetag_close_shortcut = '<leader>>'
-
 "--- Nvim treesitter ---
 lua <<EOF
 require'nvim-treesitter.configs'.setup {
@@ -531,6 +533,9 @@ require'nvim-treesitter.configs'.setup {
   highlight = {
     enable = true,
     disable = { "kotlin" }, -- kotlin syntax highlight does not work correctly.
+  },
+  indent = {
+    enable = true
   },
   context_commentstring = {
     enable = true
@@ -613,7 +618,7 @@ nnoremap <silent> [e <cmd>lua vim.diagnostic.goto_prev({severity = vim.diagnosti
 nnoremap <silent> ]e <cmd>lua vim.diagnostic.goto_next({severity = vim.diagnostic.severity.ERROR})<cr>
 lua <<EOF
 Lsp_on_attach = function (client, bufnr)
-    if client.name == "elmls" then print("attaching elmls") end
+  print("Attaching", client.name, "lsp")
 
   local opts = { noremap=true, silent=true }
   vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gD', '<cmd>lua vim.lsp.buf.declaration()<CR>', opts)
@@ -763,6 +768,7 @@ local config = {
   },
   underline = true,
   severity_sort = true,
+  --update_in_insert = true,
   float = {
     focusable = false,
     --style = "minimal",
@@ -836,10 +842,35 @@ vim.g.coq_settings = {
     --snippets = { user_path = "~/.vim/snip"} -- put here custom snippets
   }
 }
+-- Make <CR> and <BS> to work with autopairs
+local npairs = require('nvim-autopairs')
+_G.MUtils= {}
+
+MUtils.CR = function()
+  if vim.fn.pumvisible() ~= 0 then
+    if vim.fn.complete_info({ 'selected' }).selected ~= -1 then
+      return npairs.esc('<c-y>')
+    else
+      return npairs.esc('<c-e>') .. npairs.autopairs_cr()
+    end
+  else
+    return npairs.autopairs_cr()
+  end
+end
+
+MUtils.BS = function()
+  if vim.fn.pumvisible() ~= 0 and vim.fn.complete_info({ 'mode' }).mode == 'eval' then
+    return npairs.esc('<c-e>') .. npairs.autopairs_bs()
+  else
+    return npairs.autopairs_bs()
+  end
+end
 EOF
 " 🐓 Coq completion settings
 ino <silent><expr> <Esc>   pumvisible() ? "\<C-e><Esc>" : "\<Esc>"
 ino <silent><expr> <C-c>   pumvisible() ? "\<C-e><C-c>" : "\<C-c>"
-ino <silent><expr> <BS>    pumvisible() ? "\<C-e><BS>"  : "\<BS>"
-ino <silent><expr> <CR>    pumvisible() ? (complete_info().selected == -1 ? "\<C-e><CR>" : "\<C-y>") : "\<CR>"
+inoremap <expr> <cr> v:lua.MUtils.CR()
+inoremap <expr> <bs> v:lua.MUtils.BS()
+"ino <silent><expr> <BS>    pumvisible() ? "\<C-e><BS>"  : "\<BS>"
+"ino <silent><expr> <CR>    pumvisible() ? (complete_info().selected == -1 ? "\<C-e><CR>" : "\<C-y>") : "\<CR>"
 command! COQmySnipEdit execute 'tabe ~/.vim/plugged/coq_nvim/.vars/clients/snippets/users+v2.json'

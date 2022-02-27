@@ -63,6 +63,10 @@ augroup end
 nnoremap <SPACE> <Nop>
 let mapleader = " "
 
+" Navigation
+nnoremap <C-tab> <C-^>
+" go to last tab is still g<tab>
+
 " Splits navigation
 nnoremap <C-l> <C-w>l
 nnoremap <C-h> <C-w>h
@@ -138,3 +142,6 @@ nnoremap [g <cmd>cprev<cr>
 nnoremap ]g <cmd>cnext<cr>
 nnoremap [l <cmd>lprev<cr>
 nnoremap ]l <cmd>lnext<cr>
+
+" Abreviations
+ab nch nocheckin

@@ -13,9 +13,9 @@
 "
 "
 " Todos:
+" TODO: checkout https://github.com/nvim-treesitter/nvim-treesitter-textobjects
 " TODO: Setup git bash in toggle terminal https://github.com/akinsho/toggleterm.nvim
 "       - example https://github.com/kabinspace/AstroVim/blob/main/lua/configs/toggleterm.lua
-" TODO: Checkout easy align plugin https://www.giters.com/junegunn/vim-easy-align
 " TODO: Checkout some lsp status line.
 " TODO: Remap :diffget //2 and diffget //3
 " TODO: Fix java formatting settings.
@@ -63,6 +63,7 @@ Plug 'tpope/vim-repeat'         " make surround repeatable with .
 Plug 'vim-scripts/ReplaceWithRegister'
 " Plug 'justinmk/vim-sneak'     " add after I'm good with f/t
 Plug 'AndrewRadev/switch.vim'
+Plug 'junegunn/vim-easy-align'
 
 " Textobjects
 Plug 'kana/vim-textobj-user'         " dependency of textobj-entire
@@ -127,7 +128,7 @@ Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && yarn install'  }
 Plug 'neovim/nvim-lspconfig'
 Plug 'williamboman/nvim-lsp-installer'
 Plug 'mfussenegger/nvim-jdtls'
-Plug 'glepnir/lspsaga.nvim'
+Plug 'tami5/lspsaga.nvim', {'branch' : 'nvim6.0'}
 
 Plug 'ms-jpq/coq_nvim', {'branch': 'coq'}
 " Plug 'ms-jpq/coq.thirdparty', {'branch': '3p'}
@@ -219,6 +220,7 @@ augroup my_syntax
     au!
     " Indent sizes
     " TODO: fix this, vim stil uses 4 spaces
+    autocmd Filetype lua             setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
     autocmd Filetype vim             setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
     autocmd Filetype python          setlocal expandtab tabstop=4 shiftwidth=4 softtabstop=4
     autocmd Filetype go              setlocal expandtab tabstop=4 shiftwidth=4 softtabstop=4
@@ -291,6 +293,9 @@ lua << EOF
 P = function(thing)
     print(vim.inspect(thing))
     return thing
+end
+R = function(...)
+  return require("plenary.reload").reload_module(...)
 end
 EOF
 
@@ -383,9 +388,6 @@ require('nvim-autopairs').setup({
     java = false,
   },
 })
--- TODO: add rule to insert in this sitution
---   before: function ((|) -> press: ) -> after: function ((|))
---   now it just moves right
 EOF
 " --- Autotags ---
 lua << EOF
@@ -476,6 +478,9 @@ command! Dotfiles :lua require('telescope.builtin').git_files { cwd = '~' } <cr>
 
 " Telescope colorscheme is anther useful one.
 
+" --- EasyAlign ---
+xmap ga <Plug>(EasyAlign)
+nmap ga <Plug>(EasyAlign)
 
 " ----- Nerdtree -----
 nnoremap <C-n> <cmd>NERDTreeToggle<CR>
@@ -500,7 +505,7 @@ augroup my_nerdtree
 augroup end
 
 " --- Undo tree ---
-nnoremap <leader>u <cmd>UndotreeToggle<cr>
+nnoremap <leader>u <cmd>UndotreeToggle<cr><cmd>UndotreeFocus<cr>
 set undodir=~/.vim/undodir
 set undofile
 "let g:undotree_WindowLayout = 2  " bigger diff window
@@ -601,6 +606,42 @@ let g:cpp_class_decl_highlight = 1
 " :help vim-lsp-cxx-highlight
 
 
+" ----- Lsp saga ----
+lua << EOF
+-- Do not use Lspsaga lspfinder, it's broken.
+local saga = require 'lspsaga'
+saga.init_lsp_saga({
+  border_style = "round",
+  use_saga_diagnostic_sign = true,
+  error_sign = "",
+  warn_sign = "",
+  infor_sign = "",
+  hint_sign = "",
+  diagnostic_header_icon = "   ",
+  diagnostic_prefix_format = "%d. ",
+  diagnostic_message_format = "%m %c",
+  code_action_icon = " ",
+  code_action_prompt = {
+    enable = false,
+    --sign = false,
+    --sign_priority = 40,
+    --virtual_text = false,
+  },
+  code_action_keys = { quit = {"q", "<ESC>"}, exec = "<CR>", },
+  rename_prompt_prefix = "",
+  rename_output_qflist = { enable = true },
+  rename_action_keys = { quit = "<C-c>", exec = "<CR>", },
+  finder_action_keys = {
+    quit = {"q", "<ESC>"},
+    open = "o",
+    vsplit = "s",
+    split = "i",
+    quit = "q",
+    scroll_down = "<C-f>",
+    scroll_up = "<C-b>",
+  }
+})
+EOF
 
 " ----- Native lsp -----
 
@@ -627,18 +668,21 @@ Lsp_on_attach = function (client, bufnr)
   vim.api.nvim_buf_set_keymap(bufnr, 'n', 'K',  '<cmd>lua vim.lsp.buf.hover()<cr>', opts)
   vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<cr>', opts)
   vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gy', '<cmd>lua vim.lsp.buf.type_definition()<cr>', opts)
-  vim.api.nvim_buf_set_keymap(bufnr, 'n', 'ga', '<cmd>lua vim.lsp.buf.references()<cr>', opts)
-  vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gm', '<cmd>lua vim.lsp.buf.rename()<cr>', opts)
-  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<C-m>', '<cmd>lua vim.lsp.buf.signature_help()<cr>', opts)
+  -- gu for go to usages
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gu', '<cmd>lua vim.lsp.buf.references()<cr>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gm', '<cmd>Lspsaga rename<cr>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<C-p>', '<cmd>lua vim.lsp.buf.signature_help()<cr>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'i', '<C-p>', '<cmd>lua vim.lsp.buf.signature_help()<cr>', opts)
   vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>L', '<cmd>lua vim.lsp.buf.formatting()<cr>', opts)
   vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>l', '<cmd>lua vim.lsp.buf.range_formatting()<cr>', opts)
   vim.api.nvim_buf_set_keymap(bufnr, 'v', '<leader>l', '<cmd>lua vim.lsp.buf.range_formatting()<cr>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>a',  '<cmd>Lspsaga code_action<cr>', opts)
+
 
   -- what does this mean/do ?
   --vim.api.nvim_buf_set_keymap(bufnr, 'n', '<space>wa', '<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>', opts)
   --vim.api.nvim_buf_set_keymap(bufnr, 'n', '<space>wr', '<cmd>lua vim.lsp.buf.remove_workspace_folder()<CR>', opts)
   --vim.api.nvim_buf_set_keymap(bufnr, 'n', '<space>wl', '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>', opts)
-  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>a', '<cmd>lua vim.lsp.buf.code_action()<cr>', opts)
 
   if client.resolved_capabilities.document_highlight then
     if client.name ~= "vimls" then
@@ -673,7 +717,7 @@ lsp_installer.on_server_ready(function(server)
   if server.name == "tsserver" then
     local ts_cfg = {
       handlers = {
-        ["textDocument/publishDiagnostics"] = function(err, result, ctx, config)
+        ["textDocument/publishDiagnostics"] = function(err, result, ctx, hconfig)
             if result ~= nil and result.diagnostics ~= nil then
               -- Do not report React is unused import.
               local isTsx = result.uri:sub(-#"tsx") == "tsx"
@@ -686,7 +730,11 @@ lsp_installer.on_server_ready(function(server)
                 end
               end
             end
-          vim.lsp.diagnostic.on_publish_diagnostics(err, result, ctx, config)
+          local handler = vim.lsp.with(vim.lsp.diagnostic.on_publish_diagnostics, {
+            virtual_text = false,
+          })
+
+          handler(err, result, ctx, hconfig)
         end,
         -- TODO: create code action with only quick fix items, but each lsp has it's own kind's.
         --["textDocument/codeAction"] = function(err, result, ctx, ...)
@@ -714,6 +762,17 @@ lsp_installer.on_server_ready(function(server)
       }
     }
     config = vim.tbl_deep_extend("force", elm_cfg, config)
+  elseif server.name == "sumneko_lua" then
+    local lua_cfg = {
+      Lua = {
+        runtime = { version = 'LuaJIT', path = runtime_path, },
+        diagnostics = { globals = {'vim'}, },
+        workspace = { library = vim.api.nvim_get_runtime_file("", true), },
+        -- Do not send telemetry data containing a randomized but unique identifier
+        telemetry = { enable = false, },
+      },
+    }
+    config = vim.tbl_deep_extend("force", lua_cfg, config)
   end
 
   server:setup(config)
@@ -749,8 +808,12 @@ vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, {
 vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, {
   border = "rounded",
 })
+vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(vim.lsp.diagnostic.on_publish_diagnostics, {
+  virtual_text = false,
+})
 
 -- Diagnostics
+-- This is not used since signs are shown by lspsaga. TODO: remove later.
 local signs = {
   { name = "DiagnosticSignError", text = "" },
   { name = "DiagnosticSignWarn", text = "" },
@@ -842,35 +905,38 @@ vim.g.coq_settings = {
     --snippets = { user_path = "~/.vim/snip"} -- put here custom snippets
   }
 }
+-- I don't know why this is needed, it breaks stuff like:
+-- press of " on ) does not insert and also other way around.
 -- Make <CR> and <BS> to work with autopairs
-local npairs = require('nvim-autopairs')
-_G.MUtils= {}
+--local npairs = require('nvim-autopairs')
+--_G.MUtils= {}
 
-MUtils.CR = function()
-  if vim.fn.pumvisible() ~= 0 then
-    if vim.fn.complete_info({ 'selected' }).selected ~= -1 then
-      return npairs.esc('<c-y>')
-    else
-      return npairs.esc('<c-e>') .. npairs.autopairs_cr()
-    end
-  else
-    return npairs.autopairs_cr()
-  end
-end
+--MUtils.CR = function()
+  --if vim.fn.pumvisible() ~= 0 then
+    --if vim.fn.complete_info({ 'selected' }).selected ~= -1 then
+      --return npairs.esc('<c-y>')
+    --else
+      --return npairs.esc('<c-e>') .. npairs.autopairs_cr()
+    --end
+  --else
+    --return npairs.autopairs_cr()
+  --end
+--end
 
-MUtils.BS = function()
-  if vim.fn.pumvisible() ~= 0 and vim.fn.complete_info({ 'mode' }).mode == 'eval' then
-    return npairs.esc('<c-e>') .. npairs.autopairs_bs()
-  else
-    return npairs.autopairs_bs()
-  end
-end
+--MUtils.BS = function()
+  --if vim.fn.pumvisible() ~= 0 and vim.fn.complete_info({ 'mode' }).mode == 'eval' then
+    --return npairs.esc('<c-e>') .. npairs.autopairs_bs()
+  --else
+    --return npairs.autopairs_bs()
+  --end
+--end
 EOF
 " 🐓 Coq completion settings
 ino <silent><expr> <Esc>   pumvisible() ? "\<C-e><Esc>" : "\<Esc>"
 ino <silent><expr> <C-c>   pumvisible() ? "\<C-e><C-c>" : "\<C-c>"
-inoremap <expr> <cr> v:lua.MUtils.CR()
-inoremap <expr> <bs> v:lua.MUtils.BS()
-"ino <silent><expr> <BS>    pumvisible() ? "\<C-e><BS>"  : "\<BS>"
-"ino <silent><expr> <CR>    pumvisible() ? (complete_info().selected == -1 ? "\<C-e><CR>" : "\<C-y>") : "\<CR>"
+"inoremap <expr> <cr> v:lua.MUtils.CR()
+" inoremap <expr> <bs> v:lua.MUtils.BS()
+ino <silent><expr> <BS>    pumvisible() ? "\<C-e><BS>"  : "\<BS>"
+ino <silent><expr> <CR>    pumvisible() ? (complete_info().selected == -1 ? "\<C-e><CR>" : "\<C-y>") : "\<CR>"
 command! COQmySnipEdit execute 'tabe ~/.vim/plugged/coq_nvim/.vars/clients/snippets/users+v2.json'
+

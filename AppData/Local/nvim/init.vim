@@ -16,7 +16,6 @@
 " TODO: Setup git bash in toggle terminal https://github.com/akinsho/toggleterm.nvim
 "       - example https://github.com/kabinspace/AstroVim/blob/main/lua/configs/toggleterm.lua
 " TODO: Checkout easy align plugin https://www.giters.com/junegunn/vim-easy-align
-" TODO: Checkout smooth scrolling karb94/neoscroll.nvim
 " TODO: Checkout some lsp status line.
 " TODO: Remap :diffget //2 and diffget //3
 " TODO: Fix java formatting settings.
@@ -75,6 +74,7 @@ Plug 'wellle/targets.vim'       " adds more textobjects like args, separators (,
 " Changes to behaviour
 Plug 'machakann/vim-highlightedyank'
 Plug 'tpope/vim-speeddating'         " <C-a> increment for dates and such, vim not seeing '-' as minus
+Plug 'karb94/neoscroll.nvim'
 "
 " Autopairs may be causing more problems than helping.
 " TODO: Try https://github.com/windwp/nvim-autopairs
@@ -87,7 +87,7 @@ Plug 'alvan/vim-closetag'
 Plug 'vim-airline/vim-airline'
 Plug 'vim-airline/vim-airline-themes'
 Plug 'rafi/awesome-vim-colorschemes'
-Plug 'ap/vim-css-color'
+Plug 'norcalli/nvim-colorizer.lua'
 Plug 'savq/melange'
 Plug 'ryanoasis/vim-devicons'        " adds icons to plugins
 Plug 'mhinz/vim-startify'       " better info about buffer change in statusline
@@ -130,6 +130,7 @@ Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && yarn install'  }
 Plug 'neovim/nvim-lspconfig'
 Plug 'williamboman/nvim-lsp-installer'
 Plug 'mfussenegger/nvim-jdtls'
+Plug 'glepnir/lspsaga.nvim'
 
 Plug 'ms-jpq/coq_nvim', {'branch': 'coq'}
 " Plug 'ms-jpq/coq.thirdparty', {'branch': '3p'}
@@ -322,6 +323,27 @@ endfunction
 autocmd User AirlineAfterTheme call s:update_highlights()
 command! BufMessages execute 'Bufferize messages'
 
+" --- Colorizer ---
+lua << EOF
+require'colorizer'.setup()
+EOF
+" --- Neoscroll ---
+" smooth scrolling
+lua << EOF
+require('neoscroll').setup()
+-- speed it up compared to defaults.
+require('neoscroll.config').set_mappings({
+  ['<C-u>'] = {'scroll', {'-vim.wo.scroll', 'true', '50'}},
+  ['<C-d>'] = {'scroll', { 'vim.wo.scroll', 'true', '50'}},
+  ['<C-b>'] = {'scroll', {'-vim.api.nvim_win_get_height(0)', 'true', '100'}},
+  ['<C-f>'] = {'scroll', { 'vim.api.nvim_win_get_height(0)', 'true', '100'}},
+  ['<C-y>'] = {'scroll', {'-0.10', 'false', '15'}},
+  ['<C-e>'] = {'scroll', { '0.10', 'false', '15'}},
+  ['zt']    = {'zt', {'35'}},
+  ['zz']    = {'zz', {'35'}},
+  ['zb']    = {'zb', {'35'}}
+})
+EOF
 " --- Indent blank line ---
 lua<<EOF
 vim.g.indent_blankline_show_trailing_blankline_indent = false
@@ -713,6 +735,15 @@ lspconfig.ccls.setup {
   on_attach = Lsp_on_attach
 }
 
+-- Global handlers
+-- Make border arount these floats.
+vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, {
+  border = "rounded",
+})
+
+vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, {
+  border = "rounded",
+})
 
 -- Diagnostics
 local signs = {

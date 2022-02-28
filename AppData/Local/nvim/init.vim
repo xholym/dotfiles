@@ -13,16 +13,10 @@
 "
 "
 " Todos:
-" TODO: checkout https://github.com/nvim-treesitter/nvim-treesitter-textobjects
-" TODO: Setup git bash in toggle terminal https://github.com/akinsho/toggleterm.nvim
-"       - example https://github.com/kabinspace/AstroVim/blob/main/lua/configs/toggleterm.lua
-" TODO: Checkout some lsp status line.
+" TODO: Configure java debug.
+" TODO: Consider lsp status line
 " TODO: Remap :diffget //2 and diffget //3
 " TODO: Fix java formatting settings.
-" - https://stackoverflow.com/questions/2468939/how-to-let-tab-display-only-file-name-rather-than-the-full-path-in-vim
-" TODO: Do not show telescope preview for some file extensions.
-"  - it wrote with default previewer 'binary cannot be previewed' on my work pc so this may work on its own.
-" TODO: Configure java debug.
 "
 "
 " Notes:
@@ -112,6 +106,8 @@ Plug 'kyazdani42/nvim-web-devicons'  " devicons for telescope
 
 Plug 'mbbill/undotree'
 
+Plug 'akinsho/toggleterm.nvim'
+
 Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
 Plug 'ElmCast/elm-vim' " better syntax highliging
 Plug 'udalov/kotlin-vim'
@@ -188,6 +184,8 @@ function! s:my_highlights()
     hi link tsxTag TSConstructor
     hi link tsxTagName TSConstructor
 
+    hi link htmlArg Normal
+
     hi clear SpellBad
     " Default spellbad colloring.
     " hi SpellBad cterm=underline ctermfg=204 gui=underline guifg=#E06C75
@@ -208,6 +206,12 @@ function! s:my_highlights()
     hi Background guifg=#2A2520
     " Whitespace is #4D453E
     hi IndentGuide guifg=#3A3029
+    hi FloatBorder guifg=#8D857E
+    hi link LspSagaCodeActionBorder FloatBorder
+    hi link LspSagaRenameBorder FloatBorder
+    hi link LspSagaCodeActionTitle Statement
+    " This is PreProc collor
+    hi LspSagaCodeActionContent gui=bold guifg=#99D59D
 endfunction
 call s:my_highlights()
 " Show nine spell checking candidates at most
@@ -525,6 +529,48 @@ augroup my_goyo
     autocmd! User GoyoLeave nested call <SID>my_highlights()
 augroup end
 
+" --- Toggle terminal ---
+lua << EOF
+require("toggleterm").setup{
+  open_mapping = [[<c-t>]],
+  shell = 'C:\\tools\\bash.exe',
+  direction = 'vertical',
+  size = function(term)
+    if term.direction == "horizontal" then
+      return 15
+    elseif term.direction == "vertical" then
+      return vim.o.columns * 0.4
+    else
+      return 20
+    end
+  end,
+  float_opts = {
+    border = "curved",
+    highlights = {
+      border = "Normal",
+    }
+  },
+}
+function _G.set_terminal_keymaps()
+  local opts = {noremap = true}
+  vim.api.nvim_buf_set_keymap(0, 't', '<esc>', [[<C-\><C-n>]], opts)
+  vim.api.nvim_buf_set_keymap(0, 't', '<C-h>', [[<C-\><C-n><C-W>h]], opts)
+  vim.api.nvim_buf_set_keymap(0, 't', '<C-j>', [[<C-\><C-n><C-W>j]], opts)
+  vim.api.nvim_buf_set_keymap(0, 't', '<C-k>', [[<C-\><C-n><C-W>k]], opts)
+  vim.api.nvim_buf_set_keymap(0, 't', '<C-l>', [[<C-\><C-n><C-W>l]], opts)
+end
+EOF
+augroup my_term
+    au!
+    autocmd TermEnter term://*toggleterm#*
+          \ tnoremap <silent><c-t> <Cmd>exe v:count1 . "ToggleTerm"<CR>
+    autocmd! TermOpen term://* lua set_terminal_keymaps()
+augroup end
+command! Tt execute 'ToggleTerm direction=tab'
+command! Tf execute 'ToggleTerm direction=float'
+command! Tv execute 'ToggleTerm direction=vertical'
+command! Th execute 'ToggleTerm direction=horizontal'
+
 " --- Ultisnips ---
 let g:UltiSnipsExpandTrigger="<tab>"
 let g:UltiSnipsJumpForwardTrigger="<tab>"
@@ -612,14 +658,8 @@ lua << EOF
 local saga = require 'lspsaga'
 saga.init_lsp_saga({
   border_style = "round",
-  use_saga_diagnostic_sign = true,
-  error_sign = "",
-  warn_sign = "",
-  infor_sign = "",
-  hint_sign = "",
+  use_saga_diagnostic_sign = false,
   diagnostic_header_icon = "   ",
-  diagnostic_prefix_format = "%d. ",
-  diagnostic_message_format = "%m %c",
   code_action_icon = " ",
   code_action_prompt = {
     enable = false,
@@ -813,21 +853,15 @@ vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(vim.lsp.diagn
 })
 
 -- Diagnostics
--- This is not used since signs are shown by lspsaga. TODO: remove later.
-local signs = {
-  { name = "DiagnosticSignError", text = "" },
-  { name = "DiagnosticSignWarn", text = "" },
-  { name = "DiagnosticSignHint", text = "" },
-  { name = "DiagnosticSignInfo", text = "" },
-}
-for _, sign in ipairs(signs) do
-  vim.fn.sign_define(sign.name, { texthl = sign.name, text = sign.text, numhl = "" })
-end
-
 local config = {
   virtual_text = false,
   signs = {
-    active = signs,
+    active = {
+      { name = "DiagnosticSignError", text = "" },
+      { name = "DiagnosticSignWarn", text = "" },
+      { name = "DiagnosticSignHint", text = "" },
+      { name = "DiagnosticSignInfo", text = "" },
+    },
   },
   underline = true,
   severity_sort = true,
@@ -842,6 +876,10 @@ local config = {
     prefix = "",
   },
 }
+for _, sign in ipairs(config.signs.active) do
+  vim.fn.sign_define(sign.name, { texthl = sign.name, text = sign.text, numhl = "" })
+end
+
 vim.diagnostic.config(config)
 EOF
 

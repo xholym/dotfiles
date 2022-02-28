@@ -74,6 +74,8 @@ nnoremap <C-j> <C-w>j
 nnoremap <C-k> <C-w>k
 nnoremap + :vertical resize +5<CR>
 nnoremap _ :vertical resize -5<CR>
+nnoremap <c-+> :resize +5<CR>
+nnoremap <c-_> :resize -5<CR>
 
 " Tabs navigation
 nnoremap <M-h> :tabp<CR>
@@ -96,9 +98,6 @@ nnoremap : ,
 
 " Rerun last command
 nnoremap <leader>; :<up><CR>
-
-" Open vimrc on new tab
-nnoremap <leader>v <cmd>tabe $MYVIMRC<CR>:vs ~/.vimrc<CR><C-w>h
 
 " Keep visual selection when indenting
 vnoremap > >gv

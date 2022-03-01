@@ -139,8 +139,12 @@ nnoremap <leader>\ :%s//gc<left><left><left>
 " quickfix, location lists
 nnoremap [g <cmd>cprev<cr>
 nnoremap ]g <cmd>cnext<cr>
+nnoremap [G <cmd>copen<cr>
+nnoremap ]G <cmd>cclose<cr>
 nnoremap [l <cmd>lprev<cr>
 nnoremap ]l <cmd>lnext<cr>
+nnoremap [L <cmd>lopen<cr>
+nnoremap ]L <cmd>lclose<cr>
 
 " Abreviations
 ab nch nocheckin

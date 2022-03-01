@@ -93,7 +93,7 @@ Plug 'junegunn/gv.vim'
 " Working directory navigation
 Plug 'preservim/nerdtree'
 Plug 'tiagofumo/vim-nerdtree-syntax-highlight'
-Plug 'ivalkeen/nerdtree-execute'
+"Plug 'ivalkeen/nerdtree-execute'
 
 " Distraction free mode
 Plug 'junegunn/goyo.vim'
@@ -124,6 +124,7 @@ Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && yarn install'  }
 Plug 'neovim/nvim-lspconfig'
 Plug 'williamboman/nvim-lsp-installer'
 Plug 'mfussenegger/nvim-jdtls'
+
 Plug 'tami5/lspsaga.nvim', {'branch' : 'nvim6.0'}
 
 Plug 'ms-jpq/coq_nvim', {'branch': 'coq'}
@@ -298,8 +299,9 @@ P = function(thing)
     print(vim.inspect(thing))
     return thing
 end
-R = function(...)
-  return require("plenary.reload").reload_module(...)
+R = function(module)
+  require("plenary.reload").reload_module(module)
+  return require(module)
 end
 EOF
 
@@ -478,9 +480,10 @@ nnoremap <leader>g, <cmd>Telescope resume<cr>
 nnoremap <leader>gb <cmd>Telescope git_branches<cr>
 
 " Quickly go to some my config file
-command! Dotfiles :lua require('telescope.builtin').git_files { cwd = '~' } <cr>
+command! Dotfiles execute 'lua require("telescope.builtin").git_files { cwd = "~" }'
 
-" Telescope colorscheme is anther useful one.
+command! Nocheckin silent execute 'Ggrep nocheckin'
+command! Nch silent execute 'Ggrep nocheckin'
 
 " --- EasyAlign ---
 xmap ga <Plug>(EasyAlign)
@@ -489,7 +492,7 @@ nmap ga <Plug>(EasyAlign)
 " ----- Nerdtree -----
 nnoremap <C-n> <cmd>NERDTreeToggle<CR>
 " TODO: Create a lua function which finds the last visited buffer.
-nnoremap <leader>r <cmd>NERDTreeFind<CR>
+nnoremap <leader>n <cmd>NERDTreeFind<CR>
 let g:NERDTreeDirArrowExpandable = '▸'
 let g:NERDTreeDirArrowCollapsible = '▾'
 let NERDTreeShowHidden=1                    " Show hidden files
@@ -507,6 +510,11 @@ augroup my_nerdtree
   " Close the tab if NERDTree is the only window remaining in it.
   autocmd BufEnter * if winnr('$') == 1 && exists('b:NERDTree') && b:NERDTree.isTabTree() | quit | endif
 augroup end
+
+" unmap nerdtree execute, it's only needed in menu
+" Do not use nvim Netrw plugin explorer
+let g:loaded_netrw       = 1
+let g:loaded_netrwPlugin = 1
 
 " --- Undo tree ---
 nnoremap <leader>u <cmd>UndotreeToggle<cr><cmd>UndotreeFocus<cr>
@@ -534,12 +542,12 @@ lua << EOF
 require("toggleterm").setup{
   open_mapping = [[<c-t>]],
   shell = 'C:\\tools\\bash.exe',
-  direction = 'vertical',
+  direction = 'float',
   size = function(term)
     if term.direction == "horizontal" then
       return 15
     elseif term.direction == "vertical" then
-      return vim.o.columns * 0.4
+      return vim.o.columns * 0.45
     else
       return 20
     end
@@ -547,8 +555,9 @@ require("toggleterm").setup{
   float_opts = {
     border = "curved",
     highlights = {
-      border = "Normal",
-    }
+      border = "FloatBorder",
+      background = "DarkenedPanel",
+    },
   },
 }
 function _G.set_terminal_keymaps()
@@ -558,6 +567,9 @@ function _G.set_terminal_keymaps()
   vim.api.nvim_buf_set_keymap(0, 't', '<C-j>', [[<C-\><C-n><C-W>j]], opts)
   vim.api.nvim_buf_set_keymap(0, 't', '<C-k>', [[<C-\><C-n><C-W>k]], opts)
   vim.api.nvim_buf_set_keymap(0, 't', '<C-l>', [[<C-\><C-n><C-W>l]], opts)
+  vim.api.nvim_buf_set_keymap(0, 't', '<C-l>', [[<C-\><C-n><C-W>l]], opts)
+  vim.api.nvim_buf_set_keymap(0, 't', '<C-v>', [[<C-\><C-n>"*pa]], opts)
+  -- TODO: add copy mapping
 end
 EOF
 augroup my_term
@@ -698,6 +710,31 @@ nnoremap <silent> ]D <cmd>lua vim.diagnostic.setloclist()<cr>
 nnoremap <silent> [e <cmd>lua vim.diagnostic.goto_prev({severity = vim.diagnostic.severity.ERROR})<cr>
 nnoremap <silent> ]e <cmd>lua vim.diagnostic.goto_next({severity = vim.diagnostic.severity.ERROR})<cr>
 lua <<EOF
+--local telescope = require'telescope.builtin'
+--local view = require('telescope.themes').get_ivy()
+--function Lsp_references_in_telescope()
+--  local request = vim.lsp.util.make_position_params()
+--  request.context = { includeDeclaration = false }
+--
+--  vim.lsp.buf_request(0, "textDocument/references", request, function (err, result, ctx, config)
+--    if err then
+--      print 'TextDocument/references returned an error'
+--      P(err)
+--      return
+--    end
+--    if not result then
+--      print 'TextDocument/references returned no result'
+--      return
+--    end
+--    local locations = vim.lsp.util.locations_to_items(result, vim.lsp.get_client_by_id(ctx.client_id).offset_encoding) or {}
+--    vim.fn.setqflist(locations, 'r')
+--
+--    view.on_complete = { function() vim.cmd"stopinsert" end }
+--    telescope.quickfix(view)
+--  end)
+--
+--end
+
 Lsp_on_attach = function (client, bufnr)
   print("Attaching", client.name, "lsp")
 
@@ -708,16 +745,18 @@ Lsp_on_attach = function (client, bufnr)
   vim.api.nvim_buf_set_keymap(bufnr, 'n', 'K',  '<cmd>lua vim.lsp.buf.hover()<cr>', opts)
   vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<cr>', opts)
   vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gy', '<cmd>lua vim.lsp.buf.type_definition()<cr>', opts)
-  -- gu for go to usages
-  vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gu', '<cmd>lua vim.lsp.buf.references()<cr>', opts)
-  vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gm', '<cmd>Lspsaga rename<cr>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gx', '<cmd>lua vim.lsp.buf.references({includeDeclaration = false})<cr>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gm', '<cmd>Lspsaga rename<cr>', opts) -- TODO: also rewrite this
   vim.api.nvim_buf_set_keymap(bufnr, 'n', '<C-p>', '<cmd>lua vim.lsp.buf.signature_help()<cr>', opts)
   vim.api.nvim_buf_set_keymap(bufnr, 'i', '<C-p>', '<cmd>lua vim.lsp.buf.signature_help()<cr>', opts)
-  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>L', '<cmd>lua vim.lsp.buf.formatting()<cr>', opts)
-  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>l', '<cmd>lua vim.lsp.buf.range_formatting()<cr>', opts)
-  vim.api.nvim_buf_set_keymap(bufnr, 'v', '<leader>l', '<cmd>lua vim.lsp.buf.range_formatting()<cr>', opts)
-  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>a',  '<cmd>Lspsaga code_action<cr>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>l', '<cmd>lua vim.lsp.buf.formatting()<cr>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>L', '<cmd>lua vim.lsp.buf.range_formatting()<cr>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'v', '<leader>L', '<cmd>lua vim.lsp.buf.range_formatting()<cr>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>a', '<cmd>lua require("lsp-ops").list_code_actions()<cr>', opts)
 
+
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>q', '<cmd>lua require("lsp-ops").run_fix()<cr>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>Q', '<cmd>lua require("lsp-ops").list_code_actions({only = {"quickfix"}})<cr>', opts)
 
   -- what does this mean/do ?
   --vim.api.nvim_buf_set_keymap(bufnr, 'n', '<space>wa', '<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>', opts)
@@ -803,16 +842,22 @@ lsp_installer.on_server_ready(function(server)
     }
     config = vim.tbl_deep_extend("force", elm_cfg, config)
   elseif server.name == "sumneko_lua" then
+    local runtime_path = vim.split(package.path, ';')
+    table.insert(runtime_path, "lua/?.lua")
+    table.insert(runtime_path, "lua/?/init.lua")
     local lua_cfg = {
-      Lua = {
-        runtime = { version = 'LuaJIT', path = runtime_path, },
-        diagnostics = { globals = {'vim'}, },
-        workspace = { library = vim.api.nvim_get_runtime_file("", true), },
-        -- Do not send telemetry data containing a randomized but unique identifier
-        telemetry = { enable = false, },
-      },
+      settings = {
+        Lua = {
+          runtime = { version = 'LuaJIT', path = runtime_path, },
+          diagnostics = { globals = {'vim', 'P', 'R'}, },
+          workspace = { library = vim.api.nvim_get_runtime_file("", true), },
+          -- Do not send telemetry data containing a randomized but unique identifier
+          telemetry = { enable = false, },
+        },
+      }
     }
     config = vim.tbl_deep_extend("force", lua_cfg, config)
+    -- TODO texlab
   end
 
   server:setup(config)
@@ -844,7 +889,6 @@ lspconfig.ccls.setup {
 vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, {
   border = "rounded",
 })
-
 vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, {
   border = "rounded",
 })
@@ -943,6 +987,7 @@ vim.g.coq_settings = {
     --snippets = { user_path = "~/.vim/snip"} -- put here custom snippets
   }
 }
+-- TODO this causes bugs
 -- I don't know why this is needed, it breaks stuff like:
 -- press of " on ) does not insert and also other way around.
 -- Make <CR> and <BS> to work with autopairs

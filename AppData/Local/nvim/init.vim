@@ -127,7 +127,8 @@ Plug 'mfussenegger/nvim-jdtls'
 
 Plug 'tami5/lspsaga.nvim', {'branch' : 'nvim6.0'}
 
-Plug 'ms-jpq/coq_nvim', {'branch': 'coq'}
+" latest release has an utf encoding bug
+Plug 'ms-jpq/coq_nvim', {'branch': 'coq' }
 " Plug 'ms-jpq/coq.thirdparty', {'branch': '3p'}
 Plug 'ms-jpq/coq.artifacts', {'branch': 'artifacts'}
 call plug#end()
@@ -213,10 +214,13 @@ function! s:my_highlights()
     hi link LspSagaCodeActionTitle Statement
     " This is PreProc collor
     hi LspSagaCodeActionContent gui=bold guifg=#99D59D
+
+    hi link SelectionBracket Delimiter
+    hi link SelectionIndex Number
 endfunction
 call s:my_highlights()
 " Show nine spell checking candidates at most
-set spellsuggest=best,9
+set spellsuggest=best,10
 
 noremap <M-+> :call AdjustFontSize(1)<CR>
 noremap <M-_> :call AdjustFontSize(-1)<CR>
@@ -271,7 +275,7 @@ set updatetime=100
 " set spelllang=en,sk
 " TODO: Maybe move mapping to ~/.vimrc
 nnoremap <silent> <F11> <cmd>setlocal spell! spelllang=en,sk<CR>
-nnoremap z+ 1z=
+nmap z+ 1z=
 
 " Verbose file for debug.
 function! ToggleVerbose()
@@ -306,6 +310,42 @@ end
 EOF
 
 " ----- Plugin specific mappings -----
+
+" ----- Selection ----
+lua << EOF
+local selection = require'selection'
+function Select_spell_suggestion()
+  local cursor_word = vim.fn.expand "<cword>"
+  local spellsuggest = vim.api.nvim_get_option('spellsuggest')
+  local max = nil
+  if spellsuggest then
+    local matches = string.gmatch(spellsuggest, "%s*,([^,]+)")
+    for match in matches do
+      max = match
+      break -- we just want the first match
+    end
+  end
+  local suggestions = vim.fn.spellsuggest(cursor_word, max)
+
+  if limit then
+    -- (safely) remove items above limit
+    for i=#suggestions,1,-1 do
+      if i <= limit then
+        break
+      end
+      table.remove(suggestions, i)
+    end
+  end
+
+  P(sugg)
+  local on_select = function (_, suggestion)
+    vim.cmd("normal! ciw" .. suggestion)
+    vim.cmd "stopinsert"
+  end
+  selection.open(suggestions, on_select)
+end
+EOF
+nnoremap z= <cmd>lua Select_spell_suggestion()<cr>
 
 " ----- Airline -----
 " Airline theme should be automatically selected.
@@ -484,6 +524,9 @@ command! Dotfiles execute 'lua require("telescope.builtin").git_files { cwd = "~
 
 command! Nocheckin silent execute 'Ggrep nocheckin'
 command! Nch silent execute 'Ggrep nocheckin'
+
+" --- Startify ---
+command! SQuit execute 'SClose | qa'
 
 " --- EasyAlign ---
 xmap ga <Plug>(EasyAlign)
@@ -747,16 +790,16 @@ Lsp_on_attach = function (client, bufnr)
   vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gy', '<cmd>lua vim.lsp.buf.type_definition()<cr>', opts)
   vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gx', '<cmd>lua vim.lsp.buf.references({includeDeclaration = false})<cr>', opts)
   vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gm', '<cmd>Lspsaga rename<cr>', opts) -- TODO: also rewrite this
-  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<C-p>', '<cmd>lua vim.lsp.buf.signature_help()<cr>', opts)
-  vim.api.nvim_buf_set_keymap(bufnr, 'i', '<C-p>', '<cmd>lua vim.lsp.buf.signature_help()<cr>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<C-S-K>', '<cmd>lua vim.lsp.buf.signature_help()<cr>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'i', '<C-k>', '<cmd>lua vim.lsp.buf.signature_help()<cr>', opts)
   vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>l', '<cmd>lua vim.lsp.buf.formatting()<cr>', opts)
   vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>L', '<cmd>lua vim.lsp.buf.range_formatting()<cr>', opts)
   vim.api.nvim_buf_set_keymap(bufnr, 'v', '<leader>L', '<cmd>lua vim.lsp.buf.range_formatting()<cr>', opts)
-  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>a', '<cmd>lua require("lsp-ops").list_code_actions()<cr>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>a', '<cmd>lua require("lspops").list_code_actions()<cr>', opts)
 
 
-  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>q', '<cmd>lua require("lsp-ops").run_fix()<cr>', opts)
-  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>Q', '<cmd>lua require("lsp-ops").list_code_actions({only = {"quickfix"}})<cr>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>q', '<cmd>lua require("lspops").run_fix()<cr>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>Q', '<cmd>lua require("lspops").list_code_actions({only = {"quickfix"}})<cr>', opts)
 
   -- what does this mean/do ?
   --vim.api.nvim_buf_set_keymap(bufnr, 'n', '<space>wa', '<cmd>lua vim.lsp.buf.add_workspace_folder()<CR>', opts)
@@ -848,12 +891,24 @@ lsp_installer.on_server_ready(function(server)
     local lua_cfg = {
       settings = {
         Lua = {
-          runtime = { version = 'LuaJIT', path = runtime_path, },
+          runtime = {
+            version = 'LuaJIT',
+            path = runtime_path,
+            unicode_name = false
+          },
           diagnostics = { globals = {'vim', 'P', 'R'}, },
           workspace = { library = vim.api.nvim_get_runtime_file("", true), },
           -- Do not send telemetry data containing a randomized but unique identifier
           telemetry = { enable = false, },
         },
+      },
+      hanlders = {
+        ["textDocument/hover"] = function (err, result, ctx, cfg)
+          P(result)
+          vim.lsp.with(vim.lsp.handlers.hover, {
+              border = "rounded",
+            })
+          end
       }
     }
     config = vim.tbl_deep_extend("force", lua_cfg, config)
@@ -982,7 +1037,7 @@ vim.g.coq_settings = {
     lsp = { short_name = "lsp", weight_adjust = 1.5 },
     snippets = { enabled = true, short_name = "snip", weight_adjust = 1.2 },
     paths = { short_name = "path", path_seps = { "/" } }, -- always use / even in Windows
-    buffers = { short_name = "buf" },
+    buffers = { enabled = true, short_name = "buf" },
     tree_sitter = { enabled = false, short_name = "ts", weight_adjust = -2},
     --snippets = { user_path = "~/.vim/snip"} -- put here custom snippets
   }
@@ -991,34 +1046,32 @@ vim.g.coq_settings = {
 -- I don't know why this is needed, it breaks stuff like:
 -- press of " on ) does not insert and also other way around.
 -- Make <CR> and <BS> to work with autopairs
---local npairs = require('nvim-autopairs')
 --_G.MUtils= {}
 
+--local npairs = require('nvim-autopairs')
 --MUtils.CR = function()
-  --if vim.fn.pumvisible() ~= 0 then
-    --if vim.fn.complete_info({ 'selected' }).selected ~= -1 then
-      --return npairs.esc('<c-y>')
-    --else
-      --return npairs.esc('<c-e>') .. npairs.autopairs_cr()
-    --end
-  --else
-    --return npairs.autopairs_cr()
-  --end
+--  if vim.fn.pumvisible() ~= 0 then
+--    if vim.fn.complete_info({ 'selected' }).selected ~= -1 then
+--      return npairs.esc('<c-y>')
+--    else
+--      return npairs.esc('<c-e>') .. npairs.autopairs_cr()
+--    end
+--  else
+--    return npairs.autopairs_cr()
+--  end
 --end
-
+--
 --MUtils.BS = function()
-  --if vim.fn.pumvisible() ~= 0 and vim.fn.complete_info({ 'mode' }).mode == 'eval' then
-    --return npairs.esc('<c-e>') .. npairs.autopairs_bs()
-  --else
-    --return npairs.autopairs_bs()
-  --end
+--  if vim.fn.pumvisible() ~= 0 and vim.fn.complete_info({ 'mode' }).mode == 'eval' then
+--    return npairs.esc('<c-e>') .. npairs.autopairs_bs()
+--  else
+--    return npairs.autopairs_bs()
+--  end
 --end
 EOF
 " 🐓 Coq completion settings
-ino <silent><expr> <Esc>   pumvisible() ? "\<C-e><Esc>" : "\<Esc>"
-ino <silent><expr> <C-c>   pumvisible() ? "\<C-e><C-c>" : "\<C-c>"
 "inoremap <expr> <cr> v:lua.MUtils.CR()
-" inoremap <expr> <bs> v:lua.MUtils.BS()
+"inoremap <expr> <bs> v:lua.MUtils.BS()
 ino <silent><expr> <BS>    pumvisible() ? "\<C-e><BS>"  : "\<BS>"
 ino <silent><expr> <CR>    pumvisible() ? (complete_info().selected == -1 ? "\<C-e><CR>" : "\<C-y>") : "\<CR>"
 command! COQmySnipEdit execute 'tabe ~/.vim/plugged/coq_nvim/.vars/clients/snippets/users+v2.json'

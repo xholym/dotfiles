@@ -28,7 +28,6 @@ local function execute_action(act)
       vim.lsp.util.apply_workspace_edit(act.edit)
     end
     if type(act.command) == "table" then
-      print 'executing command'
       vim.lsp.buf.execute_command(act.command)
     end
   else

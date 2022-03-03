@@ -6,8 +6,6 @@ Lsp_on_attach(client, bufnr)
   local opts = { noremap=true, silent=true }
   vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>o', [[ <cmd>lua require'jdtls'.organize_imports()<cr> ]], opts)
 end
---local capabilities = vim.lsp.protocol.make_client_capabilities()
---capabilities = require('cmp_nvim_lsp').update_capabilities(capabilities)
 local config = {
   on_attach = on_attach,
   cmd = {
@@ -46,11 +44,8 @@ local config = {
   init_options = {
     bundles = {}
   },
-  --capabilities = capabilities,
 }
-local coq = require "coq"
-config = coq.lsp_ensure_capabilities(config)
-require('jdtls').start_or_attach(config)
+config.capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
 
 function format_range_operator()
   local old_func = vim.go.operatorfunc

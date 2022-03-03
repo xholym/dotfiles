@@ -13,6 +13,7 @@
 "
 "
 " Todos:
+" TODO: fix undercurl
 " TODO: Configure java debug.
 " TODO: Consider lsp status line
 " TODO: Remap :diffget //2 and diffget //3
@@ -65,6 +66,7 @@ Plug 'kana/vim-textobj-entire'
 Plug 'kana/vim-textobj-line'
 Plug 'wellle/targets.vim'       " adds more textobjects like args, separators (, . /) and so on
 " Plug 'vim-scripts/argtextobj.vim'    " reconsider using intead of targets argtextobj
+Plug 'michaeljsmith/vim-indent-object'
 
 " Changes to behaviour
 Plug 'machakann/vim-highlightedyank'
@@ -95,8 +97,8 @@ Plug 'preservim/nerdtree'
 Plug 'tiagofumo/vim-nerdtree-syntax-highlight'
 "Plug 'ivalkeen/nerdtree-execute'
 
-" Distraction free mode
-Plug 'junegunn/goyo.vim'
+" Zen mode
+Plug 'folke/zen-mode.nvim' " junegunn/goyo.vim is slowers on quit, because of highlights restoring
 
 " Fuzzy finder
 Plug 'nvim-telescope/telescope.nvim'
@@ -125,12 +127,17 @@ Plug 'neovim/nvim-lspconfig'
 Plug 'williamboman/nvim-lsp-installer'
 Plug 'mfussenegger/nvim-jdtls'
 
-Plug 'tami5/lspsaga.nvim', {'branch' : 'nvim6.0'}
 
-" latest release has an utf encoding bug
-Plug 'ms-jpq/coq_nvim', {'branch': 'coq' }
-" Plug 'ms-jpq/coq.thirdparty', {'branch': '3p'}
-Plug 'ms-jpq/coq.artifacts', {'branch': 'artifacts'}
+Plug 'SirVer/ultisnips' | Plug 'honza/vim-snippets'
+" Not using COQ, because in lua it throws utf8 errors and does not work with . (repeat).
+Plug 'hrsh7th/cmp-nvim-lsp'
+Plug 'hrsh7th/cmp-nvim-lua'
+Plug 'hrsh7th/cmp-buffer'
+Plug 'hrsh7th/cmp-path'
+Plug 'hrsh7th/nvim-cmp'
+Plug 'hrsh7th/cmp-emoji' " trying this out
+Plug 'quangnguyen30192/cmp-nvim-ultisnips'
+
 call plug#end()
 
 " ------ Highlighting --------
@@ -140,11 +147,7 @@ if (has("nvim"))
 endif
 if (has("termguicolors"))
    set termguicolors
- endif
-
-" Colorschemes
-colorscheme melange
-" colorscheme onedark
+endif
 
 set colorcolumn=80
 
@@ -156,7 +159,10 @@ function! s:my_highlights()
     hi TSVariableBuiltin gui=NONE
     hi TSConstBuiltin gui=NONE
 
-    hi Comment ctermfg=Green guifg=Green
+    "hi Search guifg=#2A2520 guibg=#8E733F " default
+    hi Search guifg=#2A2520 guibg=#BEA35F
+
+    "hi Comment ctermfg=Green guifg=Green
     " consider String color change for melange
     " hi String ctermfg=DarkGreen guifg=#69764D
 
@@ -194,31 +200,38 @@ function! s:my_highlights()
     hi SpellBad cterm=underline gui=underline
 
     " Use same colors as DiagnosticError / DiagnosticWarn and so on.
-    hi DiagnosticUnderlineError guisp=#B65C60
-    hi DiagnosticUnderlineWarn guisp=#EBC06D
-    hi DiagnosticUnderlineInfo guisp=#9AACCE
-    hi DiagnosticUnderlineHint guisp=#99D59D
+    " Nvim-qt does not render unercurl correctly, checkout their 2.17 release, it should be fixed there
+    hi DiagnosticUnderlineError guisp=#B65C60 gui=underline
+    hi DiagnosticUnderlineWarn guisp=#EBC06D gui=underline
+    hi DiagnosticUnderlineInfo guisp=#9AACCE gui=underline
+    hi DiagnosticUnderlineHint guisp=#99D59D gui=underline
 
     hi MyLspCursorWord ctermbg=242 guibg=#383029
     hi link LspReferenceText  MyLspCursorWord
     hi link LspReferenceRead  MyLspCursorWord
     hi link LspReferenceWrite MyLspCursorWord
 
+    hi link CmpItemKind Label
+    hi link CmpItemMenu Ignore
+
     " this is melange background color
     hi Background guifg=#2A2520
     " Whitespace is #4D453E
     hi IndentGuide guifg=#3A3029
+    hi link NormalFloat Normal
     hi FloatBorder guifg=#8D857E
-    hi link LspSagaCodeActionBorder FloatBorder
-    hi link LspSagaRenameBorder FloatBorder
-    hi link LspSagaCodeActionTitle Statement
-    " This is PreProc collor
-    hi LspSagaCodeActionContent gui=bold guifg=#99D59D
 
     hi link SelectionBracket Delimiter
     hi link SelectionIndex Number
+    hi link SelectionHover Visual
+
+    hi link RenamePrefix PreProc
 endfunction
-call s:my_highlights()
+
+colorscheme melange
+call s:my_highlights() " done this way to run highlights every time I source this file
+
+
 " Show nine spell checking candidates at most
 set spellsuggest=best,10
 
@@ -300,8 +313,8 @@ command! Qo execute '%bdelete | edit # | normal `"'
 lua << EOF
 -- easily print lua table
 P = function(thing)
-    print(vim.inspect(thing))
-    return thing
+  print(vim.inspect(thing))
+  return thing
 end
 R = function(module)
   require("plenary.reload").reload_module(module)
@@ -313,7 +326,6 @@ EOF
 
 " ----- Selection ----
 lua << EOF
-local selection = require'selection'
 function Select_spell_suggestion()
   local cursor_word = vim.fn.expand "<cword>"
   local spellsuggest = vim.api.nvim_get_option('spellsuggest')
@@ -337,12 +349,11 @@ function Select_spell_suggestion()
     end
   end
 
-  P(sugg)
   local on_select = function (_, suggestion)
     vim.cmd("normal! ciw" .. suggestion)
     vim.cmd "stopinsert"
   end
-  selection.open(suggestions, on_select)
+  require'selection'.open(suggestions, on_select)
 end
 EOF
 nnoremap z= <cmd>lua Select_spell_suggestion()<cr>
@@ -364,9 +375,9 @@ let g:airline#extensions#tabline#formatter = 'unique_tail'
 " let g:airline#extensions#tabline#left_alt_sep = '|'
 
 function! s:update_highlights()
-    " For tomorrow airline theme
-    "hi airline_tab guifg=#4D453E
-    hi airline_tab guifg=#9D958E
+  " For tomorrow airline theme
+  "hi airline_tab guifg=#4D453E
+  hi airline_tab guifg=#9D958E
 endfunction
 autocmd User AirlineAfterTheme call s:update_highlights()
 command! BufMessages execute 'Bufferize messages'
@@ -424,6 +435,8 @@ require("indent_blankline").setup {
     },
 }
 EOF
+let g:indent_blankline_enabled = v:false
+nnoremap <leader>gi <cmd>IndentBlanklineToggle<cr>
 " --- Autopairs ---
 lua << EOF
 require('nvim-autopairs').setup({
@@ -454,6 +467,7 @@ require('telescope').setup {
     file_ignore_patterns = {'build/.*', 'bin/.*'},
     path_display = { truncate = 2 },
     color_devicons = true,
+    prompt_prefix = ' ',
     set_env = { ['COLORTERM'] = 'truecolor' },
     mappings = {
       i = {
@@ -514,8 +528,8 @@ nnoremap <leader>? <cmd>lua require('telescope.builtin').grep_string { search = 
 " Maybe temporary mappings
 " May change this mappind. <leader>g can have multiple key mappings, since it's easy to press.
 nnoremap <leader>gm <cmd>Telescope marks<cr>
-nnoremap <leader>gH <cmd>Telescope help_tags<cr>
-nnoremap <leader>gh <cmd>Telescope highlights<cr>
+nnoremap <leader>gh <cmd>Telescope help_tags<cr>
+nnoremap <leader>gH <cmd>Telescope highlights<cr>
 nnoremap <leader>g, <cmd>Telescope resume<cr>
 nnoremap <leader>gb <cmd>Telescope git_branches<cr>
 
@@ -571,14 +585,22 @@ let g:undotree_ShortIndicators = 1
 let g:gitgutter_signs = 0
 nnoremap <leader>hh <cmd>GitGutterSignsToggle<cr>
 
-" --- Goyo ---
-nnoremap <leader>z <cmd>Goyo<cr>
-let g:goyo_linenr=1
-let g:goyo_width=120
-augroup my_goyo
-    au!
-    autocmd! User GoyoLeave nested call <SID>my_highlights()
-augroup end
+" --- Zen mode ---
+
+nnoremap <leader>z <cmd>ZenMode<cr>
+lua << EOF
+require("zen-mode").setup {
+  window = {
+    --backdrop = 1,
+    height = 0.9,
+    options = {
+      signcolumn     = "yes",
+      number         = true,
+      relativenumber = true,
+    }
+  }
+}
+EOF
 
 " --- Toggle terminal ---
 lua << EOF
@@ -707,37 +729,6 @@ let g:cpp_class_decl_highlight = 1
 " :help vim-lsp-cxx-highlight
 
 
-" ----- Lsp saga ----
-lua << EOF
--- Do not use Lspsaga lspfinder, it's broken.
-local saga = require 'lspsaga'
-saga.init_lsp_saga({
-  border_style = "round",
-  use_saga_diagnostic_sign = false,
-  diagnostic_header_icon = "   ",
-  code_action_icon = " ",
-  code_action_prompt = {
-    enable = false,
-    --sign = false,
-    --sign_priority = 40,
-    --virtual_text = false,
-  },
-  code_action_keys = { quit = {"q", "<ESC>"}, exec = "<CR>", },
-  rename_prompt_prefix = "",
-  rename_output_qflist = { enable = true },
-  rename_action_keys = { quit = "<C-c>", exec = "<CR>", },
-  finder_action_keys = {
-    quit = {"q", "<ESC>"},
-    open = "o",
-    vsplit = "s",
-    split = "i",
-    quit = "q",
-    scroll_down = "<C-f>",
-    scroll_up = "<C-b>",
-  }
-})
-EOF
-
 " ----- Native lsp -----
 
 set completeopt=menu,menuone,noselect,noinsert
@@ -779,17 +770,14 @@ lua <<EOF
 --end
 
 Lsp_on_attach = function (client, bufnr)
-  print("Attaching", client.name, "lsp")
+  vim.notify("Attaching " .. client.name .. " lsp ...", vim.log.levels.INFO)
 
   local opts = { noremap=true, silent=true }
-  vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gD', '<cmd>lua vim.lsp.buf.declaration()<CR>', opts)
-
   vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gd', '<cmd>lua vim.lsp.buf.definition()<cr>', opts)
   vim.api.nvim_buf_set_keymap(bufnr, 'n', 'K',  '<cmd>lua vim.lsp.buf.hover()<cr>', opts)
-  vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gi', '<cmd>lua vim.lsp.buf.implementation()<cr>', opts)
-  vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gy', '<cmd>lua vim.lsp.buf.type_definition()<cr>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gD', '<cmd>lua vim.lsp.buf.type_definition()<cr>', opts)
   vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gx', '<cmd>lua vim.lsp.buf.references({includeDeclaration = false})<cr>', opts)
-  vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gm', '<cmd>Lspsaga rename<cr>', opts) -- TODO: also rewrite this
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gm', '<cmd>lua require("lspops").rename()<cr>', opts) -- TODO: also rewrite this
   vim.api.nvim_buf_set_keymap(bufnr, 'n', '<C-S-K>', '<cmd>lua vim.lsp.buf.signature_help()<cr>', opts)
   vim.api.nvim_buf_set_keymap(bufnr, 'i', '<C-k>', '<cmd>lua vim.lsp.buf.signature_help()<cr>', opts)
   vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>l', '<cmd>lua vim.lsp.buf.formatting()<cr>', opts)
@@ -821,12 +809,7 @@ Lsp_on_attach = function (client, bufnr)
     end
   end
 
-  --if client.name == "tsserver" then
-    --P(client.resolved_capabilities.code_action.codeActionKinds)
-  --end
-  --vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>e', '<cmd>lua vim.lsp.buf.code_action({ only = "quickfix"})<cr>', opts)
-  --vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>E', '<cmd>lua vim.lsp.buf.range_code_action({ only = "quickfix"})<cr>', opts)
-
+  vim.notify("... " .. client.name .. " lsp attached. ", vim.log.levels.INFO)
 end
 
 
@@ -834,7 +817,7 @@ local lsp_installer = require("nvim-lsp-installer")
 
 lsp_installer.on_server_ready(function(server)
   local config = { on_attach = Lsp_on_attach }
-  config = coq.lsp_ensure_capabilities(config)
+  config.capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
 
   if server.name == "tsserver" then
     local ts_cfg = {
@@ -858,13 +841,6 @@ lsp_installer.on_server_ready(function(server)
 
           handler(err, result, ctx, hconfig)
         end,
-        -- TODO: create code action with only quick fix items, but each lsp has it's own kind's.
-        --["textDocument/codeAction"] = function(err, result, ctx, ...)
-            --print('code action called'
-            --P(result)
-            --P(ctx)
-            --vim.lsp.buf.code_action(err, result, ctx, ...)
-        --end
       }
     }
     config = vim.tbl_deep_extend("force", ts_cfg, config)
@@ -958,8 +934,8 @@ local config = {
     active = {
       { name = "DiagnosticSignError", text = "" },
       { name = "DiagnosticSignWarn", text = "" },
-      { name = "DiagnosticSignHint", text = "" },
-      { name = "DiagnosticSignInfo", text = "" },
+      { name = "DiagnosticSignInfo", text = "" },
+      { name = "DiagnosticSignHint", text = "" },
     },
   },
   underline = true,
@@ -982,7 +958,13 @@ end
 vim.diagnostic.config(config)
 EOF
 
+" --- Ultisnips ---
+let g:UltiSnipsExpandTrigger="<tab>"
+let g:UltiSnipsJumpForwardTrigger="<tab>"
+let g:UltiSnipsJumpBackwardTrigger="<S-tab>"
+let g:UltiSnipsEditSplit="tabdo"
 
+" --- Autocompletion ---
 lua <<EOF
 local kind_icons = {
   Text = "",
@@ -1011,37 +993,96 @@ local kind_icons = {
   Operator = "",
   TypeParameter = "",
 }
+-- Nvim-cmp
 
-vim.g.coq_settings = {
-  auto_start = true,
-  keymap = {
-    recommended = false,
-    pre_select = false,
-    jump_to_mark = "<c-,>"
-    --bigger_preview = "<C-k>"
-  }, -- use the recommended keymap
-  -- auto trigger completion
-  -- Did not find a seeting to change replace on confirm behaviour.
-  completion = { always = true, smart = true },
-  display = {
-    ghost_text = { enabled = false },
-    pum = {
-      ellipsis = ".. ",
-      kind_context = {"", ""},
-      source_context = {"[", "]"},
-    },
-    preview = { border = "rounded" },
-    icons = { mode = "short", spacing = 1, mappings = kind_icons },
+local cmp = require'cmp'
+local cmp_ultisnips_mappings = require("cmp_nvim_ultisnips.mappings")
+
+cmp.setup({
+  --completion = {
+    --autocomplete = true -- can disable and invoke manually
+  --},
+  snippet = {
+    expand = function(args)
+      for i,v in ipairs(args) do print(i,v) end
+      vim.fn["UltiSnips#Anon"](args.body)
+    end,
   },
-  clients = {
-    lsp = { short_name = "lsp", weight_adjust = 1.5 },
-    snippets = { enabled = true, short_name = "snip", weight_adjust = 1.2 },
-    paths = { short_name = "path", path_seps = { "/" } }, -- always use / even in Windows
-    buffers = { enabled = true, short_name = "buf" },
-    tree_sitter = { enabled = false, short_name = "ts", weight_adjust = -2},
-    --snippets = { user_path = "~/.vim/snip"} -- put here custom snippets
+  mapping = {
+    ['<C-p>'] = cmp.mapping.select_prev_item(),
+    ['<C-n>'] = cmp.mapping.select_next_item(),
+    ['<C-b>'] = cmp.mapping.scroll_docs(-4),
+    ['<C-f>'] = cmp.mapping.scroll_docs(4),
+    ['<C-Space>'] = cmp.mapping.complete(),
+    ['<C-e>'] = cmp.mapping.close(),
+    -- Try C-y instead fo <CR>
+    --['<C-y>'] = cmp.mapping.confirm({ -select = true, behavior = cmp.ConfirmBehavior.Insert, }),
+    ['<CR>'] = cmp.mapping.confirm({ select = false, behavior = cmp.ConfirmBehavior.Insert, }),
+  },
+  sources = cmp.config.sources({
+    { name = 'nvim_lsp' },
+    { name = 'ultisnips' },
+    { name = 'nvim_lua' }
+  }, {
+    { name = 'buffer', keyword_length = 5 },
+    { name = 'path' },
+    { name = 'emoji'}
+  }),
+  formatting = {
+    format = function(entry, vim_item)
+     vim_item.kind = string.format("%s", kind_icons[vim_item.kind])
+
+     vim_item.menu = ({
+        buffer    = '{buf}',
+        nvim_lsp  = '{lsp}',
+        nvim_lua  = '{nlua}',
+        path      = '{path}',
+        utlisnips = '{snip}',
+        emoji     = '{:)}',
+     })[entry.source.name]
+
+     return vim_item
+    end
+  },
+  view = {
+    entries = "custom",
+  },
+  experimental = {
+    --native_menu = false,
+    --ghost_text = { hl_group = 'Ignore'},
   }
-}
+})
+
+--vim.g.coq_settings = {
+--  auto_start = true,
+--  keymap = {
+--    recommended = false,
+--    pre_select = false,
+--    jump_to_mark = "<c-,>"
+--    --bigger_preview = "<C-k>"
+--  }, -- use the recommended keymap
+--  -- auto trigger completion
+--  -- Did not find a seeting to change replace on confirm behaviour.
+--  completion = { always = true, smart = true },
+--  display = {
+--    ghost_text = { enabled = false },
+--    pum = {
+--      ellipsis = ".. ",
+--      kind_context = {"", ""},
+--      source_context = {"[", "]"},
+--    },
+--    preview = { border = "rounded" },
+--    icons = { mode = "short", spacing = 1, mappings = kind_icons },
+--  },
+--  clients = {
+--    lsp = { short_name = "lsp", weight_adjust = 1.5 },
+--    snippets = { enabled = true, short_name = "snip", weight_adjust = 1.2 },
+--    paths = { short_name = "path", path_seps = { "/" } }, -- always use / even in Windows
+--    buffers = { enabled = true, short_name = "buf" },
+--    tree_sitter = { enabled = false, short_name = "ts", weight_adjust = -2},
+--    --snippets = { user_path = "~/.vim/snip"} -- put here custom snippets
+--  }
+--}
 -- TODO this causes bugs
 -- I don't know why this is needed, it breaks stuff like:
 -- press of " on ) does not insert and also other way around.
@@ -1072,7 +1113,7 @@ EOF
 " 🐓 Coq completion settings
 "inoremap <expr> <cr> v:lua.MUtils.CR()
 "inoremap <expr> <bs> v:lua.MUtils.BS()
-ino <silent><expr> <BS>    pumvisible() ? "\<C-e><BS>"  : "\<BS>"
-ino <silent><expr> <CR>    pumvisible() ? (complete_info().selected == -1 ? "\<C-e><CR>" : "\<C-y>") : "\<CR>"
-command! COQmySnipEdit execute 'tabe ~/.vim/plugged/coq_nvim/.vars/clients/snippets/users+v2.json'
+" ino <silent><expr> <BS>    pumvisible() ? "\<C-e><BS>"  : "\<BS>"
+" ino <silent><expr> <CR>    pumvisible() ? (complete_info().selected == -1 ? "\<C-e><CR>" : "\<C-y>") : "\<CR>"
+" command! COQmySnipEdit execute 'tabe ~/.vim/plugged/coq_nvim/.vars/clients/snippets/users+v2.json'
 

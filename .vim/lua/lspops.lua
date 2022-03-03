@@ -178,20 +178,18 @@ M.rename = function()
       width = 30
     end
 
-    local anchor = "NW"
-    local line = vim.fn.screenrow()
-    local col = vim.fn.screencol()
-    if line + 1 > vim.o.lines - 4 then -- 4 is for padding
-      anchor = "SW"
-    end
-    local win = vim.api.nvim_open_win(buf, true, {
+    local win_opts = {
       focusable = true,
       border = "rounded", style = "minimal",
       width = width, height = 1,
-      relative = "cursor",
-      row = 0, col = 0,
-      anchor = determine_anchor(width, 1)
-    })
+      relative = "editor",
+      row = vim.fn.screenrow(), col = vim.fn.screencol(),
+      anchor = "NW"
+    }
+    if win_opts.row + win_opts.height > vim.o.lines - 4 then -- 4 is for padding
+      win_opts.anchor = "SW"
+    end
+    local win = vim.api.nvim_open_win(buf, true, win_opts)
     M.rename_win = win
 
     vim.api.nvim_win_set_option(win, "scrolloff", 0)

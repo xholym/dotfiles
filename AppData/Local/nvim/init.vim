@@ -795,7 +795,7 @@ Lsp_on_attach = function (client, bufnr)
   --vim.api.nvim_buf_set_keymap(bufnr, 'n', '<space>wl', '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>', opts)
 
   if client.resolved_capabilities.document_highlight then
-    if client.name ~= "vimls" then
+    if client.name ~= "vimls" and client.name ~= "texlab" then
       vim.api.nvim_exec(
         [[
         augroup lsp_document_highlight
@@ -880,7 +880,6 @@ lsp_installer.on_server_ready(function(server)
       },
       hanlders = {
         ["textDocument/hover"] = function (err, result, ctx, cfg)
-          P(result)
           vim.lsp.with(vim.lsp.handlers.hover, {
               border = "rounded",
             })

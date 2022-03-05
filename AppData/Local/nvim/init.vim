@@ -23,9 +23,6 @@
 " Notes:
 " Im writing this down, cause it help me to remember these mappings and use them.
 "
-" In nerdtree:
-" p     - go to parent
-"
 
 " Bugs_or_Restrictions:
 "
@@ -34,8 +31,6 @@
 "
 " Starting neovim from gitbash breaks terminal.
 " See https://github.com/neovim/neovim/issues/14605
-"
-" May try to use treesitter statusline.
 "
 
 set runtimepath^=~/.vim runtimepath+=~/.vim/after
@@ -51,7 +46,7 @@ set autowrite
 
 call plug#begin('~/.vim/plugged')    " initialize plugin system
 
-" Commands
+" Changes to behaviour
 Plug 'tpope/vim-surround'
 Plug 'tpope/vim-commentary'
 Plug 'tpope/vim-repeat'         " make surround repeatable with .
@@ -59,43 +54,41 @@ Plug 'vim-scripts/ReplaceWithRegister'
 " Plug 'justinmk/vim-sneak'     " add after I'm good with f/t
 Plug 'AndrewRadev/switch.vim'
 Plug 'junegunn/vim-easy-align'
-
-" Textobjects
 Plug 'kana/vim-textobj-user'         " dependency of textobj-entire
 Plug 'kana/vim-textobj-entire'
 Plug 'kana/vim-textobj-line'
 Plug 'wellle/targets.vim'       " adds more textobjects like args, separators (, . /) and so on
 " Plug 'vim-scripts/argtextobj.vim'    " reconsider using intead of targets argtextobj
 Plug 'michaeljsmith/vim-indent-object'
-
-" Changes to behaviour
 Plug 'machakann/vim-highlightedyank'
-Plug 'tpope/vim-speeddating'         " <C-a> increment for dates and such, vim not seeing '-' as minus
-Plug 'karb94/neoscroll.nvim'
-
 Plug 'windwp/nvim-autopairs'
-Plug 'AndrewRadev/bufferize.vim' " put command output in tmp buffer
 Plug 'windwp/nvim-ts-autotag'
 
+Plug 'AndrewRadev/bufferize.vim' " put command output in tmp buffer
+
+" Tried both smooth scrolling plugins, both are slow in large files.
+" They lagged a lot in my master thesis in latex - +2000 lines file.
+"Plug 'karb94/neoscroll.nvim'
+"Plug 'terryma/vim-smooth-scroll'
+
 " Themes
-Plug 'vim-airline/vim-airline'
-Plug 'vim-airline/vim-airline-themes'
-Plug 'rafi/awesome-vim-colorschemes'
+Plug 'nvim-lualine/lualine.nvim'
+"Plug 'rafi/awesome-vim-colorschemes'
 Plug 'norcalli/nvim-colorizer.lua'
 Plug 'savq/melange'
-Plug 'ryanoasis/vim-devicons'        " adds icons to plugins
 Plug 'mhinz/vim-startify'       " better info about buffer change in statusline
 Plug 'lukas-reineke/indent-blankline.nvim'
 
 " Git
 Plug 'tpope/vim-fugitive' " rival is https://github.com/lewis6991/gitsigns.nvim
-Plug 'airblade/vim-gitgutter'
+Plug 'lewis6991/gitsigns.nvim'
 Plug 'junegunn/gv.vim'
 
 " Working directory navigation
-Plug 'preservim/nerdtree'
-Plug 'tiagofumo/vim-nerdtree-syntax-highlight'
+"Plug 'preservim/nerdtree'
+"Plug 'tiagofumo/vim-nerdtree-syntax-highlight'
 "Plug 'ivalkeen/nerdtree-execute'
+Plug 'kyazdani42/nvim-tree.lua'
 
 " Zen mode
 Plug 'folke/zen-mode.nvim' " junegunn/goyo.vim is slowers on quit, because of highlights restoring
@@ -110,16 +103,19 @@ Plug 'mbbill/undotree'
 
 Plug 'akinsho/toggleterm.nvim'
 
+Plug 'folke/trouble.nvim'
+
+Plug 'lewis6991/impatient.nvim' " improve staruptime by caching lua modules
+
 Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
 Plug 'ElmCast/elm-vim' " better syntax highliging
 Plug 'udalov/kotlin-vim'
 Plug 'lervag/vimtex'
-Plug 'jackguo380/vim-lsp-cxx-highlight'
+Plug 'jackguo380/vim-lsp-cxx-highlight' " TODO: maybe delete this, it may not be needed since I have treesitter
 " More syntax highlighting.
 Plug 'nvim-treesitter/nvim-treesitter'
 Plug 'nvim-treesitter/playground'
 Plug 'JoosepAlviste/nvim-ts-context-commentstring'  " set commentstring base on treesitter context
-" Plug 'SmiteshP/nvim-gps' " needs lualine not airline
 
 Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app && yarn install'  }
 
@@ -135,16 +131,13 @@ Plug 'hrsh7th/cmp-nvim-lua'
 Plug 'hrsh7th/cmp-buffer'
 Plug 'hrsh7th/cmp-path'
 Plug 'hrsh7th/nvim-cmp'
-Plug 'hrsh7th/cmp-emoji' " trying this out
 Plug 'quangnguyen30192/cmp-nvim-ultisnips'
 
 call plug#end()
 
 " ------ Highlighting --------
 "
-if (has("nvim"))
-   let $NVIM_TUI_ENABLE_TRUE_COLOR=1
-endif
+let $NVIM_TUI_ENABLE_TRUE_COLOR=1
 if (has("termguicolors"))
    set termguicolors
 endif
@@ -218,7 +211,7 @@ function! s:my_highlights()
     hi Background guifg=#2A2520
     " Whitespace is #4D453E
     hi IndentGuide guifg=#3A3029
-    hi link NormalFloat Normal
+    hi NormalFloat guibg=#2A2520
     hi FloatBorder guifg=#8D857E
 
     hi link SelectionBracket Delimiter
@@ -226,6 +219,17 @@ function! s:my_highlights()
     hi link SelectionHover Visual
 
     hi link RenamePrefix PreProc
+
+    " Consider
+    "hi GitSignsChange guifg=#B380B0
+    " hi GitSignsChange guifg=#A9BDE2
+    " hi link lualine_b_diff_modified_insert GitSignsChange
+    " hi link lualine_b_diff_modified_normal GitSignsChange
+    " hi link lualine_b_diff_modified_visual GitSignsChange
+    " hi link lualine_b_diff_modified_command GitSignsChange
+    " hi link lualine_b_diff_modified_replace GitSignsChange
+    " hi link lualine_b_diff_modified_inactive GitSignsChange
+    " hi link lualine_b_diff_modified_terminal GitSignsChange
 endfunction
 
 colorscheme melange
@@ -309,6 +313,9 @@ command! -complete=file -nargs=1 Rm :echo 'Remove: '.'<f-args>'.' '.(delete(<f-a
 command! Qother execute '%bdelete | edit # | normal `"'
 command! Qo execute '%bdelete | edit # | normal `"'
 
+" Use lua module cache
+lua require('impatient')
+
 " Lua utils
 lua << EOF
 -- easily print lua table
@@ -358,51 +365,20 @@ end
 EOF
 nnoremap z= <cmd>lua Select_spell_suggestion()<cr>
 
-" ----- Airline -----
-" Airline theme should be automatically selected.
-" let g:airline_theme = 'base16_espresso'
-" let g:airline_theme = 'minimalist'
-" let g:airline_theme = 'monochrome'
-" let g:airline_theme = 'term'
-let g:airline_theme = 'tomorrow'
-" let g:airline_theme = 'transparent'
-let g:airline_stl_path_style = 'short'
-let g:airline_section_c_only_filename = 1
-let g:airline_powerline_fonts = 1
-let g:airline#extensions#tabline#enabled = 1
-let g:airline#extensions#tabline#formatter = 'unique_tail'
-" let g:airline#extensions#tabline#left_sep = ' '
-" let g:airline#extensions#tabline#left_alt_sep = '|'
-
-function! s:update_highlights()
-  " For tomorrow airline theme
-  "hi airline_tab guifg=#4D453E
-  hi airline_tab guifg=#9D958E
-endfunction
-autocmd User AirlineAfterTheme call s:update_highlights()
-command! BufMessages execute 'Bufferize messages'
-
+" ----- Status line -----
+lua << EOF
+require('lualine').setup({
+  options = {
+    theme = 'auto'
+  },
+  extensions = { 'quickfix', 'fugitive', 'toggleterm' } -- TODO: add nvim-tree
+})
+EOF
 " --- Colorizer ---
 lua << EOF
 require'colorizer'.setup()
 EOF
-" --- Neoscroll ---
-" smooth scrolling
-lua << EOF
-require('neoscroll').setup()
--- speed it up compared to defaults.
-require('neoscroll.config').set_mappings({
-  ['<C-u>'] = {'scroll', {'-vim.wo.scroll', 'true', '30'}},
-  ['<C-d>'] = {'scroll', { 'vim.wo.scroll', 'true', '30'}},
-  ['<C-b>'] = {'scroll', {'-vim.api.nvim_win_get_height(0)', 'true', '60'}},
-  ['<C-f>'] = {'scroll', { 'vim.api.nvim_win_get_height(0)', 'true', '60'}},
-  ['<C-y>'] = {'scroll', {'-0.10', 'false', '5'}},
-  ['<C-e>'] = {'scroll', { '0.10', 'false', '5'}},
-  ['zt']    = {'zt', {'20'}},
-  ['zz']    = {'zz', {'20'}},
-  ['zb']    = {'zb', {'20'}}
-})
-EOF
+
 " --- Indent blank line ---
 lua<<EOF
 vim.g.indent_blankline_show_trailing_blankline_indent = false
@@ -415,7 +391,7 @@ vim.g.indent_blankline_buftype_exclude = {
 "lspinfo",
 }
 vim.g.indent_blankline_filetype_exclude = {
-    "nerdtree",
+    "NvimTree",
     "help",
     "startify"
 }
@@ -452,6 +428,8 @@ EOF
 lua << EOF
 require('nvim-ts-autotag').setup()
 EOF
+" Close tag in normal mode.
+nmap <leader>> a<bs>><esc>
 
 " --- Git ---
 " https://dpwright.com/posts/2018/04/06/graphical-log-with-vimfugitive/
@@ -541,32 +519,74 @@ command! Nch silent execute 'Ggrep nocheckin'
 
 " --- Startify ---
 command! SQuit execute 'SClose | qa'
+lua << EOF
+function _G.webDevIcons(path)
+  local filename = vim.fn.fnamemodify(path, ':t')
+  local extension = vim.fn.fnamemodify(path, ':e')
+  return require'nvim-web-devicons'.get_icon(filename, extension, { default = true })
+end
+EOF
+
+function! StartifyEntryFormat() abort
+  return 'v:lua.webDevIcons(absolute_path) . " " . entry_path'
+endfunction
 
 " --- EasyAlign ---
 xmap ga <Plug>(EasyAlign)
 nmap ga <Plug>(EasyAlign)
 
+" ------ File explorer (nvim-tree) -----
+nnoremap <C-n> :NvimTreeToggle<CR>
+nnoremap <leader>n :NvimTreeFindFile<CR>
+lua << EOF
+require'nvim-tree'.setup {
+  auto_close = true,
+  update_focused_file = { enable = true, },
+  system_open = { cmd  = nil, args = {} }, -- TODO: do for win
+  git = { enable = true, ignore = false, },
+  view = {
+    side = 'right',
+    mappings = { -- TODO: add custom ones
+      custom_only = false,
+      list = {
+          -- TODO: populate this
+      }
+    },
+  },
+  trash = { cmd = "trash", require_confirm = true }, -- ?
+  actions = {
+    change_dir = {
+      enable = true,
+      global = false,
+    },
+    open_file = {
+      quit_on_open = true,
+      resize_window = false,
+    }
+  }
+}
+EOF
 " ----- Nerdtree -----
-nnoremap <C-n> <cmd>NERDTreeToggle<CR>
-" TODO: Create a lua function which finds the last visited buffer.
-nnoremap <leader>n <cmd>NERDTreeFind<CR>
-let g:NERDTreeDirArrowExpandable = '▸'
-let g:NERDTreeDirArrowCollapsible = '▾'
-let NERDTreeShowHidden=1                    " Show hidden files
-let g:NERDTreeWinPos = "right"
-let NERDTreeQuitOnOpen=1
-let g:NERDTreeWinSize=50           " Maybe do this just for some file types.
-" Refresh devicons so nerdtree does not show [] around icons
-if exists('g:loaded_webdevicons')
-  call webdevicons#refresh()
-endif
-augroup my_nerdtree
-  au!
-  " Exit Vim if NERDTree is the only window remaining in the only tab.
-  autocmd BufEnter * if tabpagenr('$') == 1 && winnr('$') == 1 && exists('b:NERDTree') && b:NERDTree.isTabTree() | quit | endif
-  " Close the tab if NERDTree is the only window remaining in it.
-  autocmd BufEnter * if winnr('$') == 1 && exists('b:NERDTree') && b:NERDTree.isTabTree() | quit | endif
-augroup end
+" nnoremap <C-n> <cmd>NERDTreeToggle<CR>
+" " nnoremap <C-n> <cmd>NERDTreeToggle<CR>
+" nnoremap <leader>n <cmd>NERDTreeFind<CR>
+" let g:NERDTreeDirArrowExpandable = '▸'
+" let g:NERDTreeDirArrowCollapsible = '▾'
+" let NERDTreeShowHidden=1                    " Show hidden files
+" let g:NERDTreeWinPos = "right"
+" let NERDTreeQuitOnOpen=1
+" let g:NERDTreeWinSize=50           " Maybe do this just for some file types.
+" " let g:NERDTreeWinSize=50           " Maybe do this just for some file types.
+" " Refresh devicons so nerdtree does not show [] around icons
+" if exists('g:loaded_webdevicons')
+"   call webdevicons#refresh()
+" endif
+" augroup my_nerdtree
+"   au!
+"   autocmd BufEnter * if tabpagenr('$') == 1 && winnr('$') == 1 && exists('b:NERDTree') && b:NERDTree.isTabTree() | quit | endif
+"   " autocmd BufEnter * if tabpagenr('$') == 1 && winnr('$') == 1 && exists('b:NERDTree') && b:NERDTree.isTabTree() | quit | endif
+"   autocmd BufEnter * if winnr('$') == 1 && exists('b:NERDTree') && b:NERDTree.isTabTree() | quit | endif
+" augroup end
 
 " unmap nerdtree execute, it's only needed in menu
 " Do not use nvim Netrw plugin explorer
@@ -581,9 +601,40 @@ set undofile
 let g:undotree_ShortIndicators = 1
 "let g:undotree_SetFocusWhenToggle = 0  " set focus on undotree
 
-" --- Git gutter ---
-let g:gitgutter_signs = 0
-nnoremap <leader>hh <cmd>GitGutterSignsToggle<cr>
+" --- Git signs ---
+lua << EOF
+require('gitsigns').setup {
+  on_attach = function(bufnr)
+    local function map(mode, lhs, rhs, opts)
+        opts = vim.tbl_extend('force', {noremap = true, silent = true}, opts or {})
+        vim.api.nvim_buf_set_keymap(bufnr, mode, lhs, rhs, opts)
+    end
+
+    -- Navigation
+    map('n', ']c', "&diff ? ']c' : '<cmd>Gitsigns next_hunk<CR>'", {expr=true})
+    map('n', '[c', "&diff ? '[c' : '<cmd>Gitsigns prev_hunk<CR>'", {expr=true})
+
+    -- Actions
+    map('n', '<leader>hs', ':Gitsigns stage_hunk<CR>')
+    map('v', '<leader>hs', ':Gitsigns stage_hunk<CR>')
+    map('n', '<leader>hr', ':Gitsigns reset_hunk<CR>')
+    map('v', '<leader>hr', ':Gitsigns reset_hunk<CR>')
+    map('n', '<leader>hS', '<cmd>Gitsigns stage_buffer<CR>')
+    map('n', '<leader>hu', '<cmd>Gitsigns undo_stage_hunk<CR>')
+    map('n', '<leader>hR', '<cmd>Gitsigns reset_buffer<CR>')
+    map('n', '<leader>hp', '<cmd>Gitsigns preview_hunk<CR>')
+    map('n', '<leader>hb', '<cmd>lua require"gitsigns".blame_line{full=true}<CR>')
+    map('n', '<leader>hB', '<cmd>Gitsigns toggle_current_line_blame<CR>')
+    map('n', '<leader>hd', '<cmd>Gitsigns diffthis<CR>')
+    map('n', '<leader>hD', '<cmd>lua require"gitsigns".diffthis("~")<CR>')
+    map('n', '<leader>ht', '<cmd>Gitsigns toggle_deleted<CR>')
+
+    -- Text object
+    map('o', 'ih', ':<C-U>Gitsigns select_hunk<CR>')
+    map('x', 'ih', ':<C-U>Gitsigns select_hunk<CR>')
+  end
+}
+EOF
 
 " --- Zen mode ---
 
@@ -634,7 +685,6 @@ function _G.set_terminal_keymaps()
   vim.api.nvim_buf_set_keymap(0, 't', '<C-l>', [[<C-\><C-n><C-W>l]], opts)
   vim.api.nvim_buf_set_keymap(0, 't', '<C-l>', [[<C-\><C-n><C-W>l]], opts)
   vim.api.nvim_buf_set_keymap(0, 't', '<C-v>', [[<C-\><C-n>"*pa]], opts)
-  -- TODO: add copy mapping
 end
 EOF
 augroup my_term
@@ -647,6 +697,38 @@ command! Tt execute 'ToggleTerm direction=tab'
 command! Tf execute 'ToggleTerm direction=float'
 command! Tv execute 'ToggleTerm direction=vertical'
 command! Th execute 'ToggleTerm direction=horizontal'
+
+" --- Trouble ---
+" Warning: trouble has mapping all over this file.
+" TODO: figure out a way to add custom mapping wichih pipes Trouble items to qflist
+nnoremap <leader>t <cmd>TroubleToggle<cr>
+nnoremap <leader>T <cmd>TroubleToggle workspace_diagnostics<cr>
+nnoremap [t <cmd>lua require("trouble").next({skip_groups = true, jump = true})<cr>
+nnoremap ]t <cmd>lua require("trouble").prev({skip_groups = true, jump = true})<cr>
+nnoremap <leader>[T <cmd>TroubleToggle quickfix<cr>
+nnoremap <leader>]T <cmd>TroubleToggle loclist<cr>
+
+lua << EOF
+require("trouble").setup {
+   action_keys = {
+     -- switched <CR> with o
+     jump = {"o", "<tab>"},
+     jump_close = {"<cr>"},
+     -- same as telescope and nerdtree
+     open_split = { "i", "<c-i>" },
+     open_vsplit = { "s", "<c-s>" },
+     open_tab = { "t","<c-t>" },
+     toggle_fold = {"x"},
+   },
+   group = true,
+   auto_preview = false,
+   auto_close = false,
+   auto_jump = {"lsp_definitions", "lsp_references", "lsp_implementations", "lsp_type_definitions"},
+   use_diagnostic_signs = true
+}
+EOF
+" --- Switch ---
+let g:switch_mapping = "gw"
 
 " --- Ultisnips ---
 let g:UltiSnipsExpandTrigger="<tab>"
@@ -714,7 +796,13 @@ let g:vimtex_quickfix_mode=0
 let g:vimtex_view_general_viewer = 'SumatraPDF'
 let g:vimtex_view_general_options
     \ = '-reuse-instance -forward-search @tex @line @pdf'
-let g:vimtex_view_general_options_latexmk = '-reuse-instance'
+ let g:vimtex_compiler_latexmk = {
+    \ 'options' : [
+        \   '-reuse-instance',
+        \ ],
+    \ }
+
+"\   '-interaction=nonstopmode', maybe use
 
 augroup my_latex
     au!
@@ -740,44 +828,23 @@ set completeopt=menu,menuone,noselect,noinsert
 nnoremap <silent> [d <cmd>lua vim.diagnostic.goto_prev()<cr>
 nnoremap <silent> ]d <cmd>lua vim.diagnostic.goto_next()<cr>
 nnoremap <silent> [D <cmd>lua vim.diagnostic.open_float()<cr>
-nnoremap <silent> ]D <cmd>lua vim.diagnostic.setloclist()<cr>
+nnoremap <silent> ]D <cmd>TroubleToggle document_diagnostics<cr>
+"nnoremap <silent> ]D <cmd>lua vim.diagnostic.setloclist()<cr>
 nnoremap <silent> [e <cmd>lua vim.diagnostic.goto_prev({severity = vim.diagnostic.severity.ERROR})<cr>
 nnoremap <silent> ]e <cmd>lua vim.diagnostic.goto_next({severity = vim.diagnostic.severity.ERROR})<cr>
 lua <<EOF
---local telescope = require'telescope.builtin'
---local view = require('telescope.themes').get_ivy()
---function Lsp_references_in_telescope()
---  local request = vim.lsp.util.make_position_params()
---  request.context = { includeDeclaration = false }
---
---  vim.lsp.buf_request(0, "textDocument/references", request, function (err, result, ctx, config)
---    if err then
---      print 'TextDocument/references returned an error'
---      P(err)
---      return
---    end
---    if not result then
---      print 'TextDocument/references returned no result'
---      return
---    end
---    local locations = vim.lsp.util.locations_to_items(result, vim.lsp.get_client_by_id(ctx.client_id).offset_encoding) or {}
---    vim.fn.setqflist(locations, 'r')
---
---    view.on_complete = { function() vim.cmd"stopinsert" end }
---    telescope.quickfix(view)
---  end)
---
---end
-
 Lsp_on_attach = function (client, bufnr)
   vim.notify("Attaching " .. client.name .. " lsp ...", vim.log.levels.INFO)
 
   local opts = { noremap=true, silent=true }
-  vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gd', '<cmd>lua vim.lsp.buf.definition()<cr>', opts)
-  vim.api.nvim_buf_set_keymap(bufnr, 'n', 'K',  '<cmd>lua vim.lsp.buf.hover()<cr>', opts)
-  vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gD', '<cmd>lua vim.lsp.buf.type_definition()<cr>', opts)
-  vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gx', '<cmd>lua vim.lsp.buf.references({includeDeclaration = false})<cr>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gd', '<cmd>TroubleToggle lsp_definitions<cr>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gD', '<cmd>TroubleToggle lsp_type_definitions<cr>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gs', '<cmd>TroubleToggle lsp_references<cr>', opts)
+  -- I chaned trouble.nvim/lua/trouble/providers/lsp.lua includeDeclaration to false, since I can't pass it as arg.
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gS', '<cmd>TroubleToggle lsp_implementations<cr>', opts)
+
   vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gm', '<cmd>lua require("lspops").rename()<cr>', opts) -- TODO: also rewrite this
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', 'K',  '<cmd>lua vim.lsp.buf.hover()<cr>', opts)
   vim.api.nvim_buf_set_keymap(bufnr, 'n', '<C-S-K>', '<cmd>lua vim.lsp.buf.signature_help()<cr>', opts)
   vim.api.nvim_buf_set_keymap(bufnr, 'i', '<C-k>', '<cmd>lua vim.lsp.buf.signature_help()<cr>', opts)
   vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>l', '<cmd>lua vim.lsp.buf.formatting()<cr>', opts)
@@ -796,6 +863,7 @@ Lsp_on_attach = function (client, bufnr)
 
   if client.resolved_capabilities.document_highlight then
     if client.name ~= "vimls" and client.name ~= "texlab" then
+      print 'setting doc highlight'
       vim.api.nvim_exec(
         [[
         augroup lsp_document_highlight
@@ -934,7 +1002,7 @@ local config = {
       { name = "DiagnosticSignError", text = "" },
       { name = "DiagnosticSignWarn", text = "" },
       { name = "DiagnosticSignInfo", text = "" },
-      { name = "DiagnosticSignHint", text = "" },
+      { name = "DiagnosticSignHint", text = "" },
     },
   },
   underline = true,
@@ -956,12 +1024,6 @@ end
 
 vim.diagnostic.config(config)
 EOF
-
-" --- Ultisnips ---
-let g:UltiSnipsExpandTrigger="<tab>"
-let g:UltiSnipsJumpForwardTrigger="<tab>"
-let g:UltiSnipsJumpBackwardTrigger="<S-tab>"
-let g:UltiSnipsEditSplit="tabdo"
 
 " --- Autocompletion ---
 lua <<EOF
@@ -1009,7 +1071,14 @@ cmp.setup({
   },
   mapping = {
     ['<C-p>'] = cmp.mapping.select_prev_item(),
-    ['<C-n>'] = cmp.mapping.select_next_item(),
+     ['<C-n>'] = function(fallback)
+         -- either open window or select next item
+       if cmp.visible() then
+         cmp.select_next_item()
+       else
+         cmp.complete()
+       end
+     end,
     ['<C-b>'] = cmp.mapping.scroll_docs(-4),
     ['<C-f>'] = cmp.mapping.scroll_docs(4),
     ['<C-Space>'] = cmp.mapping.complete(),
@@ -1023,7 +1092,7 @@ cmp.setup({
     { name = 'ultisnips' },
     { name = 'nvim_lua' }
   }, {
-    { name = 'buffer', keyword_length = 5 },
+    { name = 'buffer', keyword_length = 4 },
     { name = 'path' },
     { name = 'emoji'}
   }),
@@ -1033,11 +1102,10 @@ cmp.setup({
 
      vim_item.menu = ({
         buffer    = '{buf}',
-        nvim_lsp  = '{lsp}',
+        nvim_lsp  = '{ls}',
         nvim_lua  = '{nlua}',
         path      = '{path}',
-        utlisnips = '{snip}',
-        emoji     = '{:)}',
+        ultisnips = '{snip}',
      })[entry.source.name]
 
      return vim_item
@@ -1051,68 +1119,3 @@ cmp.setup({
     --ghost_text = { hl_group = 'Ignore'},
   }
 })
-
---vim.g.coq_settings = {
---  auto_start = true,
---  keymap = {
---    recommended = false,
---    pre_select = false,
---    jump_to_mark = "<c-,>"
---    --bigger_preview = "<C-k>"
---  }, -- use the recommended keymap
---  -- auto trigger completion
---  -- Did not find a seeting to change replace on confirm behaviour.
---  completion = { always = true, smart = true },
---  display = {
---    ghost_text = { enabled = false },
---    pum = {
---      ellipsis = ".. ",
---      kind_context = {"", ""},
---      source_context = {"[", "]"},
---    },
---    preview = { border = "rounded" },
---    icons = { mode = "short", spacing = 1, mappings = kind_icons },
---  },
---  clients = {
---    lsp = { short_name = "lsp", weight_adjust = 1.5 },
---    snippets = { enabled = true, short_name = "snip", weight_adjust = 1.2 },
---    paths = { short_name = "path", path_seps = { "/" } }, -- always use / even in Windows
---    buffers = { enabled = true, short_name = "buf" },
---    tree_sitter = { enabled = false, short_name = "ts", weight_adjust = -2},
---    --snippets = { user_path = "~/.vim/snip"} -- put here custom snippets
---  }
---}
--- TODO this causes bugs
--- I don't know why this is needed, it breaks stuff like:
--- press of " on ) does not insert and also other way around.
--- Make <CR> and <BS> to work with autopairs
---_G.MUtils= {}
-
---local npairs = require('nvim-autopairs')
---MUtils.CR = function()
---  if vim.fn.pumvisible() ~= 0 then
---    if vim.fn.complete_info({ 'selected' }).selected ~= -1 then
---      return npairs.esc('<c-y>')
---    else
---      return npairs.esc('<c-e>') .. npairs.autopairs_cr()
---    end
---  else
---    return npairs.autopairs_cr()
---  end
---end
---
---MUtils.BS = function()
---  if vim.fn.pumvisible() ~= 0 and vim.fn.complete_info({ 'mode' }).mode == 'eval' then
---    return npairs.esc('<c-e>') .. npairs.autopairs_bs()
---  else
---    return npairs.autopairs_bs()
---  end
---end
-EOF
-" 🐓 Coq completion settings
-"inoremap <expr> <cr> v:lua.MUtils.CR()
-"inoremap <expr> <bs> v:lua.MUtils.BS()
-" ino <silent><expr> <BS>    pumvisible() ? "\<C-e><BS>"  : "\<BS>"
-" ino <silent><expr> <CR>    pumvisible() ? (complete_info().selected == -1 ? "\<C-e><CR>" : "\<C-y>") : "\<CR>"
-" command! COQmySnipEdit execute 'tabe ~/.vim/plugged/coq_nvim/.vars/clients/snippets/users+v2.json'
-

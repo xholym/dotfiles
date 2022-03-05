@@ -9,8 +9,7 @@ local M = {} -- : {
 -- }
 M.config = { rename_prefix = '' }
 
-local function request_code_actions(ctx)
-
+local function request_code_actions(ctx, callback)
   local params = vim.lsp.util.make_range_params()
   params.context = {
     diagnostics = vim.lsp.diagnostic.get_line_diagnostics(),
@@ -18,15 +17,7 @@ local function request_code_actions(ctx)
   if ctx then
     params = vim.tbl_deep_extend("force", ctx, params)
   end
-
-  local results, err = vim.lsp.buf_request_sync(0, "textDocument/codeAction", params, 900)
-  if err then
-    print 'textDocument/codeAction returned an error'
-    P(err)
-    return
-  end
-
-  return results
+  vim.lsp.buf_request_all(0, "textDocument/codeAction", params, callback)
 end
 
 local function execute_action(act)
@@ -70,62 +61,62 @@ end
 
 M.run_fix = function()
 
-  local results = request_code_actions({ only = {"quickfix"}})
+  request_code_actions({only = "quickfix"}, function(results)
 
-  if not results or vim.tbl_isempty(results) then
-    print "No quickfixes!"
-    return
-  end
+    for cid, resp in pairs(results) do
+      if resp.result then
+        for _, action in pairs(resp.result) do
 
-  for cid, resp in pairs(results) do
-    if resp.result then
-      for _, result in pairs(resp.result) do
+          -- Run the first action
+          do_action(action, cid)
+          return
 
-        -- Run the first action
-        do_action(result, cid)
-        return
-
+        end
       end
     end
-  end
+
+    vim.notify('No quickfixes available.', vim.log.levels.INFO)
+  end)
 end
 
 M.list_code_actions = function(ctx)
-  local results = request_code_actions(ctx)
-  if not results then
-    return
-  end
 
-  local action_choices = {}
-  for cid, resp in pairs(results) do
-    if resp.result then
-      for _, result in pairs(resp.result) do
+  request_code_actions(nil, function(results)
 
-        -- Run the first action
-        local text
-        if result.title then
-          text = result.title
-        elseif result.command then
-          text = result.command.title
-        else
-          print "Can't find text for code aciton"
+    if not results or vim.tbl_isempty(results) then
+      vim.notify('No code actions available', vim.log.levels.INFO)
+      return
+    end
+    local action_choices = {}
+    for cid, resp in pairs(results) do
+      if resp.result then
+        for _, action in pairs(resp.result) do
+
+          local text
+          if action.title then
+            text = action.title
+          elseif action.command then
+            text = action.command.title
+          else
+            print "Can't find text for code aciton"
+          end
+          local choice = {
+            -- data for code action running
+            data = action,
+            client_id = cid,
+            -- data for selection view
+            text = text
+          }
+          table.insert(action_choices, choice)
         end
-        local choice = {
-          -- data for code action running
-          data = result,
-          client_id = cid,
-          -- data for selection view
-          text = text
-        }
-        table.insert(action_choices, choice)
       end
     end
-  end
 
-  local on_select = function (_, action)
-    do_action(action.data, action.client_id)
-  end
-  selection.open(action_choices, on_select)
+    local on_select = function (_, action)
+      do_action(action.data, action.client_id)
+    end
+    selection.open(action_choices, on_select)
+  end)
 end
 
 

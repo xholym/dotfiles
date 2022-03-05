@@ -94,7 +94,8 @@ nnoremap <leader>` <cmd>set wrap!<CR>
 nnoremap ; :
 " And use , as ; to go to next f/t hit and : as , to go to previous.
 nnoremap , ;
-nnoremap : ,
+nnoremap <c-,> ,
+" : is a free key to use wherever
 
 " Rerun last command
 nnoremap <leader>; :<up><CR>

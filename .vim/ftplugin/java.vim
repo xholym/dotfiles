@@ -1,7 +1,7 @@
 lua <<EOF
 local workspace_dir = vim.fn.fnamemodify(vim.fn.getcwd(), ':p:h:t')
 local on_attach = function (client, bufnr)
-Lsp_on_attach(client, bufnr)
+  Lsp_on_attach(client, bufnr)
 
   local opts = { noremap=true, silent=true }
   vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>o', [[ <cmd>lua require'jdtls'.organize_imports()<cr> ]], opts)
@@ -46,6 +46,8 @@ local config = {
   },
 }
 config.capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
+
+require('jdtls').start_or_attach(config)
 
 function format_range_operator()
   local old_func = vim.go.operatorfunc

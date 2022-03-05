@@ -119,7 +119,7 @@ M.choose = function(idx)
     return
   end
   if not idx then
-    idx = tonumber(vim.fn.expand("<cword>"))
+    idx = tonumber(vim.fn.expand("<cword>")) + 1
   end
   local choice = M.choices[idx]
   local on_select = M.on_select

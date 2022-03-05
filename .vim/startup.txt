@@ -1,0 +1,3 @@
+before               1166.102
+aflter more plugins  1122.246
+after impatient      823.904

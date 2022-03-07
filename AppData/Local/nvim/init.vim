@@ -8,14 +8,11 @@
 " - install MikTex and SumatraPDF for latex.
 " - install ccls (On windows using choco install ccls)
 " - install tar (lsp-installer requires it)
-" - if coq snipets do not work copy coq.artifacts/coq+snippets+v2
-"     to coq_nvim/.vars/clients/snippets/users+v2.json
 "
 "
 " Todos:
 " TODO: fix undercurl
 " TODO: Configure java debug.
-" TODO: Consider lsp status line
 " TODO: Remap :diffget //2 and diffget //3
 " TODO: Fix java formatting settings.
 "
@@ -48,9 +45,9 @@ call plug#begin('~/.vim/plugged')    " initialize plugin system
 
 " Changes to behaviour
 Plug 'tpope/vim-surround'
-Plug 'tpope/vim-commentary'
 Plug 'tpope/vim-repeat'         " make surround repeatable with .
 Plug 'vim-scripts/ReplaceWithRegister'
+Plug 'numToStr/Comment.nvim'
 " Plug 'justinmk/vim-sneak'     " add after I'm good with f/t
 Plug 'AndrewRadev/switch.vim'
 Plug 'junegunn/vim-easy-align'
@@ -68,8 +65,7 @@ Plug 'AndrewRadev/bufferize.vim' " put command output in tmp buffer
 
 " Tried both smooth scrolling plugins, both are slow in large files.
 " They lagged a lot in my master thesis in latex - +2000 lines file.
-"Plug 'karb94/neoscroll.nvim'
-"Plug 'terryma/vim-smooth-scroll'
+Plug 'karb94/neoscroll.nvim'
 
 " Themes
 Plug 'nvim-lualine/lualine.nvim'
@@ -85,10 +81,10 @@ Plug 'lewis6991/gitsigns.nvim'
 Plug 'junegunn/gv.vim'
 
 " Working directory navigation
-"Plug 'preservim/nerdtree'
-"Plug 'tiagofumo/vim-nerdtree-syntax-highlight'
-"Plug 'ivalkeen/nerdtree-execute'
-Plug 'kyazdani42/nvim-tree.lua'
+Plug 'ryanoasis/vim-devicons'
+Plug 'preservim/nerdtree'
+Plug 'tiagofumo/vim-nerdtree-syntax-highlight'
+Plug 'ivalkeen/nerdtree-execute'
 
 " Zen mode
 Plug 'folke/zen-mode.nvim' " junegunn/goyo.vim is slowers on quit, because of highlights restoring
@@ -111,7 +107,7 @@ Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
 Plug 'ElmCast/elm-vim' " better syntax highliging
 Plug 'udalov/kotlin-vim'
 Plug 'lervag/vimtex'
-Plug 'jackguo380/vim-lsp-cxx-highlight' " TODO: maybe delete this, it may not be needed since I have treesitter
+"Plug 'jackguo380/vim-lsp-cxx-highlight' " TODO: maybe delete this, it may not be needed since I have treesitter
 " More syntax highlighting.
 Plug 'nvim-treesitter/nvim-treesitter'
 Plug 'nvim-treesitter/playground'
@@ -124,14 +120,15 @@ Plug 'williamboman/nvim-lsp-installer'
 Plug 'mfussenegger/nvim-jdtls'
 
 
-Plug 'SirVer/ultisnips' | Plug 'honza/vim-snippets'
+Plug 'L3MON4D3/LuaSnip'
+Plug 'rafamadriz/friendly-snippets'
 " Not using COQ, because in lua it throws utf8 errors and does not work with . (repeat).
 Plug 'hrsh7th/cmp-nvim-lsp'
 Plug 'hrsh7th/cmp-nvim-lua'
 Plug 'hrsh7th/cmp-buffer'
 Plug 'hrsh7th/cmp-path'
 Plug 'hrsh7th/nvim-cmp'
-Plug 'quangnguyen30192/cmp-nvim-ultisnips'
+Plug 'saadparwaiz1/cmp_luasnip'
 
 call plug#end()
 
@@ -162,7 +159,7 @@ function! s:my_highlights()
     " For melange colorscheme
     " hi Function guifg=#EBC06D " This is the default fo melange
     " hi Function guifg=#FFE88D
-    hi Function guifg=#ECDFA0
+    hi Function guifg=#FFDFAA
     " This is the normal default
     " hi Normal guifg=#ECE1D7
     " Consider making normal little brighter
@@ -184,6 +181,7 @@ function! s:my_highlights()
     hi link tsxAttrib Normal
     hi link tsxTag TSConstructor
     hi link tsxTagName TSConstructor
+    hi link typescriptCall Normal
 
     hi link htmlArg Normal
 
@@ -196,8 +194,10 @@ function! s:my_highlights()
     " Nvim-qt does not render unercurl correctly, checkout their 2.17 release, it should be fixed there
     hi DiagnosticUnderlineError guisp=#B65C60 gui=underline
     hi DiagnosticUnderlineWarn guisp=#EBC06D gui=underline
-    hi DiagnosticUnderlineInfo guisp=#9AACCE gui=underline
-    hi DiagnosticUnderlineHint guisp=#99D59D gui=underline
+    hi DiagnosticUnderlineInfo guisp=#9AACCE gui=NONE guibg=#353025
+    hi DiagnosticUnderlineHint guisp=#99D59D gui=NONE guibg=#353025
+    hi clear DiagnosticHint
+    hi link DiagnosticHint Ignore
 
     hi MyLspCursorWord ctermbg=242 guibg=#383029
     hi link LspReferenceText  MyLspCursorWord
@@ -223,13 +223,6 @@ function! s:my_highlights()
     " Consider
     "hi GitSignsChange guifg=#B380B0
     " hi GitSignsChange guifg=#A9BDE2
-    " hi link lualine_b_diff_modified_insert GitSignsChange
-    " hi link lualine_b_diff_modified_normal GitSignsChange
-    " hi link lualine_b_diff_modified_visual GitSignsChange
-    " hi link lualine_b_diff_modified_command GitSignsChange
-    " hi link lualine_b_diff_modified_replace GitSignsChange
-    " hi link lualine_b_diff_modified_inactive GitSignsChange
-    " hi link lualine_b_diff_modified_terminal GitSignsChange
 endfunction
 
 colorscheme melange
@@ -265,8 +258,6 @@ augroup my_syntax
     autocmd BufNewFile,BufRead *.ts  set syntax=typescript
     autocmd BufNewFile,BufRead *.tsx set syntax=typescriptreact
 
-
-    autocmd FileType cpp setlocal commentstring=//\ %s
 
     " Custom switch definitions
     autocmd FileType java let b:switch_custom_definitions =  [
@@ -309,6 +300,14 @@ endfunction
 command! ToggleVerbose <cmd>call ToggleVerbose()
 command! -complete=file -nargs=1 Rm :echo 'Remove: '.'<f-args>'.' '.(delete(<f-args>) == 0 ? 'SUCCEEDED' : 'FAILED')
 
+function! DeleteHiddenBuffers()
+    let tpbl=[]
+    call map(range(1, tabpagenr('$')), 'extend(tpbl, tabpagebuflist(v:val))')
+    for buf in filter(range(1, bufnr('$')), 'bufexists(v:val) && index(tpbl, v:val)==-1')
+        silent execute 'bwipeout' buf
+    endfor
+endfunction
+command! Bdhidden call DeleteHiddenBuffers()
 
 command! Qother execute '%bdelete | edit # | normal `"'
 command! Qo execute '%bdelete | edit # | normal `"'
@@ -329,6 +328,44 @@ R = function(module)
 end
 EOF
 
+" ---- Diagnostics ----
+lua << EOF
+_G.Diagnostic_signs = {
+  error = "", --"",
+  warning = "", -- "",
+  hint = "",
+  info = "", -- "",
+  other = "﫠"
+}
+local config = {
+  virtual_text = false,
+  signs = {
+    active = {
+      { name = "DiagnosticSignError", text = Diagnostic_signs.error },
+      { name = "DiagnosticSignWarn",  text = Diagnostic_signs.warn },
+      { name = "DiagnosticSignInfo",  text = Diagnostic_signs.info },
+      { name = "DiagnosticSignHint",  text = Diagnostic_signs.hint },
+    },
+  },
+  underline = true,
+  severity_sort = true,
+  --update_in_insert = true,
+  float = {
+    focusable = false,
+    --style = "minimal",
+    border = "rounded",
+    --source = false,
+    source = "always",
+    header = "",
+    prefix = "",
+  },
+}
+for _, sign in ipairs(config.signs.active) do
+  vim.fn.sign_define(sign.name, { texthl = sign.name, text = sign.text, numhl = "" })
+end
+
+vim.diagnostic.config(config)
+EOF
 " ----- Plugin specific mappings -----
 
 " ----- Selection ----
@@ -367,11 +404,71 @@ nnoremap z= <cmd>lua Select_spell_suggestion()<cr>
 
 " ----- Status line -----
 lua << EOF
+local utils = require'lualine.utils.utils'
+
+local colors = {
+  back1   = utils.extract_color_from_hllist('bg', { 'StatusLineNC' }, 'NONE'),
+  normal  = utils.extract_color_from_hllist('fg', { 'StatusLineNC' }, 'NONE'),
+  insert  = utils.extract_color_from_hllist('fg', { 'String' }, 'NONE'),
+  ignore  = utils.extract_color_from_hllist('fg', { 'Ignore' }, 'NONE'),
+  visual  = utils.extract_color_from_hllist('fg', { 'Constant' }, 'NONE'),
+  command = utils.extract_color_from_hllist('fg', { 'Statement' }, 'NONE'),
+  replace = utils.extract_color_from_hllist('fg', { 'Type' }, 'NONE'),
+  fore    = utils.extract_color_from_hllist('fg', { 'StatusLine' }, 'NONE'),
+  back2   = utils.extract_color_from_hllist('bg', { 'StatusLine' }, 'NONE'),
+}
+local melange = {
+  normal = {
+    a = { bg = colors.normal,  fg = colors.back1, gui = 'bold' },
+    b = { bg = colors.back1,   fg = colors.normal },
+    c = { bg = colors.back2,   fg = colors.fore },
+    x = { bg = colors.back2,   fg = colors.ignore },
+  },
+  insert = {
+    a = { bg = colors.insert,  fg = colors.back1, gui = 'bold' },
+    b = { bg = colors.back1,   fg = colors.insert },
+    c = { bg = colors.back2,   fg = colors.fore },
+    x = { bg = colors.back2,   fg = colors.ignore },
+  },
+  replace = {
+    a = { bg = colors.replace, fg = colors.back1, gui = 'bold' },
+    b = { bg = colors.back1,   fg = colors.replace },
+    c = { bg = colors.back2,   fg = colors.fore },
+    x = { bg = colors.back2,   fg = colors.ignore },
+  },
+  visual = {
+    a = { bg = colors.visual,  fg = colors.back1, gui = 'bold' },
+    b = { bg = colors.back1,   fg = colors.visual },
+    c = { bg = colors.back2,   fg = colors.fore },
+    x = { bg = colors.back2,   fg = colors.ignore },
+  },
+  command = {
+    a = { bg = colors.command, fg = colors.back1, gui = 'bold' },
+    b = { bg = colors.back1,   fg = colors.command },
+    c = { bg = colors.back2,   fg = colors.fore },
+    x = { bg = colors.back2,   fg = colors.ignore },
+  },
+}
+
 require('lualine').setup({
   options = {
-    theme = 'auto'
+    theme = melange,
+    -- Just disable these, even though there are extensions for them.
+    disabled_filetypes = {'nerdtree', 'fugitive', 'toggleterm' },
   },
-  extensions = { 'quickfix', 'fugitive', 'toggleterm' } -- TODO: add nvim-tree
+  sections = {
+    lualine_b = {
+      'branch', 'diff',
+      {
+        'diagnostics',
+        sources = { 'nvim_diagnostic' },
+      }
+    },
+    lualine_y = {
+      { 'progress', separators = '', padding = { left = 0, right = 1 }}
+    }
+  },
+  extensions = { 'quickfix' },
 })
 EOF
 " --- Colorizer ---
@@ -391,7 +488,7 @@ vim.g.indent_blankline_buftype_exclude = {
 "lspinfo",
 }
 vim.g.indent_blankline_filetype_exclude = {
-    "NvimTree",
+    "nerdtree",
     "help",
     "startify"
 }
@@ -431,6 +528,33 @@ EOF
 " Close tag in normal mode.
 nmap <leader>> a<bs>><esc>
 
+" --- Comment ---
+lua << EOF
+require('Comment').setup({
+  --ignore = '^$' -- ignore empty lines
+  toggler = { line = 'gcc', block = 'gbb', },
+  pre_hook = function(ctx)
+    -- In these files use nvim-ts-context-commentstring.
+    if vim.bo.filetype == 'typescriptreact' then
+      local U = require('Comment.utils')
+
+      -- Detemine whether to use linewise or blockwise commentstring
+      local type = ctx.ctype == U.ctype.line and '__default' or '__multiline'
+
+      -- Determine the location where to calculate commentstring from
+      local location = nil
+      if ctx.ctype == U.ctype.block then
+        location = require('ts_context_commentstring.utils').get_cursor_location()
+      elseif ctx.cmotion == U.cmotion.v or ctx.cmotion == U.cmotion.V then
+        location = require('ts_context_commentstring.utils').get_visual_start_location()
+      end
+
+      return require('ts_context_commentstring.internal').calculate_commentstring({ key = type, location = location, })
+    end
+  end,
+})
+EOF
+
 " --- Git ---
 " https://dpwright.com/posts/2018/04/06/graphical-log-with-vimfugitive/
 command! -nargs=* Glg Git! log --graph --abbrev-commit --decorate --format=format:'%s %C(bold yellow)%d%C(reset) %C(bold green)(%ar)%C(reset) %C(dim white)<%an>%C(reset) %C(bold blue)%h%C(reset)' --all<args>
@@ -439,6 +563,24 @@ command! -nargs=* Glg Git! log --graph --abbrev-commit --decorate --format=forma
 lua <<EOF
 local actions = require('telescope.actions')
 local previewers = require('telescope.previewers')
+local action_state = require("telescope.actions.state")
+local delete_buffer = function (force)
+  return function (prompt_buf)
+    local current_picker = action_state.get_current_picker(prompt_buf)
+    local multi_selections = current_picker:get_multi_selection()
+
+    if next(multi_selections) == nil then
+      local selection = action_state.get_selected_entry()
+      actions.close(prompt_buf)
+      vim.api.nvim_buf_delete(selection.bufnr, {force = force, unload = false})
+    else
+      actions.close(prompt_buf)
+      for _, selection in ipairs(multi_selections) do
+        vim.api.nvim_buf_delete(selection.bufnr, {force = force, unload = false})
+      end
+    end
+  end
+end
 
 require('telescope').setup {
   defaults = {
@@ -449,13 +591,36 @@ require('telescope').setup {
     set_env = { ['COLORTERM'] = 'truecolor' },
     mappings = {
       i = {
-        ['<esc>'] = actions.close,
-        ['jj'] = { '<esc>', type = 'command' },
+        --['<esc>'] = actions.close,
+        --['jj'] = { '<esc>', type = 'command' },
         -- Use same horizontal and vertical mappings as Nerdtree.
         ["<C-i>"] = actions.select_horizontal,
         ["<C-s>"] = actions.select_vertical,
+        ["<C-b>"] = actions.preview_scrolling_up,
+        ["<C-f>"] = actions.preview_scrolling_down,
+        ["<C-u>"] = false, -- clears prompt
       },
+      n = {
+        ["<C-i>"] = actions.select_horizontal,
+        ["<C-s>"] = actions.select_vertical,
+      }
     },
+  },
+  pickers = {
+    buffers = {
+      mappings = {
+        i = {
+          ["<c-d>"] = delete_buffer(false),
+          ["<c-S-D>"] = delete_buffer(true),
+        },
+        n = {
+          ["<c-d>"] = delete_buffer(false),
+          ["<c-S-D>"] = delete_buffer(true),
+          ["d"] = delete_buffer(false),
+          ["D"] = delete_buffer(true),
+        }
+      }
+    }
   },
   extensions = {
     fzf = {
@@ -535,58 +700,27 @@ endfunction
 xmap ga <Plug>(EasyAlign)
 nmap ga <Plug>(EasyAlign)
 
-" ------ File explorer (nvim-tree) -----
-nnoremap <C-n> :NvimTreeToggle<CR>
-nnoremap <leader>n :NvimTreeFindFile<CR>
-lua << EOF
-require'nvim-tree'.setup {
-  auto_close = true,
-  update_focused_file = { enable = true, },
-  system_open = { cmd  = nil, args = {} }, -- TODO: do for win
-  git = { enable = true, ignore = false, },
-  view = {
-    side = 'right',
-    mappings = { -- TODO: add custom ones
-      custom_only = false,
-      list = {
-          -- TODO: populate this
-      }
-    },
-  },
-  trash = { cmd = "trash", require_confirm = true }, -- ?
-  actions = {
-    change_dir = {
-      enable = true,
-      global = false,
-    },
-    open_file = {
-      quit_on_open = true,
-      resize_window = false,
-    }
-  }
-}
-EOF
+
 " ----- Nerdtree -----
-" nnoremap <C-n> <cmd>NERDTreeToggle<CR>
-" " nnoremap <C-n> <cmd>NERDTreeToggle<CR>
-" nnoremap <leader>n <cmd>NERDTreeFind<CR>
-" let g:NERDTreeDirArrowExpandable = '▸'
-" let g:NERDTreeDirArrowCollapsible = '▾'
-" let NERDTreeShowHidden=1                    " Show hidden files
-" let g:NERDTreeWinPos = "right"
-" let NERDTreeQuitOnOpen=1
+nnoremap <C-n> <cmd>NERDTreeToggle<CR>
+nnoremap <leader>n <cmd>NERDTreeFind<CR>
+let g:NERDTreeDirArrowExpandable = '▸'
+let g:NERDTreeDirArrowCollapsible = '▾'
+let NERDTreeShowHidden=1                    " Show hidden files
+let g:NERDTreeWinPos = "right"
+let NERDTreeQuitOnOpen=1
+let g:NERDTreeWinSize=50           " Maybe do this just for some file types.
 " let g:NERDTreeWinSize=50           " Maybe do this just for some file types.
-" " let g:NERDTreeWinSize=50           " Maybe do this just for some file types.
-" " Refresh devicons so nerdtree does not show [] around icons
-" if exists('g:loaded_webdevicons')
-"   call webdevicons#refresh()
-" endif
-" augroup my_nerdtree
-"   au!
-"   autocmd BufEnter * if tabpagenr('$') == 1 && winnr('$') == 1 && exists('b:NERDTree') && b:NERDTree.isTabTree() | quit | endif
-"   " autocmd BufEnter * if tabpagenr('$') == 1 && winnr('$') == 1 && exists('b:NERDTree') && b:NERDTree.isTabTree() | quit | endif
-"   autocmd BufEnter * if winnr('$') == 1 && exists('b:NERDTree') && b:NERDTree.isTabTree() | quit | endif
-" augroup end
+" Refresh devicons so nerdtree does not show [] around icons
+if exists('g:loaded_webdevicons')
+  call webdevicons#refresh()
+endif
+augroup my_nerdtree
+  au!
+  autocmd BufEnter * if tabpagenr('$') == 1 && winnr('$') == 1 && exists('b:NERDTree') && b:NERDTree.isTabTree() | quit | endif
+  " autocmd BufEnter * if tabpagenr('$') == 1 && winnr('$') == 1 && exists('b:NERDTree') && b:NERDTree.isTabTree() | quit | endif
+  autocmd BufEnter * if winnr('$') == 1 && exists('b:NERDTree') && b:NERDTree.isTabTree() | quit | endif
+augroup end
 
 " unmap nerdtree execute, it's only needed in menu
 " Do not use nvim Netrw plugin explorer
@@ -698,6 +832,23 @@ command! Tf execute 'ToggleTerm direction=float'
 command! Tv execute 'ToggleTerm direction=vertical'
 command! Th execute 'ToggleTerm direction=horizontal'
 
+" --- Smooth scroll (Neo scroll) ---
+lua << EOF
+require('neoscroll').setup()
+-- speed it up compared to defaults.
+require('neoscroll.config').set_mappings({
+  ['<C-u>'] = {'scroll', {'-vim.wo.scroll', 'true', '30'}},
+  ['<C-d>'] = {'scroll', { 'vim.wo.scroll', 'true', '30'}},
+  ['<C-b>'] = {'scroll', {'-vim.api.nvim_win_get_height(0)', 'true', '60'}},
+  ['<C-f>'] = {'scroll', { 'vim.api.nvim_win_get_height(0)', 'true', '60'}},
+--  ['<C-y>'] = {'scroll', {'-0.10', 'false', '5'}},
+--  ['<C-e>'] = {'scroll', { '0.10', 'false', '5'}},
+  ['zt']    = {'zt', {'20'}},
+  ['zz']    = {'zz', {'20'}},
+  ['zb']    = {'zb', {'20'}}
+})
+EOF
+
 " --- Trouble ---
 " Warning: trouble has mapping all over this file.
 " TODO: figure out a way to add custom mapping wichih pipes Trouble items to qflist
@@ -711,9 +862,8 @@ nnoremap <leader>]T <cmd>TroubleToggle loclist<cr>
 lua << EOF
 require("trouble").setup {
    action_keys = {
-     -- switched <CR> with o
-     jump = {"o", "<tab>"},
-     jump_close = {"<cr>"},
+     jump = {"<cr>", "<tab>"},
+     jump_close = {"o"},
      -- same as telescope and nerdtree
      open_split = { "i", "<c-i>" },
      open_vsplit = { "s", "<c-s>" },
@@ -721,20 +871,40 @@ require("trouble").setup {
      toggle_fold = {"x"},
    },
    group = true,
-   auto_preview = false,
+   auto_preview = true,
    auto_close = false,
    auto_jump = {"lsp_definitions", "lsp_references", "lsp_implementations", "lsp_type_definitions"},
-   use_diagnostic_signs = true
+   signs = {
+     error       = Diagnostic_signs.error,
+     warning     = Diagnostic_signs.warn,
+     hint        = Diagnostic_signs.hint,
+     information = Diagnostic_signs.info,
+     other       = Diagnostic_signs.other
+   },
+   use_diagnostic_signs = false
 }
 EOF
 " --- Switch ---
 let g:switch_mapping = "gw"
 
-" --- Ultisnips ---
-let g:UltiSnipsExpandTrigger="<tab>"
-let g:UltiSnipsJumpForwardTrigger="<tab>"
-let g:UltiSnipsJumpBackwardTrigger="<S-tab>"
-let g:UltiSnipsEditSplit="tabdo"
+" --- Luasnip ---
+imap <silent><expr> <c-;> luasnip#expand_or_jumpable() ? '<Plug>luasnip-expand-or-jump' : '<c-,>'
+inoremap <silent> <c-l> <cmd>lua require'luasnip'.jump(-1)<cr>
+
+snoremap <silent> <c-;> <cmd>lua require('luasnip').jump(1)<cr>
+snoremap <silent> <c-l> <cmd>lua require('luasnip').jump(-1)<cr>
+
+" For changing choices in choiceNodes (not strictly necessary for a basic setup).
+imap <silent><expr> <c-'> luasnip#choice_active() ? '<Plug>luasnip-next-choice' : '<C-'>'
+smap <silent><expr> <C-'> luasnip#choice_active() ? '<Plug>luasnip-next-choice' : '<C-'>'
+lua << EOF
+local ls = require("luasnip")
+require("luasnip.loaders.from_vscode").load()
+ls.config.set_config({
+	history = true,
+	updateevents = "TextChanged,TextChangedI",
+})
+EOF
 
 "--- Nvim treesitter ---
 lua <<EOF
@@ -791,8 +961,10 @@ let g:elm_format_fail_silently = 0
 " ----- Latex -----
 " Set previewer to SumatraPDF
 let g:tex_flavor='latex'
+" Do not open quickfix on each compilation.
 let g:vimtex_quickfix_mode=0
-
+" Matchin of environments is too slow, escpecially for large files
+let g:vimtex_matchparen_enabled = 0
 let g:vimtex_view_general_viewer = 'SumatraPDF'
 let g:vimtex_view_general_options
     \ = '-reuse-instance -forward-search @tex @line @pdf'
@@ -809,17 +981,9 @@ augroup my_latex
     autocmd FileType tex set wrap
 augroup end
 
-" ----- C++ -------
-let g:cpp_class_scope_highlight = 1
-let g:cpp_member_variable_highlight = 1
-let g:cpp_class_decl_highlight = 1
-" For more highlights run
-" :help vim-lsp-cxx-highlight
-
-
 " ----- Native lsp -----
 
-set completeopt=menu,menuone,noselect,noinsert
+" set completeopt=menu,menuone,noselect,noinsert
 " set omnifunc=''
 " inoremap <C-space> <Cmd>lua require('cmp').complete()<CR>
 " inoremap <C-n> <Cmd>lua require('cmp').complete()<CR>
@@ -834,10 +998,14 @@ nnoremap <silent> [e <cmd>lua vim.diagnostic.goto_prev({severity = vim.diagnosti
 nnoremap <silent> ]e <cmd>lua vim.diagnostic.goto_next({severity = vim.diagnostic.severity.ERROR})<cr>
 lua <<EOF
 Lsp_on_attach = function (client, bufnr)
-  vim.notify("Attaching " .. client.name .. " lsp ...", vim.log.levels.INFO)
 
   local opts = { noremap=true, silent=true }
-  vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gd', '<cmd>TroubleToggle lsp_definitions<cr>', opts)
+
+  if client.name == "elmls" then
+    vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gd', '<cmd>lua vim.lsp.buf.definition()<cr>', opts)
+  else
+    vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gd', '<cmd>TroubleToggle lsp_definitions<cr>', opts)
+  end
   vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gD', '<cmd>TroubleToggle lsp_type_definitions<cr>', opts)
   vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gs', '<cmd>TroubleToggle lsp_references<cr>', opts)
   -- I chaned trouble.nvim/lua/trouble/providers/lsp.lua includeDeclaration to false, since I can't pass it as arg.
@@ -863,7 +1031,6 @@ Lsp_on_attach = function (client, bufnr)
 
   if client.resolved_capabilities.document_highlight then
     if client.name ~= "vimls" and client.name ~= "texlab" then
-      print 'setting doc highlight'
       vim.api.nvim_exec(
         [[
         augroup lsp_document_highlight
@@ -877,7 +1044,7 @@ Lsp_on_attach = function (client, bufnr)
     end
   end
 
-  vim.notify("... " .. client.name .. " lsp attached. ", vim.log.levels.INFO)
+  vim.api.nvim_notify("... " .. client.name .. " lsp attached. ", vim.log.levels.INFO, {})
 end
 
 
@@ -891,6 +1058,8 @@ lsp_installer.on_server_ready(function(server)
     local ts_cfg = {
       handlers = {
         ["textDocument/publishDiagnostics"] = function(err, result, ctx, hconfig)
+         -- Do nothing since tsserver diagnostics are too slow.
+
             if result ~= nil and result.diagnostics ~= nil then
               -- Do not report React is unused import.
               local isTsx = result.uri:sub(-#"tsx") == "tsx"
@@ -903,11 +1072,11 @@ lsp_installer.on_server_ready(function(server)
                 end
               end
             end
-          local handler = vim.lsp.with(vim.lsp.diagnostic.on_publish_diagnostics, {
-            virtual_text = false,
-          })
+         local handler = vim.lsp.with(vim.lsp.diagnostic.on_publish_diagnostics, {
+           virtual_text = false,
+         })
 
-          handler(err, result, ctx, hconfig)
+         handler(err, result, ctx, hconfig)
         end,
       }
     }
@@ -994,70 +1163,40 @@ vim.lsp.handlers["textDocument/publishDiagnostics"] = vim.lsp.with(vim.lsp.diagn
   virtual_text = false,
 })
 
--- Diagnostics
-local config = {
-  virtual_text = false,
-  signs = {
-    active = {
-      { name = "DiagnosticSignError", text = "" },
-      { name = "DiagnosticSignWarn", text = "" },
-      { name = "DiagnosticSignInfo", text = "" },
-      { name = "DiagnosticSignHint", text = "" },
-    },
-  },
-  underline = true,
-  severity_sort = true,
-  --update_in_insert = true,
-  float = {
-    focusable = false,
-    --style = "minimal",
-    border = "rounded",
-    --source = false,
-    source = "always",
-    header = "",
-    prefix = "",
-  },
-}
-for _, sign in ipairs(config.signs.active) do
-  vim.fn.sign_define(sign.name, { texthl = sign.name, text = sign.text, numhl = "" })
-end
-
-vim.diagnostic.config(config)
 EOF
 
 " --- Autocompletion ---
 lua <<EOF
 local kind_icons = {
-  Text = "",
-  Method = "m",
-  Function = "",
-  Constructor = "",
-  Field = "",
-  Variable = "",
-  Class = "",
-  Interface = "",
-  Module = "",
-  Property = "",
-  Unit = "",
-  Value = "",
-  Enum = "",
-  Keyword = "",
-  Snippet = "",
-  Color = "",
-  File = "",
-  Reference = "",
-  Folder = "",
-  EnumMember = "",
-  Constant = "",
-  Struct = "",
-  Event = "",
-  Operator = "",
+  Text          = "",
+  Method        = "m",
+  Function      = "",
+  Constructor   = "",
+  Field         = "",
+  Variable      = "",
+  Class         = "",
+  Interface     = "",
+  Module        = "",
+  Property      = "",
+  Unit          = "",
+  Value         = "",
+  Enum          = "",
+  Keyword       = "",
+  Snippet       = "",
+  Color         = "",
+  File          = "",
+  Reference     = "",
+  Folder        = "",
+  EnumMember    = "",
+  Constant      = "",
+  Struct        = "",
+  Event         = "",
+  Operator      = "",
   TypeParameter = "",
 }
 -- Nvim-cmp
 
 local cmp = require'cmp'
-local cmp_ultisnips_mappings = require("cmp_nvim_ultisnips.mappings")
 
 cmp.setup({
   --completion = {
@@ -1065,8 +1204,7 @@ cmp.setup({
   --},
   snippet = {
     expand = function(args)
-      for i,v in ipairs(args) do print(i,v) end
-      vim.fn["UltiSnips#Anon"](args.body)
+      require('luasnip').lsp_expand(args.body)
     end,
   },
   mapping = {
@@ -1088,8 +1226,8 @@ cmp.setup({
     ['<CR>'] = cmp.mapping.confirm({ select = false, behavior = cmp.ConfirmBehavior.Insert, }),
   },
   sources = cmp.config.sources({
+    { name = 'luasnip' },
     { name = 'nvim_lsp' },
-    { name = 'ultisnips' },
     { name = 'nvim_lua' }
   }, {
     { name = 'buffer', keyword_length = 4 },
@@ -1105,7 +1243,7 @@ cmp.setup({
         nvim_lsp  = '{ls}',
         nvim_lua  = '{nlua}',
         path      = '{path}',
-        ultisnips = '{snip}',
+        luasnip   = '{snip}',
      })[entry.source.name]
 
      return vim_item
@@ -1114,8 +1252,4 @@ cmp.setup({
   view = {
     entries = "custom",
   },
-  experimental = {
-    --native_menu = false,
-    --ghost_text = { hl_group = 'Ignore'},
-  }
 })

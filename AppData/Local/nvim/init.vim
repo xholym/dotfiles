@@ -407,15 +407,25 @@ lua << EOF
 local utils = require'lualine.utils.utils'
 
 local colors = {
-  back1   = utils.extract_color_from_hllist('bg', { 'StatusLineNC' }, 'NONE'),
-  normal  = utils.extract_color_from_hllist('fg', { 'StatusLineNC' }, 'NONE'),
-  insert  = utils.extract_color_from_hllist('fg', { 'String' }, 'NONE'),
-  ignore  = utils.extract_color_from_hllist('fg', { 'Ignore' }, 'NONE'),
-  visual  = utils.extract_color_from_hllist('fg', { 'Constant' }, 'NONE'),
-  command = utils.extract_color_from_hllist('fg', { 'Statement' }, 'NONE'),
-  replace = utils.extract_color_from_hllist('fg', { 'Type' }, 'NONE'),
-  fore    = utils.extract_color_from_hllist('fg', { 'StatusLine' }, 'NONE'),
-  back2   = utils.extract_color_from_hllist('bg', { 'StatusLine' }, 'NONE'),
+  -- Can be done dynamicly, but using raw colors for speed.
+  normal  = '#C1A78E',
+  insert  = '#9AACCE',
+  ignore  = '#A38D78',
+  visual  = '#B380B0',
+  command = '#E49B5D',
+  replace = '#86A3A3',
+  fore    = '#ECE1D7',
+  back1   = '#352F2A',
+  back2   = '#2A2520',
+  --normal  = utils.extract_color_from_hllist('fg', { 'StatusLineNC' }, 'NONE'),
+  --insert  = utils.extract_color_from_hllist('fg', { 'String' }, 'NONE'),
+  --ignore  = utils.extract_color_from_hllist('fg', { 'Ignore' }, 'NONE'),
+  --visual  = utils.extract_color_from_hllist('fg', { 'Constant' }, 'NONE'),
+  --command = utils.extract_color_from_hllist('fg', { 'Statement' }, 'NONE'),
+  --replace = utils.extract_color_from_hllist('fg', { 'Type' }, 'NONE'),
+  --fore    = utils.extract_color_from_hllist('fg', { 'Normal' }, 'NONE'),
+  --back2   = utils.extract_color_from_hllist('bg', { 'StatusLine' }, 'NONE'),
+  --back1   = utils.extract_color_from_hllist('bg', { 'StatusLineNC' }, 'NONE'),
 }
 local melange = {
   normal = {
@@ -464,9 +474,32 @@ require('lualine').setup({
         sources = { 'nvim_diagnostic' },
       }
     },
+    lualine_x = {'filetype'},
     lualine_y = {
       { 'progress', separators = '', padding = { left = 0, right = 1 }}
     }
+  },
+  tabline = {
+    lualine_c = {{
+      'tabs',
+       mode = 2,
+       tabs_color = {
+         active = 'lualine_a_normal',
+         inactive = 'lualine_b_normal',
+       }
+    }},
+    lualine_y = { 'encoding', { 'fileformat', padding = { left = 1, right = 2 }}},
+    lualine_z = {{
+      -- Shows only active buffer number with filetype icon.
+      'buffers',
+      mode = 1,
+      max_length = 1,
+      show_modified_status = false,
+      buffers_color = {
+        active = 'lualine_a_normal',
+        inactive = 'lualine_x_normal',
+      }
+    }}
   },
   extensions = { 'quickfix' },
 })
@@ -1011,7 +1044,7 @@ Lsp_on_attach = function (client, bufnr)
   -- I chaned trouble.nvim/lua/trouble/providers/lsp.lua includeDeclaration to false, since I can't pass it as arg.
   vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gS', '<cmd>TroubleToggle lsp_implementations<cr>', opts)
 
-  vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gm', '<cmd>lua require("lspops").rename()<cr>', opts) -- TODO: also rewrite this
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gm', '<cmd>lua require("lspops").rename()<cr>', opts)
   vim.api.nvim_buf_set_keymap(bufnr, 'n', 'K',  '<cmd>lua vim.lsp.buf.hover()<cr>', opts)
   vim.api.nvim_buf_set_keymap(bufnr, 'n', '<C-S-K>', '<cmd>lua vim.lsp.buf.signature_help()<cr>', opts)
   vim.api.nvim_buf_set_keymap(bufnr, 'i', '<C-k>', '<cmd>lua vim.lsp.buf.signature_help()<cr>', opts)
@@ -1124,7 +1157,7 @@ lsp_installer.on_server_ready(function(server)
       }
     }
     config = vim.tbl_deep_extend("force", lua_cfg, config)
-    -- TODO texlab
+    -- TODO texlab (maybe)
   end
 
   server:setup(config)

@@ -1030,6 +1030,7 @@ EOF
 
 " --- Toggle terminal ---
 lua << EOF
+-- @OS_CHECK
 require("toggleterm").setup{
   open_mapping = [[<c-\>]],
   shell = 'C:\\tools\\bash.exe',
@@ -1398,6 +1399,7 @@ lspconfig.ccls.setup {
   ls_ranges = true,
   init_options = {
     cache = {
+      -- @OS_CHECK
       directory = "C:\\tools\\ccls\\.ccls_cache"
     },
     client = {

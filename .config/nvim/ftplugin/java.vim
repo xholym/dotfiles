@@ -1,4 +1,5 @@
 lua <<EOF
+-- @OS_CHECK
 local workspace_dir = vim.fn.fnamemodify(vim.fn.getcwd(), ':p:h:t')
 local on_attach = function (client, bufnr)
   Lsp_on_attach(client, bufnr)

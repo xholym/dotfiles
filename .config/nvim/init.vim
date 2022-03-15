@@ -9,6 +9,7 @@
 " - install MikTex and SumatraPDF for latex.
 " - install ccls (On windows using choco install ccls)
 " - install tar (lsp-installer requires it)
+" - install kotlin-language-server (https://github.com/fwcd/kotlin-language-server/blob/main/BUILDING.md)
 "
 "
 " Todos:
@@ -968,7 +969,7 @@ let g:loaded_netrwPlugin = 1
 
 " --- Undo tree ---
 nnoremap <leader>u <cmd>UndotreeToggle<cr><cmd>UndotreeFocus<cr>
-set undodir=~/.config/nvim/undodir
+set undodir=$HOME/.config/nvim/undodir
 set undofile
 "let g:undotree_WindowLayout = 2  " bigger diff window
 let g:undotree_ShortIndicators = 1
@@ -1155,7 +1156,7 @@ require'nvim-treesitter.configs'.setup {
   ensure_installed = { "lua", "c", "cpp", "java", "javascript", "typescript", "tsx", "css", "html" },
   highlight = {
     enable = true,
-    disable = { "kotlin" }, -- kotlin syntax highlight does not work correctly.
+    disable = { "kotlin" } -- highlights do not work correctly
   },
   indent = {
     enable = true

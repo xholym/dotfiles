@@ -10,18 +10,14 @@
 
 # Except these in subdirs:
 
-# */nvim
-!AppData/
-AppData/*
-!AppData/Local/
-AppData/Local/*
-!*AppData/Local/nvim/
+# Nvim
+!.config/
+.config/*
+!.config/nvim
+.config/nvim/undodir
+.config/nvim/plugged/
+.config/nvim/verbose.log
 
-# treesitter highlights
-!.vim/
-.vim/plugged/
-.vim/verbose.log
-.vim/undodir
 
 # git templates
 !.git-templates/

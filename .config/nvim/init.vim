@@ -1,5 +1,6 @@
-"
 " Requirements:
+" - on Windows run 'setx /M XDG_CONFIG_HOME "%USERPROFILE%\\.config"'
+"   - source: https://github.com/neovim/neovim/issues/3700
 " - C compiler is needed for treesitter to work (otherwise the is C compiler not found error.
 " - lombok in C:\tools\lombok.jar
 " - install ripgrep for telescope
@@ -30,9 +31,162 @@
 " See https://github.com/neovim/neovim/issues/14605
 "
 
+set nocompatible
+set encoding=utf-8
+
+syntax on
+syntax enable
+
+set number		    " make current line number not relative
+set relativenumber	" enable relative line numbers
+
+set noerrorbells   	" disable ring on error
+
+" Indentation
+set autoindent      " enable indetation
+set smartindent	    " try to indent for me
+set tabstop=4	    " make tab 4 spaces
+set softtabstop=4   " make soft tab 4 spaces
+set shiftwidth=4    " also make 4 spaces
+set expandtab       " convert tabs to spaces
+
+" Search
+set ignorecase      " ignore case by default
+set smartcase       " do not ignore case when uppercase is typed
+set incsearch       " incrementaly show search results
+set hlsearch        " highlight searches
+set showmatch       " hightlight matching braces
+" Clear search
+nnoremap // :noh<CR>
+
+
+set noswapfile      " dont use swapfiles
+
+set splitright      " open next split on right side
+
+set scrolloff=2     " number of line to keep
+
+if (has('mouse'))
+    set mouse=a
+endif
+
+" Basic Theme
+set background=dark
+if (has('termguicolors'))
+    set termguicolors
+endif
+set t_Co=256        " enable 256 colors
+set ruler
+set showcmd         " show partial commnand in the bottom
+
+set noerrorbells
+
+set matchtime=0      " time in tenths of seconds to jump to previous pair when closing
+
+
+" ----- Other settings -----
+augroup trim_whitespace
+    autocmd!
+    autocmd BufWritePre * :%s/\s\+$//e
+augroup end
+
+
+" ----- Mappings -----
+"
+nnoremap <SPACE> <Nop>
+let mapleader = " "
+
+" Navigation
+nnoremap <C-tab> <C-^>
+" go to last tab is still g<tab>
+
+" Splits navigation
+nnoremap <C-l> <C-w>l
+nnoremap <C-h> <C-w>h
+nnoremap <C-j> <C-w>j
+nnoremap <C-k> <C-w>k
+nnoremap + :vertical resize +5<CR>
+nnoremap _ :vertical resize -5<CR>
+nnoremap <c-+> :resize +5<CR>
+nnoremap <c-_> :resize -5<CR>
+
+" Tabs navigation
+nnoremap <M-h> :tabp<CR>
+nnoremap <M-l> :tabn<CR>
+
+" Toggle wrapping
+set nowrap		   	" don't wrap lines
+let &showbreak = '> '   " show this string wrapped line
+set linebreak textwidth=0 wrapmargin=0 " don't automatically insert line breaks at 80 column, does not work.
+nnoremap <leader>` <cmd>set wrap!<CR>
+
+" Rather remap Capslock to Escape
+"inoremap jj <ESC>
+
+" Don't hit Shift to start command mode.
+nnoremap ; :
+vnoremap ; :
+" And use , as ; to go to next f/t hit and : as , to go to previous.
+nnoremap , ;
+nnoremap <c-,> ,
+vnoremap , ;
+vnoremap <c-,> ,
+" : is a free key to use wherever
+
+" Rerun last command
+nnoremap <leader>; :<up><CR>
+
+" Keep visual selection when indenting
+vnoremap > >gv
+vnoremap < <gv
+
+" Create new lines in and stay in normal mode
+nnoremap zj o<Esc>k
+nnoremap zk O<Esc>j
+" Put space behind or after cursor
+nnoremap z9 i <Esc>
+nnoremap z0 a <Esc>
+
+" Yanking
+nnoremap Y y$
+" Copy from clipboard
+nnoremap zp "*p
+nnoremap zy "*y
+nnoremap zY "*y$
+nnoremap zP "*P
+vnoremap zy "*y
+vnoremap zY "*y$
+inoremap <C-v> <C-o>"*P
+" Yuick paste without leaving insert mode.
+inoremap <c-p> <C-o>P
+
+" Do not move cursor while joining
+"nnoremap J mzJ'z
+
+" Moving text
+vnoremap J :m '>+1<CR>gv=gv
+vnoremap K :m '>-2<CR>gv=gv
+" Probably not needed fo normal mode
+"nnoremap <leader>j :m .+1<CR>==
+"nnoremap <leader>k :m .-2<CR>==
+
+" Search and replace template
+nnoremap <leader>\ :%s//gc<left><left><left>
+
+" quickfix, location lists
+nnoremap [g <cmd>cprev<cr>
+nnoremap ]g <cmd>cnext<cr>
+nnoremap [G <cmd>copen<cr>
+nnoremap ]G <cmd>cclose<cr>
+nnoremap [l <cmd>lprev<cr>
+nnoremap ]l <cmd>lnext<cr>
+nnoremap [L <cmd>lopen<cr>
+nnoremap ]L <cmd>lclose<cr>
+
+" Abreviations
+ab nch nocheckin
 set runtimepath^=~/.vim runtimepath+=~/.vim/after
 let &packpath = &runtimepath
-source ~/.vimrc
 
 filetype plugin indent on
 
@@ -41,7 +195,7 @@ set autowrite
 
 " ----- Plugins -----
 
-call plug#begin('~/.vim/plugged')    " initialize plugin system
+call plug#begin('~/.config/nvim/plugged')    " initialize plugin system
 
 " Changes to behaviour
 Plug 'tpope/vim-surround'
@@ -128,6 +282,7 @@ Plug 'hrsh7th/cmp-nvim-lua'
 Plug 'hrsh7th/cmp-buffer'
 Plug 'hrsh7th/cmp-path'
 Plug 'hrsh7th/nvim-cmp'
+"Plug 'f3fora/cmp-spell' " TODO: configure and test
 Plug 'saadparwaiz1/cmp_luasnip'
 
 call plug#end()
@@ -140,9 +295,13 @@ if (has("termguicolors"))
 endif
 
 set colorcolumn=80
+set cursorline
 
 function! s:my_highlights()
     " Disable italics for melange colorscheme
+    hi clear CursorLine
+    hi clear CursorLineNr
+    hi link CursorLineNr Ignore
     hi Comment gui=NONE
     hi String gui=NONE
     hi Todo gui=NONE
@@ -238,7 +397,7 @@ noremap <M-_> :call AdjustFontSize(-1)<CR>
 augroup my_syntax
     au!
     " Indent sizes
-    " TODO: fix this, vim stil uses 4 spaces
+    " TODO: fix this, vim still uses 4 spaces
     autocmd Filetype lua             setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
     autocmd Filetype vim             setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
     autocmd Filetype python          setlocal expandtab tabstop=4 shiftwidth=4 softtabstop=4
@@ -247,6 +406,7 @@ augroup my_syntax
     autocmd Filetype markdown        setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
     autocmd Filetype tex             setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
     autocmd Filetype json            setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
+    autocmd Filetype javascript      setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
     autocmd Filetype typescript      setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
     autocmd Filetype typescriptreact setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
 
@@ -281,7 +441,6 @@ set updatetime=100
 " Not using global for now.
 " set spell
 " set spelllang=en,sk
-" TODO: Maybe move mapping to ~/.vimrc
 nnoremap <silent> <F11> <cmd>setlocal spell! spelllang=en,sk<CR>
 nmap z+ 1z=
 
@@ -289,7 +448,7 @@ nmap z+ 1z=
 function! ToggleVerbose()
     if !&verbose
         echo 'verbose file set'
-        set verbosefile=~/.vim/verbose.log
+        set verbosefile=~/.config/nvim/verbose.log
         set verbose=15
     else
         echo 'verbose file unset'
@@ -300,17 +459,30 @@ endfunction
 command! ToggleVerbose <cmd>call ToggleVerbose()
 command! -complete=file -nargs=1 Rm :echo 'Remove: '.'<f-args>'.' '.(delete(<f-args>) == 0 ? 'SUCCEEDED' : 'FAILED')
 
-function! DeleteHiddenBuffers()
-    let tpbl=[]
-    call map(range(1, tabpagenr('$')), 'extend(tpbl, tabpagebuflist(v:val))')
-    for buf in filter(range(1, bufnr('$')), 'bufexists(v:val) && index(tpbl, v:val)==-1')
-        silent execute 'bwipeout' buf
-    endfor
-endfunction
-command! Bdhidden call DeleteHiddenBuffers()
+lua <<EOF
+function DeleteHiddenBuffers(opts)
+  local current = vim.fn.bufnr('%')
+  local bufs = vim.api.nvim_list_bufs()
+  local count = 0
+  for _, buf in ipairs(bufs) do
+    if buf ~= current then
+      local listed = vim.fn.buflisted(buf) == 1
+      if (not opts or not opts.unlisted) and listed then
+        local force = (opts and opts.force) or false
+        vim.api.nvim_buf_delete(buf, {force = force})
+      end
+    end
+  end
+end
+EOF
+command! Bdhidden lua DeleteHiddenBuffers()
+ " TODO force with !
+command! BdhiddenForce lua DeleteHiddenBuffers()
 
 command! Qother execute '%bdelete | edit # | normal `"'
 command! Qo execute '%bdelete | edit # | normal `"'
+
+nnoremap <leader><leader>w <cmd>write <bar> source  %<cr>
 
 " Use lua module cache
 lua require('impatient')
@@ -406,6 +578,7 @@ nnoremap z= <cmd>lua Select_spell_suggestion()<cr>
 lua << EOF
 local utils = require'lualine.utils.utils'
 
+-- My custom melange colorscheme
 local colors = {
   -- Can be done dynamicly, but using raw colors for speed.
   normal  = '#C1A78E',
@@ -427,6 +600,9 @@ local colors = {
   --back2   = utils.extract_color_from_hllist('bg', { 'StatusLine' }, 'NONE'),
   --back1   = utils.extract_color_from_hllist('bg', { 'StatusLineNC' }, 'NONE'),
 }
+colors.filename_unsaved = colors.command
+colors.filename_saved   = colors.fore
+
 local melange = {
   normal = {
     a = { bg = colors.normal,  fg = colors.back1, gui = 'bold' },
@@ -460,6 +636,29 @@ local melange = {
   },
 }
 
+-- My custom components.
+local function window()
+  return vim.api.nvim_win_get_number(0)
+end
+local function current_buffer()
+  local bufnr = vim.fn.bufnr('%')
+  local bufname = vim.fn.bufname(bufnr)
+  local icon = Devicon_for(bufname)
+  return bufnr .. ' ' .. icon
+end
+local function number_of_buffers()
+  local bufs = vim.api.nvim_list_bufs()
+  local count = 0
+  for i=1,#bufs,1 do
+    local listed = vim.fn.buflisted(bufs[i]) == 1
+    if listed then
+      count = count + 1
+    end
+  end
+  return count .. ' ﬘'
+end
+
+
 require('lualine').setup({
   options = {
     theme = melange,
@@ -468,38 +667,57 @@ require('lualine').setup({
   },
   sections = {
     lualine_b = {
-      'branch', 'diff',
-      {
-        'diagnostics',
-        sources = { 'nvim_diagnostic' },
-      }
+      {'FugitiveHead', icon = ''}, -- Resuse existing info.
+      {'diff', source = function()  -- Use git diffs from git signs
+          local gitsigns = vim.b.gitsigns_status_dict
+          if gitsigns then
+            return {
+              added = gitsigns.added,
+              modified = gitsigns.changed,
+              removed = gitsigns.removed
+            }
+          end
+        end
+      },
+      { 'diagnostics', sources = { 'nvim_diagnostic' }, }
     },
-    lualine_x = {'filetype'},
+    lualine_c = {
+      {'filename',
+        color = function()
+          return { fg = vim.bo.modified and colors.command or colors.fore }
+        end
+    }},
+    lualine_x = { 'filetype'},
     lualine_y = {
-      { 'progress', separators = '', padding = { left = 0, right = 1 }}
+      {'progress', separators = '', padding = { left = 0, right = 1 }}
     }
+  },
+  inactive_sections = {
+    lualine_x = {window, 'location'},
   },
   tabline = {
     lualine_c = {{
       'tabs',
+       max_length = vim.o.columns - 10, -- nocheckin does this work? it doesn't look so.
        mode = 2,
+       separators = {left = '', right = ''},
        tabs_color = {
-         active = 'lualine_a_normal',
          inactive = 'lualine_b_normal',
+         active = 'lualine_a_normal',
        }
     }},
-    lualine_y = { 'encoding', { 'fileformat', padding = { left = 1, right = 2 }}},
-    lualine_z = {{
-      -- Shows only active buffer number with filetype icon.
-      'buffers',
-      mode = 1,
-      max_length = 1,
-      show_modified_status = false,
-      buffers_color = {
-        active = 'lualine_a_normal',
-        inactive = 'lualine_x_normal',
+    lualine_x = {
+      {'encoding'},
+      { 'fileformat',
+        padding = { left = 1, right = 1 }
       }
-    }}
+    },
+    lualine_y = {
+      {current_buffer , color = 'lualine_a_normal' },
+    },
+    lualine_z = {
+      {number_of_buffers , color = {fg = colors.normal , bg = colors.back1, gui='bold'} },
+    },
   },
   extensions = { 'quickfix' },
 })
@@ -593,6 +811,8 @@ EOF
 command! -nargs=* Glg Git! log --graph --abbrev-commit --decorate --format=format:'%s %C(bold yellow)%d%C(reset) %C(bold green)(%ar)%C(reset) %C(dim white)<%an>%C(reset) %C(bold blue)%h%C(reset)' --all<args>
 
 " --- Telescope ---
+"  Deleting text in prompt does not work after leaving insert mode.
+"  This shloud be fixed in neovim 0.7, so TODO: update when stable version is out.
 lua <<EOF
 local actions = require('telescope.actions')
 local previewers = require('telescope.previewers')
@@ -606,11 +826,13 @@ local delete_buffer = function (force)
       local selection = action_state.get_selected_entry()
       actions.close(prompt_buf)
       vim.api.nvim_buf_delete(selection.bufnr, {force = force, unload = false})
+      print('Deleted 1 buffer.')
     else
       actions.close(prompt_buf)
       for _, selection in ipairs(multi_selections) do
         vim.api.nvim_buf_delete(selection.bufnr, {force = force, unload = false})
       end
+      print('Deleted', #multi_selections, ' buffer.')
     end
   end
 end
@@ -631,11 +853,13 @@ require('telescope').setup {
         ["<C-s>"] = actions.select_vertical,
         ["<C-b>"] = actions.preview_scrolling_up,
         ["<C-f>"] = actions.preview_scrolling_down,
+        ["<tab>"] = actions.toggle_selection,
         ["<C-u>"] = false, -- clears prompt
       },
       n = {
         ["<C-i>"] = actions.select_horizontal,
         ["<C-s>"] = actions.select_vertical,
+        ["<tab>"] = actions.toggle_selection,
       }
     },
   },
@@ -653,7 +877,7 @@ require('telescope').setup {
           ["D"] = delete_buffer(true),
         }
       }
-    }
+    },
   },
   extensions = {
     fzf = {
@@ -665,52 +889,34 @@ require('telescope').setup {
   }
 }
 require('telescope').load_extension('fzf')
-
--- This is not needed, since Telescope does this by default with find_files
---Home_git = vim.fn.fnamemodify(vim.fn.expand('$homepath/.git'), ':p'):gsub("\\", "/"):sub(1, -2)
---Project_files = function(theme)
---    local current_git_dir = vim.fn.fnamemodify(vim.fn.system('git rev-parse --absolute-git-dir'), ':p')
---    local view = {}
---    if theme == "files_only" then
---      view = require('telescope.themes').get_dropdown{ previewer = false }
---    end
---
---    if current_git_dir ~= "" then
---        current_git_dir = current_git_dir:gsub("\n", "")
---        if current_git_dir ~= Home_git then
---            require'telescope.builtin'.git_files(view)
---            return
---        end
---    end
---    require'telescope.builtin'.find_files(view)
---end
---vim.api.nvim_set_keymap('n', '<leader>f', '<cmd>lua Project_files("files_only")<cr>', {})
---vim.api.nvim_set_keymap('n', '<leader>F', '<cmd>lua Project_files()<cr>', {})
 EOF
 
-" --- Fuzzy search ---
-
 " FIles
-nnoremap <leader>f <cmd>lua require('telescope.builtin').find_files(require('telescope.themes').get_dropdown{ previewer = false })<cr>
-nnoremap <leader>F <cmd>lua require('telescope.builtin').find_files()<cr>
-nnoremap <leader>b <cmd>Telescope buffers<cr>
+nnoremap <leader>f <cmd>lua require('telescope.builtin').find_files(require('telescope.themes').get_dropdown{ previewer = false, hidden = true, prompt_title = 'Find project files' })<cr>
+nnoremap <leader>F <cmd>lua require('telescope.builtin').find_files(require('telescope.themes').get_dropdown{ previewer = false, hidden = true, no_ignore = true, prompt_title = 'Find all files' })<cr>
+nnoremap <leader>gf <cmd>lua require('telescope.builtin').find_files(require('telescope.themes').get_ivy())<cr>
+nnoremap <leader>b <cmd>Telescope buffers theme=ivy<cr>
 nnoremap <leader><Tab> <cmd>lua require('telescope.builtin').oldfiles(require('telescope.themes').get_dropdown{ previewer = false })<cr>
 
 " Search in files
-nnoremap <leader>/ <cmd>Telescope live_grep<cr>
+nnoremap <leader>/ <cmd>Telescope live_grep theme=ivy<cr>
+" TODO: use theme Ivy.
 nnoremap <leader>? <cmd>lua require('telescope.builtin').grep_string { search = vim.fn.input("Grep for ") } <cr>
 
 
 " Maybe temporary mappings
 " May change this mappind. <leader>g can have multiple key mappings, since it's easy to press.
-nnoremap <leader>gm <cmd>Telescope marks<cr>
-nnoremap <leader>gh <cmd>Telescope help_tags<cr>
-nnoremap <leader>gH <cmd>Telescope highlights<cr>
+nnoremap <leader>gm <cmd>Telescope marks theme=ivy<cr>
+nnoremap <leader>gh <cmd>Telescope help_tags theme=ivy<cr>
+nnoremap <leader>gH <cmd>Telescope highlights theme=ivy<cr>
 nnoremap <leader>g, <cmd>Telescope resume<cr>
-nnoremap <leader>gb <cmd>Telescope git_branches<cr>
+nnoremap <leader>gb <cmd>Telescope git_branches theme=ivy<cr>
 
 " Quickly go to some my config file
-command! Dotfiles execute 'lua require("telescope.builtin").git_files { cwd = "~" }'
+command! Dotfiles execute "lua require('telescope.builtin').find_files(require('telescope.themes').get_dropdown({ previewer = false, cwd = '~', hidden = true, prompt_title = 'Dotfiles' }))"
+command! Plugins execute "lua require('telescope.builtin').find_files(require('telescope.themes').get_ivy({ cwd = '~/.config/nvim/plugged', hidden = true, prompt_title = 'Plugins' }))"
+nnoremap <leader>gd <cmd>Dotfiles<cr>
+nnoremap <leader>gp <cmd>Plugins<cr>
 
 command! Nocheckin silent execute 'Ggrep nocheckin'
 command! Nch silent execute 'Ggrep nocheckin'
@@ -718,7 +924,7 @@ command! Nch silent execute 'Ggrep nocheckin'
 " --- Startify ---
 command! SQuit execute 'SClose | qa'
 lua << EOF
-function _G.webDevIcons(path)
+function _G.Devicon_for(path)
   local filename = vim.fn.fnamemodify(path, ':t')
   local extension = vim.fn.fnamemodify(path, ':e')
   return require'nvim-web-devicons'.get_icon(filename, extension, { default = true })
@@ -726,7 +932,7 @@ end
 EOF
 
 function! StartifyEntryFormat() abort
-  return 'v:lua.webDevIcons(absolute_path) . " " . entry_path'
+  return 'v:lua.Devicon_for(absolute_path) . " " . entry_path'
 endfunction
 
 " --- EasyAlign ---
@@ -762,7 +968,7 @@ let g:loaded_netrwPlugin = 1
 
 " --- Undo tree ---
 nnoremap <leader>u <cmd>UndotreeToggle<cr><cmd>UndotreeFocus<cr>
-set undodir=~/.vim/undodir
+set undodir=~/.config/nvim/undodir
 set undofile
 "let g:undotree_WindowLayout = 2  " bigger diff window
 let g:undotree_ShortIndicators = 1
@@ -782,10 +988,11 @@ require('gitsigns').setup {
     map('n', '[c', "&diff ? '[c' : '<cmd>Gitsigns prev_hunk<CR>'", {expr=true})
 
     -- Actions
-    map('n', '<leader>hs', ':Gitsigns stage_hunk<CR>')
-    map('v', '<leader>hs', ':Gitsigns stage_hunk<CR>')
-    map('n', '<leader>hr', ':Gitsigns reset_hunk<CR>')
-    map('v', '<leader>hr', ':Gitsigns reset_hunk<CR>')
+    map('n', '<leader>hh', '<cmd>Gitsigns toggle_signs<CR>')
+    map('n', '<leader>hs', '<cmd>Gitsigns stage_hunk<CR>')
+    map('v', '<leader>hs', '<cmd>Gitsigns stage_hunk<CR>')
+    map('n', '<leader>hr', '<cmd>Gitsigns reset_hunk<CR>')
+    map('v', '<leader>hr', '<cmd>Gitsigns reset_hunk<CR>')
     map('n', '<leader>hS', '<cmd>Gitsigns stage_buffer<CR>')
     map('n', '<leader>hu', '<cmd>Gitsigns undo_stage_hunk<CR>')
     map('n', '<leader>hR', '<cmd>Gitsigns reset_buffer<CR>')
@@ -823,7 +1030,7 @@ EOF
 " --- Toggle terminal ---
 lua << EOF
 require("toggleterm").setup{
-  open_mapping = [[<c-t>]],
+  open_mapping = [[<c-\>]],
   shell = 'C:\\tools\\bash.exe',
   direction = 'float',
   size = function(term)
@@ -860,10 +1067,10 @@ augroup my_term
           \ tnoremap <silent><c-t> <Cmd>exe v:count1 . "ToggleTerm"<CR>
     autocmd! TermOpen term://* lua set_terminal_keymaps()
 augroup end
-command! Tt execute 'ToggleTerm direction=tab'
-command! Tf execute 'ToggleTerm direction=float'
-command! Tv execute 'ToggleTerm direction=vertical'
-command! Th execute 'ToggleTerm direction=horizontal'
+command! -count=1 Tt execute <count> . 'ToggleTerm direction=tab'
+command! -count=1 Tf execute <count> . 'ToggleTerm direction=float'
+command! -count=1 Tv execute <count> . 'ToggleTerm direction=vertical'
+command! -count=1 Th execute <count> . 'ToggleTerm direction=horizontal'
 
 " --- Smooth scroll (Neo scroll) ---
 lua << EOF
@@ -885,8 +1092,9 @@ EOF
 " --- Trouble ---
 " Warning: trouble has mapping all over this file.
 " TODO: figure out a way to add custom mapping wichih pipes Trouble items to qflist
-nnoremap <leader>t <cmd>TroubleToggle<cr>
-nnoremap <leader>T <cmd>TroubleToggle workspace_diagnostics<cr>
+" d in mapping is for diagnostics
+nnoremap <leader>d <cmd>TroubleToggle<cr>
+nnoremap <leader>D <cmd>TroubleToggle workspace_diagnostics<cr>
 nnoremap [t <cmd>lua require("trouble").next({skip_groups = true, jump = true})<cr>
 nnoremap ]t <cmd>lua require("trouble").prev({skip_groups = true, jump = true})<cr>
 nnoremap <leader>[T <cmd>TroubleToggle quickfix<cr>
@@ -895,8 +1103,8 @@ nnoremap <leader>]T <cmd>TroubleToggle loclist<cr>
 lua << EOF
 require("trouble").setup {
    action_keys = {
-     jump = {"<cr>", "<tab>"},
-     jump_close = {"o"},
+     jump_close = {"o", "<cr>"},
+     jump = {"O", "<tab>"},
      -- same as telescope and nerdtree
      open_split = { "i", "<c-i>" },
      open_vsplit = { "s", "<c-s>" },
@@ -919,6 +1127,8 @@ require("trouble").setup {
 EOF
 " --- Switch ---
 let g:switch_mapping = "gw"
+" --- ReplaceWithRegister ---
+nmap gR gr$
 
 " --- Luasnip ---
 imap <silent><expr> <c-;> luasnip#expand_or_jumpable() ? '<Plug>luasnip-expand-or-jump' : '<c-,>'
@@ -1080,6 +1290,21 @@ Lsp_on_attach = function (client, bufnr)
   vim.api.nvim_notify("... " .. client.name .. " lsp attached. ", vim.log.levels.INFO, {})
 end
 
+local function get_lua_runtime()
+    local result = {};
+    for _, path in pairs(vim.api.nvim_list_runtime_paths()) do
+        local lua_path = path .. "/lua/";
+        if vim.fn.isdirectory(lua_path) then
+            result[lua_path] = true
+        end
+    end
+
+    -- This loads the `lua` files from nvim into the runtime.
+    result[vim.fn.expand("$VIMRUNTIME/lua")] = true
+    result[vim.fn.expand("~/.config/nvim/lua")] = true
+
+    return result;
+end
 
 local lsp_installer = require("nvim-lsp-installer")
 
@@ -1142,8 +1367,8 @@ lsp_installer.on_server_ready(function(server)
             path = runtime_path,
             unicode_name = false
           },
-          diagnostics = { globals = {'vim', 'P', 'R'}, },
-          workspace = { library = vim.api.nvim_get_runtime_file("", true), },
+          diagnostics = { globals = {'vim', 'P', 'R'}, disable = { "trailing-space",} },
+          workspace = { library = get_lua_runtime(), },
           -- Do not send telemetry data containing a randomized but unique identifier
           telemetry = { enable = false, },
         },
@@ -1261,11 +1486,11 @@ cmp.setup({
   sources = cmp.config.sources({
     { name = 'luasnip' },
     { name = 'nvim_lsp' },
-    { name = 'nvim_lua' }
+    { name = 'nvim_lua' },
+    --{ name = 'spell' },
   }, {
     { name = 'buffer', keyword_length = 4 },
     { name = 'path' },
-    { name = 'emoji'}
   }),
   formatting = {
     format = function(entry, vim_item)
@@ -1277,6 +1502,7 @@ cmp.setup({
         nvim_lua  = '{nlua}',
         path      = '{path}',
         luasnip   = '{snip}',
+        --spell     = '{暈}',
      })[entry.source.name]
 
      return vim_item

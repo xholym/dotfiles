@@ -1,0 +1,15 @@
+#!/bin/bash
+program=$1
+if [ -z $program ]; then
+  echo 'Yout must pass program name as first argument.'
+  exit
+fi
+pid=$(pidof $program | awk 'NF>0{print $NF}')
+if [ -z $pid ]; then
+  echo "Running new instance of $program."
+  $program &
+else
+  echo "Openning already running, pid=$pid."
+  win=$(wmctrl -lp | awk "\$3 ~ /$pid/ {print \$1}")
+  wmctrl -ia $win
+fi

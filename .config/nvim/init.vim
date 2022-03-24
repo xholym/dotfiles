@@ -3,13 +3,16 @@
 "   - source: https://github.com/neovim/neovim/issues/3700
 " - C compiler is needed for treesitter to work (otherwise the is C compiler not found error.
 " - lombok in C:\tools\lombok.jar
-" - install ripgrep for telescope
-" - install make for telescope-fzf-native
-" - install elm-language-server with npm install -g @elm-tooling/elm-language-server
-" - install MikTex and SumatraPDF for latex.
-" - install ccls (On windows using choco install ccls)
-" - install tar (lsp-installer requires it)
-" - install kotlin-language-server (https://github.com/fwcd/kotlin-language-server/blob/main/BUILDING.md)
+" - install:
+"   - ripgrep for telescope
+"   - make for telescope-fzf-native
+"   - elm-language-server with npm install -g @elm-tooling/elm-language-server
+"   - MikTex and SumatraPDF for latex.
+"   - ccls (On windows using choco install ccls)
+"   - tar (lsp-installer requires it)
+"   - kotlin-language-server (https://github.com/fwcd/kotlin-language-server/blob/main/BUILDING.md)
+"   - some nerd font for your terminal or gui
+"   - typescript-language-server with npm install -g typescript-language-server [typescript]
 "
 "
 " Todos:
@@ -17,6 +20,10 @@
 " TODO: Configure java debug.
 " TODO: Remap :diffget //2 and diffget //3
 " TODO: Fix java formatting settings.
+"
+" Linux:
+" TODO: fix copy to clipboard, use :h clipboard
+" TODO: fix alt-h
 "
 "
 " Notes:
@@ -68,7 +75,7 @@ set splitright      " open next split on right side
 set scrolloff=2     " number of line to keep
 
 if (has('mouse'))
-    set mouse=a
+  set mouse=a
 endif
 
 " Basic Theme
@@ -84,11 +91,14 @@ set noerrorbells
 
 set matchtime=0      " time in tenths of seconds to jump to previous pair when closing
 
+if &shell =~# 'fish$'
+    set shell=bash
+endif
 
 " ----- Other settings -----
 augroup trim_whitespace
-    autocmd!
-    autocmd BufWritePre * :%s/\s\+$//e
+  autocmd!
+  autocmd BufWritePre * :%s/\s\+$//e
 augroup end
 
 
@@ -108,12 +118,12 @@ nnoremap <C-j> <C-w>j
 nnoremap <C-k> <C-w>k
 nnoremap + :vertical resize +5<CR>
 nnoremap _ :vertical resize -5<CR>
-nnoremap <c-+> :resize +5<CR>
-nnoremap <c-_> :resize -5<CR>
 
 " Tabs navigation
-nnoremap <M-h> :tabp<CR>
-nnoremap <M-l> :tabn<CR>
+nnoremap <M-h> <cmd>tabfirst<cr>
+nnoremap <M-j> gT
+nnoremap <M-k> gt
+nnoremap <M-l> <cmd>tablast<cr>
 
 " Toggle wrapping
 set nowrap		   	" don't wrap lines
@@ -151,13 +161,14 @@ nnoremap z0 a <Esc>
 " Yanking
 nnoremap Y y$
 " Copy from clipboard
-nnoremap zp "*p
-nnoremap zy "*y
-nnoremap zY "*y$
-nnoremap zP "*P
-vnoremap zy "*y
-vnoremap zY "*y$
-inoremap <C-v> <C-o>"*P
+nnoremap zp "+p
+nnoremap zy "+y
+nnoremap zY "+y$
+nnoremap zP "+P
+vnoremap zy "+y
+vnoremap zY "+y$
+inoremap <C-v> <esc>"+pa
+
 " Yuick paste without leaving insert mode.
 inoremap <c-p> <C-o>P
 
@@ -286,6 +297,10 @@ Plug 'hrsh7th/nvim-cmp'
 "Plug 'f3fora/cmp-spell' " TODO: configure and test
 Plug 'saadparwaiz1/cmp_luasnip'
 
+if (has('unix'))
+  Plug 'khaveesh/vim-fish-syntax'
+endif
+
 call plug#end()
 
 " ------ Highlighting --------
@@ -300,6 +315,7 @@ set cursorline
 
 function! s:my_highlights()
     " Disable italics for melange colorscheme
+    " TODO: Maybe rather fix italic font for neovim-qt.
     hi clear CursorLine
     hi clear CursorLineNr
     hi link CursorLineNr Ignore
@@ -352,8 +368,11 @@ function! s:my_highlights()
 
     " Use same colors as DiagnosticError / DiagnosticWarn and so on.
     " Nvim-qt does not render unercurl correctly, checkout their 2.17 release, it should be fixed there
-    hi DiagnosticUnderlineError guisp=#B65C60 gui=underline
-    hi DiagnosticUnderlineWarn guisp=#EBC06D gui=underline
+    " TODO: if neovim-qt
+    " hi DiagnosticUnderlineError guisp=#B65C60 gui=underline
+    " hi DiagnosticUnderlineWarn guisp=#EBC06D gui=underline
+    hi DiagnosticUnderlineError guisp=#B65C60
+    hi DiagnosticUnderlineWarn guisp=#EBC06D
     hi DiagnosticUnderlineInfo guisp=#9AACCE gui=NONE guibg=#353025
     hi DiagnosticUnderlineHint guisp=#99D59D gui=NONE guibg=#353025
     hi clear DiagnosticHint
@@ -392,21 +411,19 @@ call s:my_highlights() " done this way to run highlights every time I source thi
 " Show nine spell checking candidates at most
 set spellsuggest=best,10
 
-noremap <M-+> :call AdjustFontSize(1)<CR>
-noremap <M-_> :call AdjustFontSize(-1)<CR>
-
 augroup my_syntax
     au!
     " Indent sizes
     " TODO: fix this, vim still uses 4 spaces
-    autocmd Filetype lua             setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
-    autocmd Filetype vim             setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
-    autocmd Filetype python          setlocal expandtab tabstop=4 shiftwidth=4 softtabstop=4
-    autocmd Filetype go              setlocal expandtab tabstop=4 shiftwidth=4 softtabstop=4
-    autocmd Filetype java            setlocal expandtab tabstop=4 shiftwidth=4 softtabstop=4
-    autocmd Filetype markdown        setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
-    autocmd Filetype tex             setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
-    autocmd Filetype json            setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
+    autocmd Filetype sh       setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
+    autocmd Filetype lua      setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
+    autocmd Filetype vim      setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
+    autocmd Filetype go       setlocal expandtab tabstop=4 shiftwidth=4 softtabstop=4
+    autocmd Filetype java     setlocal expandtab tabstop=4 shiftwidth=4 softtabstop=4
+    autocmd Filetype tex      setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
+    autocmd Filetype json     setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
+    autocmd Filetype python   setlocal expandtab tabstop=4 shiftwidth=4 softtabstop=4
+    autocmd Filetype markdown setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
     autocmd Filetype javascript      setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
     autocmd Filetype typescript      setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
     autocmd Filetype typescriptreact setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
@@ -1030,10 +1047,9 @@ EOF
 
 " --- Toggle terminal ---
 lua << EOF
--- @OS_CHECK
 require("toggleterm").setup{
   open_mapping = [[<c-\>]],
-  shell = 'C:\\tools\\bash.exe',
+  shell = vim.fn.has('win32') == 1 and 'C:\\tools\\bash.exe' or vim.fn.expand('$SHELL'),
   direction = 'float',
   size = function(term)
     if term.direction == "horizontal" then
@@ -1060,7 +1076,7 @@ function _G.set_terminal_keymaps()
   vim.api.nvim_buf_set_keymap(0, 't', '<C-k>', [[<C-\><C-n><C-W>k]], opts)
   vim.api.nvim_buf_set_keymap(0, 't', '<C-l>', [[<C-\><C-n><C-W>l]], opts)
   vim.api.nvim_buf_set_keymap(0, 't', '<C-l>', [[<C-\><C-n><C-W>l]], opts)
-  vim.api.nvim_buf_set_keymap(0, 't', '<C-v>', [[<C-\><C-n>"*pa]], opts)
+  vim.api.nvim_buf_set_keymap(0, 't', '<C-v>', [[<C-\><C-n>"+pa]], opts)
 end
 EOF
 augroup my_term
@@ -1154,7 +1170,7 @@ EOF
 "--- Nvim treesitter ---
 lua <<EOF
 require'nvim-treesitter.configs'.setup {
-  ensure_installed = { "lua", "c", "cpp", "java", "javascript", "typescript", "tsx", "css", "html" },
+  ensure_installed = { "lua", "c", "cpp", "java", "javascript", "typescript", "tsx", "css", "html", "yaml"},
   highlight = {
     enable = true,
     disable = { "kotlin" } -- highlights do not work correctly
@@ -1310,6 +1326,26 @@ end
 
 local lsp_installer = require("nvim-lsp-installer")
 
+local to_install = {
+  "pylsp", -- nocheckin install python-lsp-server
+  "kotlin_language_server",
+  "bashls",
+  "dockerls",
+  "elmls",
+  "jsonls",
+  "sumneko_lua",
+  "texlab",
+  "tsserver",
+  "vimls",
+  "yamlls",
+}
+local installed = vim.tbl_map(function(server) return server.name end, lsp_installer.get_installed_servers())
+for _, server in ipairs(to_install) do
+  if not vim.tbl_contains(installed, server) then
+    lsp_installer.install(server)
+  end
+end
+
 lsp_installer.on_server_ready(function(server)
   local config = { on_attach = Lsp_on_attach }
   config.capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
@@ -1343,10 +1379,10 @@ lsp_installer.on_server_ready(function(server)
     config = vim.tbl_deep_extend("force", ts_cfg, config)
   elseif server.name == "elmls" then
     local elm_cfg = {
-      command = "elm-language-server.cmd",
       filetypes = {"elm"},
       root_patterns = {"elm.json"},
       initialization_options = {
+        command = vim.fn.has('win32') == 1 and "elm-language-server.cmd" or "elm-language-server",
         elm_path = "elm",
         elm_format_path = "elm-format",
         elm_test_path = "elm-test",
@@ -1399,8 +1435,7 @@ lspconfig.ccls.setup {
   ls_ranges = true,
   init_options = {
     cache = {
-      -- @OS_CHECK
-      directory = "C:\\tools\\ccls\\.ccls_cache"
+      directory = vim.fn.has('win32') and "C:\\tools\\ccls\\.ccls_cache" or vim.fn.expand("$HOME/.cache/ccls"),
     },
     client = {
       snippet_support = true

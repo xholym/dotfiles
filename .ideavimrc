@@ -62,6 +62,8 @@ nnoremap _ :vertical resize -5<CR>
 " Tabs navigation
 nnoremap <M-h> :tabp<CR>
 nnoremap <M-l> :tabn<CR>
+nnoremap <M-j> :tabp<CR>
+nnoremap <M-k> :tabn<CR>
 
 " -- Main mappings --
 nnoremap ; :

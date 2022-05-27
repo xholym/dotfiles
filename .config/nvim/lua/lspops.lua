@@ -139,7 +139,8 @@ M.rename = function()
     local variable_name
     if result ~= nil then
       variable_name = result.placeholder
-    else
+    end
+    if not variable_name then
       variable_name = vim.fn.expand '<cword>'
     end
 

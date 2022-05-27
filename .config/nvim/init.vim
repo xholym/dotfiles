@@ -62,10 +62,12 @@ nnoremap // :noh<CR>
 
 
 set noswapfile      " dont use swapfiles
-
 set splitright      " open next split on right side
-
 set scrolloff=2     " number of line to keep
+" do not autowrap comments
+" do not insert // after <cr>, or 'o'
+" remove // when joining
+set formatoptions=jql
 
 if (has('mouse'))
     set mouse=a
@@ -112,8 +114,11 @@ nnoremap <c-+> :resize +5<CR>
 nnoremap <c-_> :resize -5<CR>
 
 " Tabs navigation
-nnoremap <M-h> :tabp<CR>
-nnoremap <M-l> :tabn<CR>
+" nnoremap <M-h> :tabfirst<CR>
+nnoremap <M-h> gT
+nnoremap <M-j> gT
+nnoremap <M-k> gt
+nnoremap <M-l> gt
 
 " Toggle wrapping
 set nowrap		   	" don't wrap lines
@@ -240,6 +245,7 @@ Plug 'ryanoasis/vim-devicons'
 Plug 'preservim/nerdtree'
 Plug 'tiagofumo/vim-nerdtree-syntax-highlight'
 Plug 'ivalkeen/nerdtree-execute'
+Plug 'jistr/vim-nerdtree-tabs'
 
 " Zen mode
 Plug 'folke/zen-mode.nvim' " junegunn/goyo.vim is slowers on quit, because of highlights restoring
@@ -254,7 +260,7 @@ Plug 'mbbill/undotree'
 
 Plug 'akinsho/toggleterm.nvim'
 
-Plug 'folke/trouble.nvim'
+" Plug 'folke/trouble.nvim'
 
 Plug 'lewis6991/impatient.nvim' " improve staruptime by caching lua modules
 
@@ -462,6 +468,7 @@ command! -complete=file -nargs=1 Rm :echo 'Remove: '.'<f-args>'.' '.(delete(<f-a
 
 lua <<EOF
 function DeleteHiddenBuffers(opts)
+  -- TODO: do not delete files open in tab
   local current = vim.fn.bufnr('%')
   local bufs = vim.api.nvim_list_bufs()
   local count = 0
@@ -478,8 +485,7 @@ end
 EOF
 command! Bdhidden lua DeleteHiddenBuffers()
  " TODO force with !
-command! BdhiddenForce lua DeleteHiddenBuffers()
-
+command! BdforceHidden lua DeleteHiddenBuffers()
 command! Qother execute '%bdelete | edit # | normal `"'
 command! Qo execute '%bdelete | edit # | normal `"'
 
@@ -811,6 +817,9 @@ EOF
 " https://dpwright.com/posts/2018/04/06/graphical-log-with-vimfugitive/
 command! -nargs=* Glg Git! log --graph --abbrev-commit --decorate --format=format:'%s %C(bold yellow)%d%C(reset) %C(bold green)(%ar)%C(reset) %C(dim white)<%an>%C(reset) %C(bold blue)%h%C(reset)' --all<args>
 
+noremap zn <cmd>diffget \\2<cr>
+noremap zm <cmd>diffget \\3<cr>
+
 " --- Telescope ---
 "  Deleting text in prompt does not work after leaving insert mode.
 "  This shloud be fixed in neovim 0.7, so TODO: update when stable version is out.
@@ -944,6 +953,8 @@ nmap ga <Plug>(EasyAlign)
 " ----- Nerdtree -----
 nnoremap <C-n> <cmd>NERDTreeToggle<CR>
 nnoremap <leader>n <cmd>NERDTreeFind<CR>
+"  TODO: try
+nnoremap <leader>gn <plug>NERDTreeTabsToggle<CR>
 let g:NERDTreeDirArrowExpandable = '▸'
 let g:NERDTreeDirArrowCollapsible = '▾'
 let NERDTreeShowHidden=1                    " Show hidden files
@@ -1095,38 +1106,38 @@ EOF
 " Warning: trouble has mapping all over this file.
 " TODO: figure out a way to add custom mapping wichih pipes Trouble items to qflist
 " d in mapping is for diagnostics
-nnoremap <leader>d <cmd>TroubleToggle<cr>
-nnoremap <leader>D <cmd>TroubleToggle workspace_diagnostics<cr>
-nnoremap [t <cmd>lua require("trouble").next({skip_groups = true, jump = true})<cr>
-nnoremap ]t <cmd>lua require("trouble").prev({skip_groups = true, jump = true})<cr>
-nnoremap <leader>[T <cmd>TroubleToggle quickfix<cr>
-nnoremap <leader>]T <cmd>TroubleToggle loclist<cr>
+" nnoremap <leader>d <cmd>TroubleToggle<cr>
+" nnoremap <leader>D <cmd>TroubleToggle workspace_diagnostics<cr>
+" nnoremap [t <cmd>lua require("trouble").next({skip_groups = true, jump = true})<cr>
+" nnoremap ]t <cmd>lua require("trouble").prev({skip_groups = true, jump = true})<cr>
+" nnoremap <leader>[T <cmd>TroubleToggle quickfix<cr>
+" nnoremap <leader>]T <cmd>TroubleToggle loclist<cr>
 
-lua << EOF
-require("trouble").setup {
-   action_keys = {
-     jump_close = {"o", "<cr>"},
-     jump = {"O", "<tab>"},
-     -- same as telescope and nerdtree
-     open_split = { "i", "<c-i>" },
-     open_vsplit = { "s", "<c-s>" },
-     open_tab = { "t","<c-t>" },
-     toggle_fold = {"x"},
-   },
-   group = true,
-   auto_preview = true,
-   auto_close = false,
-   auto_jump = {"lsp_definitions", "lsp_references", "lsp_implementations", "lsp_type_definitions"},
-   signs = {
-     error       = Diagnostic_signs.error,
-     warning     = Diagnostic_signs.warn,
-     hint        = Diagnostic_signs.hint,
-     information = Diagnostic_signs.info,
-     other       = Diagnostic_signs.other
-   },
-   use_diagnostic_signs = false
-}
-EOF
+" lua << EOF
+" require("trouble").setup {
+"    action_keys = {
+"      jump_close = {"o", "<cr>"},
+"      jump = {"O", "<tab>"},
+"      -- same as telescope and nerdtree
+"      open_split = { "i", "<c-i>" },
+"      open_vsplit = { "s", "<c-s>" },
+"      open_tab = { "t","<c-t>" },
+"      toggle_fold = {"x"},
+"    },
+"    group = true,
+"    auto_preview = true,
+"    auto_close = false,
+"    auto_jump = {"lsp_definitions", "lsp_references", "lsp_implementations", "lsp_type_definitions"},
+"    signs = {
+"      error       = Diagnostic_signs.error,
+"      warning     = Diagnostic_signs.warn,
+"      hint        = Diagnostic_signs.hint,
+"      information = Diagnostic_signs.info,
+"      other       = Diagnostic_signs.other
+"    },
+"    use_diagnostic_signs = false
+" }
+" EOF
 " --- Switch ---
 let g:switch_mapping = "gw"
 " --- ReplaceWithRegister ---
@@ -1237,8 +1248,8 @@ augroup end
 nnoremap <silent> [d <cmd>lua vim.diagnostic.goto_prev()<cr>
 nnoremap <silent> ]d <cmd>lua vim.diagnostic.goto_next()<cr>
 nnoremap <silent> [D <cmd>lua vim.diagnostic.open_float()<cr>
-nnoremap <silent> ]D <cmd>TroubleToggle document_diagnostics<cr>
-"nnoremap <silent> ]D <cmd>lua vim.diagnostic.setloclist()<cr>
+" nnoremap <silent> ]D <cmd>TroubleToggle document_diagnostics<cr>
+nnoremap <silent> ]D <cmd>lua vim.diagnostic.setloclist()<cr>
 nnoremap <silent> [e <cmd>lua vim.diagnostic.goto_prev({severity = vim.diagnostic.severity.ERROR})<cr>
 nnoremap <silent> ]e <cmd>lua vim.diagnostic.goto_next({severity = vim.diagnostic.severity.ERROR})<cr>
 lua <<EOF
@@ -1249,12 +1260,18 @@ Lsp_on_attach = function (client, bufnr)
   if client.name == "elmls" then
     vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gd', '<cmd>lua vim.lsp.buf.definition()<cr>', opts)
   else
-    vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gd', '<cmd>TroubleToggle lsp_definitions<cr>', opts)
+    -- vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gd', '<cmd>TroubleToggle lsp_definitions<cr>', opts)
+    vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gd', '<cmd>lua vim.lsp.buf.definition()<cr>', opts)
   end
-  vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gD', '<cmd>TroubleToggle lsp_type_definitions<cr>', opts)
-  vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gs', '<cmd>TroubleToggle lsp_references<cr>', opts)
+  --vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gD', '<cmd>TroubleToggle lsp_type_definitions<cr>', opts)
+  --vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gs', '<cmd>TroubleToggle lsp_references<cr>', opts)
   -- I chaned trouble.nvim/lua/trouble/providers/lsp.lua includeDeclaration to false, since I can't pass it as arg.
-  vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gS', '<cmd>TroubleToggle lsp_implementations<cr>', opts)
+  --vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gS', '<cmd>TroubleToggle lsp_implementations<cr>', opts)
+
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gy', '<cmd>lua vim.lsp.buf.type_definition()<cr>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gD', '<cmd>lua vim.lsp.buf.declaration()<cr>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gs', '<cmd>lua vim.lsp.buf.references()<cr>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gS', '<cmd>lua vim.lsp.buf.implementation()<cr>', opts)
 
   vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gm', '<cmd>lua require("lspops").rename()<cr>', opts)
   vim.api.nvim_buf_set_keymap(bufnr, 'n', 'K',  '<cmd>lua vim.lsp.buf.hover()<cr>', opts)
@@ -1275,7 +1292,8 @@ Lsp_on_attach = function (client, bufnr)
   --vim.api.nvim_buf_set_keymap(bufnr, 'n', '<space>wl', '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>', opts)
 
   if client.resolved_capabilities.document_highlight then
-    if client.name ~= "vimls" and client.name ~= "texlab" then
+    local unsupported = {"vimls", "texlab","yamlls"}
+    if vim.tbl_contains(unsupported, client.name) then
       vim.api.nvim_exec(
         [[
         augroup lsp_document_highlight
@@ -1385,6 +1403,25 @@ lsp_installer.on_server_ready(function(server)
     }
     config = vim.tbl_deep_extend("force", lua_cfg, config)
     -- TODO texlab (maybe)
+  elseif server.name == "kotlin_language_server" then
+    local kt_cfg = {
+      handlers = {
+        ["textDocument/publishDiagnostics"] = function(err, result, ctx, hconfig)
+         local uri = result.uri
+         if uri:find("build%.gradle") then
+           -- Do not report errors for build.gradle files
+           return
+         end
+
+         local handler = vim.lsp.with(vim.lsp.diagnostic.on_publish_diagnostics, {
+           virtual_text = false,
+         })
+
+         handler(err, result, ctx, hconfig)
+        end,
+      }
+    }
+    config = vim.tbl_deep_extend("force", kt_cfg, config)
   end
 
   server:setup(config)

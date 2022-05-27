@@ -7,6 +7,18 @@ local on_attach = function (client, bufnr)
   local opts = { noremap=true, silent=true }
   vim.api.nvim_buf_set_keymap(bufnr, 'n', '<leader>o', [[ <cmd>lua require'jdtls'.organize_imports()<cr> ]], opts)
 end
+local lombok_agent
+local jdtls_launcher
+local jdtls_config
+if (vim.fn.has('unix')) then
+  lombok_agent   = '-javaagent:/usr/local/share/lombok.jar'
+  jdtls_config   = vim.fn.expand('~/tools/jdtls_1.9.0/config_linux')
+  jdtls_launcher = vim.fn.expand('~/tools/jdtls_1.9.0/plugins/org.eclipse.equinox.launcher_1.6.400.v20210924-0641.jar')
+else
+  lombok_agent   = '-javaagent:C:/tools/lombok.jar'
+  jdtls_config   = 'C:/tools/jdt-language-server-1.8.0/config_win'
+  jdtls_launcher = 'C:/tools/jdt-language-server-1.8.0/plugins/org.eclipse.equinox.launcher_1.6.400.v20210924-0641.jar'
+end
 local config = {
   on_attach = on_attach,
   cmd = {
@@ -18,9 +30,9 @@ local config = {
 	'-Dlog.level=ALL',
 	'-noverify',
 	'-Xmx1G',
-  '-javaagent:C:/tools/lombok.jar',
-	'-jar', 'C:/tools/jdt-language-server-1.8.0/plugins/org.eclipse.equinox.launcher_1.6.400.v20210924-0641.jar',
-	'-configuration', 'C:/tools/jdt-language-server-1.8.0/config_win',
+  lombok_agent,
+	'-jar', jdtls_launcher,
+	'-configuration', jdtls_config,
 	'-data', vim.fn.expand('~/.cache/jdtls-workspace') .. workspace_dir,
   '--add-modules=ALL-SYSTEM',
   '--add-opens', 'java.base/java.util=ALL-UNNAMED',

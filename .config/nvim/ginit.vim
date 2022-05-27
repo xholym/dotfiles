@@ -10,3 +10,5 @@ function! AdjustFontSize(amount)
   :execute "echo \"Fontsize adjusted to \"" . g:fontsize
 endfunction
 
+noremap <c-s-+> :call AdjustFontSize(1)<CR>
+noremap <c-s-_> :call AdjustFontSize(-1)<CR>

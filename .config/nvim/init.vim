@@ -2,14 +2,17 @@
 " - on Windows run 'setx /M XDG_CONFIG_HOME "%USERPROFILE%\\.config"'
 "   - source: https://github.com/neovim/neovim/issues/3700
 " - C compiler is needed for treesitter to work (otherwise the is C compiler not found error.
-" - lombok in C:\tools\lombok.jar
-" - install ripgrep for telescope
-" - install make for telescope-fzf-native
-" - install elm-language-server with npm install -g @elm-tooling/elm-language-server
-" - install MikTex and SumatraPDF for latex.
-" - install ccls (On windows using choco install ccls)
-" - install tar (lsp-installer requires it)
-" - install kotlin-language-server (https://github.com/fwcd/kotlin-language-server/blob/main/BUILDING.md)
+" - lombok in tools dir
+" - install:
+"   - ripgrep for telescope
+"   - make for telescope-fzf-native
+"   - elm-language-server with npm install -g @elm-tooling/elm-language-server
+"   - MikTex and SumatraPDF for latex.
+"   - ccls (On windows using choco install ccls)
+"   - tar (lsp-installer requires it)
+"   - kotlin-language-server (https://github.com/fwcd/kotlin-language-server/blob/main/BUILDING.md)
+"   - some nerd font for your terminal or gui
+"   - typescript-language-server with npm install -g typescript-language-server [typescript]
 "
 "
 " Todos:
@@ -70,7 +73,7 @@ set scrolloff=2     " number of line to keep
 set formatoptions=jql
 
 if (has('mouse'))
-    set mouse=a
+  set mouse=a
 endif
 
 " Basic Theme
@@ -86,11 +89,14 @@ set noerrorbells
 
 set matchtime=0      " time in tenths of seconds to jump to previous pair when closing
 
+if &shell =~# 'fish$'
+    set shell=bash
+endif
 
 " ----- Other settings -----
 augroup trim_whitespace
-    autocmd!
-    autocmd BufWritePre * :%s/\s\+$//e
+  autocmd!
+  autocmd BufWritePre * :%s/\s\+$//e
 augroup end
 
 
@@ -110,11 +116,10 @@ nnoremap <C-j> <C-w>j
 nnoremap <C-k> <C-w>k
 nnoremap + :vertical resize +5<CR>
 nnoremap _ :vertical resize -5<CR>
-nnoremap <c-+> :resize +5<CR>
-nnoremap <c-_> :resize -5<CR>
+nnoremap <M--> :resize -5<CR>
+nnoremap <M-=> :resize +5<CR>
 
 " Tabs navigation
-" nnoremap <M-h> :tabfirst<CR>
 nnoremap <M-h> gT
 nnoremap <M-j> gT
 nnoremap <M-k> gt
@@ -156,15 +161,18 @@ nnoremap z0 a <Esc>
 " Yanking
 nnoremap Y y$
 " Copy from clipboard
-nnoremap zp "*p
-nnoremap zy "*y
-nnoremap zY "*y$
-nnoremap zP "*P
-vnoremap zy "*y
-vnoremap zY "*y$
-inoremap <C-v> <C-o>"*P
+nnoremap zp "+p
+nnoremap zy "+y
+nnoremap zY "+y$
+nnoremap zP "+P
+vnoremap zy "+y
+vnoremap zY "+y$
+inoremap <C-v> <esc>"+pa
+
 " Yuick paste without leaving insert mode.
 inoremap <c-p> <C-o>P
+" Paste yanked text and not the deleted one.
+nnoremap <leader>p "0p
 
 " Do not move cursor while joining
 "nnoremap J mzJ'z
@@ -245,7 +253,6 @@ Plug 'ryanoasis/vim-devicons'
 Plug 'preservim/nerdtree'
 Plug 'tiagofumo/vim-nerdtree-syntax-highlight'
 Plug 'ivalkeen/nerdtree-execute'
-Plug 'jistr/vim-nerdtree-tabs'
 
 " Zen mode
 Plug 'folke/zen-mode.nvim' " junegunn/goyo.vim is slowers on quit, because of highlights restoring
@@ -260,11 +267,11 @@ Plug 'mbbill/undotree'
 
 Plug 'akinsho/toggleterm.nvim'
 
-" Plug 'folke/trouble.nvim'
+Plug 'folke/trouble.nvim'
 
 Plug 'lewis6991/impatient.nvim' " improve staruptime by caching lua modules
 
-Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
+" Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
 Plug 'ElmCast/elm-vim' " better syntax highliging
 Plug 'udalov/kotlin-vim'
 Plug 'lervag/vimtex'
@@ -292,6 +299,13 @@ Plug 'hrsh7th/nvim-cmp'
 "Plug 'f3fora/cmp-spell' " TODO: configure and test
 Plug 'saadparwaiz1/cmp_luasnip'
 
+if (has('unix'))
+  Plug 'khaveesh/vim-fish-syntax'
+endif
+
+" Debugging
+Plug 'puremourning/vimspector'
+
 call plug#end()
 
 " ------ Highlighting --------
@@ -306,6 +320,7 @@ set cursorline
 
 function! s:my_highlights()
     " Disable italics for melange colorscheme
+    " TODO: Maybe rather fix italic font for neovim-qt.
     hi clear CursorLine
     hi clear CursorLineNr
     hi link CursorLineNr Ignore
@@ -316,22 +331,25 @@ function! s:my_highlights()
     hi TSConstBuiltin gui=NONE
 
     "hi Search guifg=#2A2520 guibg=#8E733F " default
-    hi Search guifg=#2A2520 guibg=#BEA35F
+    " hi Search guifg=#2A2520 guibg=#BEA35F
 
     "hi Comment ctermfg=Green guifg=Green
     " consider String color change for melange
     " hi String ctermfg=DarkGreen guifg=#69764D
 
+    " Still did not find the right color.
     " For melange colorscheme
     " hi Function guifg=#EBC06D " This is the default fo melange
     " hi Function guifg=#FFE88D
-    hi Function guifg=#FFDFAA
+    " hi Function guifg=#FFDFAA
+    hi Function guifg=#FCE1B7
     " This is the normal default
     " hi Normal guifg=#ECE1D7
     " Consider making normal little brighter
     " hi Normal guifg=#FCF1E7
     hi MyIdentifier ctermfg=LightMagenta guifg=#B075A5
     hi link yamlTSField MyIdentifier
+    hi link tsxTSProperty MyIdentifier
     hi link elmType MyIdentifier
     " hi Delimiter guifg=#8E733F " This is the default.
     " Making Delimiter a little brighter.
@@ -354,12 +372,15 @@ function! s:my_highlights()
     hi clear SpellBad
     " Default spellbad colloring.
     " hi SpellBad cterm=underline ctermfg=204 gui=underline guifg=#E06C75
-    hi SpellBad cterm=underline gui=underline
-
+    " hi SpellBad cterm=underline gui=underline
+    hi SpellBad cterm=underline gui=undercurl guisp=#BADCEE
     " Use same colors as DiagnosticError / DiagnosticWarn and so on.
     " Nvim-qt does not render unercurl correctly, checkout their 2.17 release, it should be fixed there
-    hi DiagnosticUnderlineError guisp=#B65C60 gui=underline
-    hi DiagnosticUnderlineWarn guisp=#EBC06D gui=underline
+    " TODO: if neovim-qt
+    " hi DiagnosticUnderlineError guisp=#B65C60 gui=underline
+    " hi DiagnosticUnderlineWarn guisp=#EBC06D gui=underline
+    hi DiagnosticUnderlineError guisp=#B65C60
+    hi DiagnosticUnderlineWarn guisp=#EBC06D
     hi DiagnosticUnderlineInfo guisp=#9AACCE gui=NONE guibg=#353025
     hi DiagnosticUnderlineHint guisp=#99D59D gui=NONE guibg=#353025
     hi clear DiagnosticHint
@@ -398,21 +419,20 @@ call s:my_highlights() " done this way to run highlights every time I source thi
 " Show nine spell checking candidates at most
 set spellsuggest=best,10
 
-noremap <M-+> :call AdjustFontSize(1)<CR>
-noremap <M-_> :call AdjustFontSize(-1)<CR>
-
 augroup my_syntax
     au!
     " Indent sizes
     " TODO: fix this, vim still uses 4 spaces
-    autocmd Filetype lua             setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
-    autocmd Filetype vim             setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
-    autocmd Filetype python          setlocal expandtab tabstop=4 shiftwidth=4 softtabstop=4
-    autocmd Filetype go              setlocal expandtab tabstop=4 shiftwidth=4 softtabstop=4
-    autocmd Filetype java            setlocal expandtab tabstop=4 shiftwidth=4 softtabstop=4
-    autocmd Filetype markdown        setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
-    autocmd Filetype tex             setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
-    autocmd Filetype json            setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
+    autocmd Filetype sh       setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
+    autocmd Filetype lua      setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
+    autocmd Filetype vim      setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
+    autocmd Filetype go       setlocal expandtab tabstop=4 shiftwidth=4 softtabstop=4
+    autocmd Filetype java     setlocal expandtab tabstop=4 shiftwidth=4 softtabstop=4
+    autocmd Filetype tex      setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
+    autocmd Filetype json     setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
+    autocmd Filetype python   setlocal expandtab tabstop=4 shiftwidth=4 softtabstop=4
+    autocmd Filetype markdown setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
+    autocmd Filetype arduino  setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
     autocmd Filetype javascript      setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
     autocmd Filetype typescript      setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
     autocmd Filetype typescriptreact setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
@@ -448,7 +468,10 @@ set updatetime=100
 " Not using global for now.
 " set spell
 " set spelllang=en,sk
-nnoremap <silent> <F11> <cmd>setlocal spell! spelllang=en,sk<CR>
+" TODO: This does not work. fix it.
+set spelllang=en,sk
+" Maybe change to <leader><leader>s if needed
+nnoremap <silent> <leader>s <cmd>setlocal spell! <CR>
 nmap z+ 1z=
 
 " Verbose file for debug.
@@ -468,7 +491,6 @@ command! -complete=file -nargs=1 Rm :echo 'Remove: '.'<f-args>'.' '.(delete(<f-a
 
 lua <<EOF
 function DeleteHiddenBuffers(opts)
-  -- TODO: do not delete files open in tab
   local current = vim.fn.bufnr('%')
   local bufs = vim.api.nvim_list_bufs()
   local count = 0
@@ -930,6 +952,7 @@ nnoremap <leader>gp <cmd>Plugins<cr>
 
 command! Nocheckin silent execute 'Ggrep nocheckin'
 command! Nch silent execute 'Ggrep nocheckin'
+" TODO: Add command to populate local list with nocheckins for file
 
 " --- Startify ---
 command! SQuit execute 'SClose | qa'
@@ -953,8 +976,6 @@ nmap ga <Plug>(EasyAlign)
 " ----- Nerdtree -----
 nnoremap <C-n> <cmd>NERDTreeToggle<CR>
 nnoremap <leader>n <cmd>NERDTreeFind<CR>
-"  TODO: try
-nnoremap <leader>gn <plug>NERDTreeTabsToggle<CR>
 let g:NERDTreeDirArrowExpandable = '▸'
 let g:NERDTreeDirArrowCollapsible = '▾'
 let NERDTreeShowHidden=1                    " Show hidden files
@@ -1041,10 +1062,9 @@ EOF
 
 " --- Toggle terminal ---
 lua << EOF
--- @OS_CHECK
 require("toggleterm").setup{
   open_mapping = [[<c-\>]],
-  shell = 'C:\\tools\\bash.exe',
+  shell = vim.fn.has('win32') == 1 and 'C:\\tools\\bash.exe' or vim.fn.expand('$SHELL'),
   direction = 'float',
   size = function(term)
     if term.direction == "horizontal" then
@@ -1071,7 +1091,7 @@ function _G.set_terminal_keymaps()
   vim.api.nvim_buf_set_keymap(0, 't', '<C-k>', [[<C-\><C-n><C-W>k]], opts)
   vim.api.nvim_buf_set_keymap(0, 't', '<C-l>', [[<C-\><C-n><C-W>l]], opts)
   vim.api.nvim_buf_set_keymap(0, 't', '<C-l>', [[<C-\><C-n><C-W>l]], opts)
-  vim.api.nvim_buf_set_keymap(0, 't', '<C-v>', [[<C-\><C-n>"*pa]], opts)
+  vim.api.nvim_buf_set_keymap(0, 't', '<C-v>', [[<C-\><C-n>"+pa]], opts)
 end
 EOF
 augroup my_term
@@ -1106,45 +1126,45 @@ EOF
 " Warning: trouble has mapping all over this file.
 " TODO: figure out a way to add custom mapping wichih pipes Trouble items to qflist
 " d in mapping is for diagnostics
-" nnoremap <leader>d <cmd>TroubleToggle<cr>
-" nnoremap <leader>D <cmd>TroubleToggle workspace_diagnostics<cr>
-" nnoremap [t <cmd>lua require("trouble").next({skip_groups = true, jump = true})<cr>
-" nnoremap ]t <cmd>lua require("trouble").prev({skip_groups = true, jump = true})<cr>
-" nnoremap <leader>[T <cmd>TroubleToggle quickfix<cr>
-" nnoremap <leader>]T <cmd>TroubleToggle loclist<cr>
+nnoremap <leader>d <cmd>TroubleToggle<cr>
+nnoremap <leader>D <cmd>TroubleToggle workspace_diagnostics<cr>
+nnoremap [t <cmd>lua require("trouble").next({skip_groups = true, jump = true})<cr>
+nnoremap ]t <cmd>lua require("trouble").prev({skip_groups = true, jump = true})<cr>
+nnoremap <leader>[T <cmd>TroubleToggle quickfix<cr>
+nnoremap <leader>]T <cmd>TroubleToggle loclist<cr>
 
-" lua << EOF
-" require("trouble").setup {
-"    action_keys = {
-"      jump_close = {"o", "<cr>"},
-"      jump = {"O", "<tab>"},
-"      -- same as telescope and nerdtree
-"      open_split = { "i", "<c-i>" },
-"      open_vsplit = { "s", "<c-s>" },
-"      open_tab = { "t","<c-t>" },
-"      toggle_fold = {"x"},
-"    },
-"    group = true,
-"    auto_preview = true,
-"    auto_close = false,
-"    auto_jump = {"lsp_definitions", "lsp_references", "lsp_implementations", "lsp_type_definitions"},
-"    signs = {
-"      error       = Diagnostic_signs.error,
-"      warning     = Diagnostic_signs.warn,
-"      hint        = Diagnostic_signs.hint,
-"      information = Diagnostic_signs.info,
-"      other       = Diagnostic_signs.other
-"    },
-"    use_diagnostic_signs = false
-" }
-" EOF
+lua << EOF
+require("trouble").setup {
+   action_keys = {
+     jump_close = {"o", "<cr>"},
+     jump = {"O", "<tab>"},
+     -- same as telescope and nerdtree
+     open_split = { "i", "<c-i>" },
+     open_vsplit = { "s", "<c-s>" },
+     open_tab = { "t","<c-t>" },
+     toggle_fold = {"x"},
+   },
+   group = true,
+   auto_preview = true,
+   auto_close = false,
+   auto_jump = {"lsp_definitions", "lsp_references", "lsp_implementations", "lsp_type_definitions"},
+   signs = {
+     error       = Diagnostic_signs.error,
+     warning     = Diagnostic_signs.warn,
+     hint        = Diagnostic_signs.hint,
+     information = Diagnostic_signs.info,
+     other       = Diagnostic_signs.other
+   },
+   use_diagnostic_signs = false
+}
+EOF
 " --- Switch ---
 let g:switch_mapping = "gw"
 " --- ReplaceWithRegister ---
 nmap gR gr$
 
 " --- Luasnip ---
-imap <silent><expr> <c-;> luasnip#expand_or_jumpable() ? '<Plug>luasnip-expand-or-jump' : '<c-,>'
+imap <silent><expr> <c-;> luasnip#expand_or_jumpable() ? '<Plug>luasnip-expand-or-jump' : '<c-;>'
 inoremap <silent> <c-l> <cmd>lua require'luasnip'.jump(-1)<cr>
 
 snoremap <silent> <c-;> <cmd>lua require('luasnip').jump(1)<cr>
@@ -1165,13 +1185,14 @@ EOF
 "--- Nvim treesitter ---
 lua <<EOF
 require'nvim-treesitter.configs'.setup {
-  ensure_installed = { "lua", "c", "cpp", "java", "javascript", "typescript", "tsx", "css", "html" },
+  ensure_installed = { "go", "lua", "c", "cpp", "java", "javascript", "typescript", "tsx", "css", "html", "yaml"},
   highlight = {
     enable = true,
     disable = { "kotlin" } -- highlights do not work correctly
   },
   indent = {
-    enable = true
+    enable = false,
+    disable = { "typescript" }
   },
   context_commentstring = {
     enable = true
@@ -1190,24 +1211,25 @@ set shortmess+=c
 
 " ----- Golang ------
 
-let g:go_def_mapping_enables = 0  " use gd from LSP
-let g:go_doc_keywordprg_enabled = 0 " use K from LSP
-
-" Go syntax highlighting
-let g:go_highlight_fields = 1
-let g:go_highlight_functions = 1
-let g:go_highlight_function_calls = 1
-" let g:go_highlight_types = 1
-" let g:go_highlight_extra_types = 1
-let g:go_highlight_operators = 1
-
- " Auto formatting and importing
-let g:go_fmt_autosave = 0
-let g:go_imports_autosave = 0
-let g:go_fmt_command = "goimports"
-
-" Status line types/signatures
-let g:go_auto_type_info = 1
+" let g:go_def_mapping_enables = 0  " use gd from LSP
+" let g:go_doc_keywordprg_enabled = 0 " use K from LSP
+"
+" " Go syntax highlighting
+" " Use treesitter for highlighting
+" let g:go_highlight_fields = 0
+" let g:go_highlight_functions = 0
+" let g:go_highlight_function_calls = 0
+" let g:go_highlight_types = 0
+" let g:go_highlight_extra_types = 0
+" let g:go_highlight_operators = 0
+"
+"  " Auto formatting and importing
+" let g:go_fmt_autosave = 0
+" let g:go_imports_autosave = 0
+" let g:go_fmt_command = "goimports"
+"
+" " Status line types/signatures
+" let g:go_auto_type_info = 1
 
 " ----- Elm -----
 let g:elm_setup_keybindings = 0
@@ -1221,14 +1243,38 @@ let g:tex_flavor='latex'
 let g:vimtex_quickfix_mode=0
 " Matchin of environments is too slow, escpecially for large files
 let g:vimtex_matchparen_enabled = 0
-let g:vimtex_view_general_viewer = 'SumatraPDF'
-let g:vimtex_view_general_options
-    \ = '-reuse-instance -forward-search @tex @line @pdf'
- let g:vimtex_compiler_latexmk = {
-    \ 'options' : [
-        \   '-reuse-instance',
-        \ ],
-    \ }
+if (has('win32'))
+  let g:vimtex_view_general_viewer = 'SumatraPDF'
+  let g:vimtex_view_general_options
+      \ = '-reuse-instance -forward-search @tex @line @pdf'
+  let g:vimtex_compiler_latexmk = {
+     \ 'options' : [
+         \   '-reuse-instance',
+         \ ],
+     \ }
+else
+  let g:vimtex_compiler_progname = 'nvr'
+  let g:vimtex_compiler_latexmk = {
+      \ 'build_dir' : '',
+      \ 'callback' : 1,
+      \ 'continuous' : 1,
+      \ 'executable' : 'latexmk',
+      \ 'hooks' : [],
+      \ 'options' : [
+      \   '-verbose',
+      \   '-file-line-error',
+      \   '-synctex=1',
+      \   '-interaction=nonstopmode',
+      \ ],
+      \}
+
+  let g:vimtex_view_general_viewer = 'okular'
+  let g:vimtex_view_general_options = '--unique file:@pdf\#src:@line@tex'
+
+  " Configure this in Okular -> Settings -> Configure okular -> Editor -> Custom editor
+  " nvr --remote-silent %f -c %l
+  "
+endif
 
 "\   '-interaction=nonstopmode', maybe use
 
@@ -1248,8 +1294,8 @@ augroup end
 nnoremap <silent> [d <cmd>lua vim.diagnostic.goto_prev()<cr>
 nnoremap <silent> ]d <cmd>lua vim.diagnostic.goto_next()<cr>
 nnoremap <silent> [D <cmd>lua vim.diagnostic.open_float()<cr>
-" nnoremap <silent> ]D <cmd>TroubleToggle document_diagnostics<cr>
-nnoremap <silent> ]D <cmd>lua vim.diagnostic.setloclist()<cr>
+nnoremap <silent> ]D <cmd>TroubleToggle document_diagnostics<cr>
+"nnoremap <silent> ]D <cmd>lua vim.diagnostic.setloclist()<cr>
 nnoremap <silent> [e <cmd>lua vim.diagnostic.goto_prev({severity = vim.diagnostic.severity.ERROR})<cr>
 nnoremap <silent> ]e <cmd>lua vim.diagnostic.goto_next({severity = vim.diagnostic.severity.ERROR})<cr>
 lua <<EOF
@@ -1257,21 +1303,16 @@ Lsp_on_attach = function (client, bufnr)
 
   local opts = { noremap=true, silent=true }
 
-  if client.name == "elmls" then
+  -- TODO: uncomment after Trouble lsp_defintions works
+  -- if client.name == "elmls" then
     vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gd', '<cmd>lua vim.lsp.buf.definition()<cr>', opts)
-  else
+  -- else
     -- vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gd', '<cmd>TroubleToggle lsp_definitions<cr>', opts)
-    vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gd', '<cmd>lua vim.lsp.buf.definition()<cr>', opts)
-  end
-  --vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gD', '<cmd>TroubleToggle lsp_type_definitions<cr>', opts)
-  --vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gs', '<cmd>TroubleToggle lsp_references<cr>', opts)
+  -- end
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gD', '<cmd>TroubleToggle lsp_type_definitions<cr>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gs', '<cmd>TroubleToggle lsp_references<cr>', opts)
   -- I chaned trouble.nvim/lua/trouble/providers/lsp.lua includeDeclaration to false, since I can't pass it as arg.
-  --vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gS', '<cmd>TroubleToggle lsp_implementations<cr>', opts)
-
-  vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gy', '<cmd>lua vim.lsp.buf.type_definition()<cr>', opts)
-  vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gD', '<cmd>lua vim.lsp.buf.declaration()<cr>', opts)
-  vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gs', '<cmd>lua vim.lsp.buf.references()<cr>', opts)
-  vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gS', '<cmd>lua vim.lsp.buf.implementation()<cr>', opts)
+  vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gS', '<cmd>TroubleToggle lsp_implementations<cr>', opts)
 
   vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gm', '<cmd>lua require("lspops").rename()<cr>', opts)
   vim.api.nvim_buf_set_keymap(bufnr, 'n', 'K',  '<cmd>lua vim.lsp.buf.hover()<cr>', opts)
@@ -1292,8 +1333,7 @@ Lsp_on_attach = function (client, bufnr)
   --vim.api.nvim_buf_set_keymap(bufnr, 'n', '<space>wl', '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>', opts)
 
   if client.resolved_capabilities.document_highlight then
-    local unsupported = {"vimls", "texlab","yamlls"}
-    if vim.tbl_contains(unsupported, client.name) then
+    if client.name ~= "vimls" and client.name ~= "texlab" then
       vim.api.nvim_exec(
         [[
         augroup lsp_document_highlight
@@ -1328,6 +1368,28 @@ end
 
 local lsp_installer = require("nvim-lsp-installer")
 
+local to_install = {
+  "gopls",
+  --"pylsp", -- TODO: install python-lsp-server
+  "kotlin_language_server",
+  "bashls",
+  "dockerls",
+  "elmls",
+  "jsonls",
+  "sumneko_lua",
+  "texlab",
+  "tsserver",
+  "vimls",
+  "yamlls",
+  "arduino_language_server"
+}
+local installed = vim.tbl_map(function(server) return server.name end, lsp_installer.get_installed_servers())
+for _, server in ipairs(to_install) do
+  if not vim.tbl_contains(installed, server) then
+    lsp_installer.install(server)
+  end
+end
+
 lsp_installer.on_server_ready(function(server)
   local config = { on_attach = Lsp_on_attach }
   config.capabilities = require('cmp_nvim_lsp').update_capabilities(vim.lsp.protocol.make_client_capabilities())
@@ -1361,10 +1423,10 @@ lsp_installer.on_server_ready(function(server)
     config = vim.tbl_deep_extend("force", ts_cfg, config)
   elseif server.name == "elmls" then
     local elm_cfg = {
-      command = "elm-language-server.cmd",
       filetypes = {"elm"},
       root_patterns = {"elm.json"},
       initialization_options = {
+        command = vim.fn.has('win32') == 1 and "elm-language-server.cmd" or "elm-language-server",
         elm_path = "elm",
         elm_format_path = "elm-format",
         elm_test_path = "elm-test",
@@ -1403,25 +1465,28 @@ lsp_installer.on_server_ready(function(server)
     }
     config = vim.tbl_deep_extend("force", lua_cfg, config)
     -- TODO texlab (maybe)
-  elseif server.name == "kotlin_language_server" then
-    local kt_cfg = {
+  elseif server.name == "arduino_language_server" then
+    if vim.fn.has('unix') then
+      config.cmd = {
+        "arduino-language-server",
+        "-cli-config", vim.fn.expand("$HOME/.arduino15/arduino-cli.yaml"),
+        "-cli", "/usr/bin/arduino-cli",
+        "-clangd", "/usr/bin/clangd",
+        "--fqbn", "arduino:avr:leonardo",
+      }
+    end
+  elseif server.name == "gopls" then
+    local go_cfg = {
       handlers = {
-        ["textDocument/publishDiagnostics"] = function(err, result, ctx, hconfig)
-         local uri = result.uri
-         if uri:find("build%.gradle") then
-           -- Do not report errors for build.gradle files
-           return
-         end
-
-         local handler = vim.lsp.with(vim.lsp.diagnostic.on_publish_diagnostics, {
-           virtual_text = false,
-         })
-
-         handler(err, result, ctx, hconfig)
-        end,
+        ["textDocument/publishDiagnostics"] =
+          vim.lsp.with(vim.lsp.diagnostic.on_publish_diagnostics, {
+            underline = true,
+            update_in_insert = false,
+            virtual_text = false,
+        })
       }
     }
-    config = vim.tbl_deep_extend("force", kt_cfg, config)
+    config = vim.tbl_deep_extend("force", go_cfg, config)
   end
 
   server:setup(config)
@@ -1436,8 +1501,7 @@ lspconfig.ccls.setup {
   ls_ranges = true,
   init_options = {
     cache = {
-      -- @OS_CHECK
-      directory = "C:\\tools\\ccls\\.ccls_cache"
+      directory = vim.fn.has('win32') == 1 and "C:\\tools\\ccls\\.ccls_cache" or vim.fn.expand("$HOME/.cache/ccls"),
     },
     client = {
       snippet_support = true
@@ -1552,3 +1616,7 @@ cmp.setup({
     entries = "custom",
   },
 })
+EOF
+
+" ----- Debugging -----
+let g:vimspector_enable_mappings = 'HUMAN'

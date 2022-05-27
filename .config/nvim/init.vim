@@ -2,7 +2,11 @@
 " - on Windows run 'setx /M XDG_CONFIG_HOME "%USERPROFILE%\\.config"'
 "   - source: https://github.com/neovim/neovim/issues/3700
 " - C compiler is needed for treesitter to work (otherwise the is C compiler not found error.
+<<<<<<< HEAD
 " - lombok in C:\tools\lombok.jar
+=======
+" - lombok in tools dir
+>>>>>>> 83afefe (linux cfg)
 " - install:
 "   - ripgrep for telescope
 "   - make for telescope-fzf-native
@@ -118,12 +122,23 @@ nnoremap <C-j> <C-w>j
 nnoremap <C-k> <C-w>k
 nnoremap + :vertical resize +5<CR>
 nnoremap _ :vertical resize -5<CR>
+<<<<<<< HEAD
 
 " Tabs navigation
 nnoremap <M-h> <cmd>tabfirst<cr>
 nnoremap <M-j> gT
 nnoremap <M-k> gt
 nnoremap <M-l> <cmd>tablast<cr>
+=======
+nnoremap <M--> :resize -5<CR>
+nnoremap <M-=> :resize +5<CR>
+
+" Tabs navigation
+nnoremap <M-h> gT
+nnoremap <M-j> gT
+nnoremap <M-k> gt
+nnoremap <M-l> gt
+>>>>>>> 83afefe (linux cfg)
 
 " Toggle wrapping
 set nowrap		   	" don't wrap lines
@@ -171,6 +186,8 @@ inoremap <C-v> <esc>"+pa
 
 " Yuick paste without leaving insert mode.
 inoremap <c-p> <C-o>P
+" Paste yanked text and not the deleted one.
+nnoremap <leader>p "0p
 
 " Do not move cursor while joining
 "nnoremap J mzJ'z
@@ -269,7 +286,7 @@ Plug 'folke/trouble.nvim'
 
 Plug 'lewis6991/impatient.nvim' " improve staruptime by caching lua modules
 
-Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
+" Plug 'fatih/vim-go', { 'do': ':GoUpdateBinaries' }
 Plug 'ElmCast/elm-vim' " better syntax highliging
 Plug 'udalov/kotlin-vim'
 Plug 'lervag/vimtex'
@@ -301,6 +318,12 @@ if (has('unix'))
   Plug 'khaveesh/vim-fish-syntax'
 endif
 
+<<<<<<< HEAD
+=======
+" Debugging
+Plug 'puremourning/vimspector'
+
+>>>>>>> 83afefe (linux cfg)
 call plug#end()
 
 " ------ Highlighting --------
@@ -326,22 +349,25 @@ function! s:my_highlights()
     hi TSConstBuiltin gui=NONE
 
     "hi Search guifg=#2A2520 guibg=#8E733F " default
-    hi Search guifg=#2A2520 guibg=#BEA35F
+    " hi Search guifg=#2A2520 guibg=#BEA35F
 
     "hi Comment ctermfg=Green guifg=Green
     " consider String color change for melange
     " hi String ctermfg=DarkGreen guifg=#69764D
 
+    " Still did not find the right color.
     " For melange colorscheme
     " hi Function guifg=#EBC06D " This is the default fo melange
     " hi Function guifg=#FFE88D
-    hi Function guifg=#FFDFAA
+    " hi Function guifg=#FFDFAA
+    hi Function guifg=#FCE1B7
     " This is the normal default
     " hi Normal guifg=#ECE1D7
     " Consider making normal little brighter
     " hi Normal guifg=#FCF1E7
     hi MyIdentifier ctermfg=LightMagenta guifg=#B075A5
     hi link yamlTSField MyIdentifier
+    hi link tsxTSProperty MyIdentifier
     hi link elmType MyIdentifier
     " hi Delimiter guifg=#8E733F " This is the default.
     " Making Delimiter a little brighter.
@@ -364,8 +390,8 @@ function! s:my_highlights()
     hi clear SpellBad
     " Default spellbad colloring.
     " hi SpellBad cterm=underline ctermfg=204 gui=underline guifg=#E06C75
-    hi SpellBad cterm=underline gui=underline
-
+    " hi SpellBad cterm=underline gui=underline
+    hi SpellBad cterm=underline gui=undercurl guisp=#BADCEE
     " Use same colors as DiagnosticError / DiagnosticWarn and so on.
     " Nvim-qt does not render unercurl correctly, checkout their 2.17 release, it should be fixed there
     " TODO: if neovim-qt
@@ -424,6 +450,10 @@ augroup my_syntax
     autocmd Filetype json     setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
     autocmd Filetype python   setlocal expandtab tabstop=4 shiftwidth=4 softtabstop=4
     autocmd Filetype markdown setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
+<<<<<<< HEAD
+=======
+    autocmd Filetype arduino  setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
+>>>>>>> 83afefe (linux cfg)
     autocmd Filetype javascript      setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
     autocmd Filetype typescript      setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
     autocmd Filetype typescriptreact setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
@@ -459,7 +489,10 @@ set updatetime=100
 " Not using global for now.
 " set spell
 " set spelllang=en,sk
-nnoremap <silent> <F11> <cmd>setlocal spell! spelllang=en,sk<CR>
+" TODO: This does not work. fix it.
+set spelllang=en,sk
+" Maybe change to <leader><leader>s if needed
+nnoremap <silent> <leader>s <cmd>setlocal spell! <CR>
 nmap z+ 1z=
 
 " Verbose file for debug.
@@ -867,16 +900,16 @@ require('telescope').setup {
         --['<esc>'] = actions.close,
         --['jj'] = { '<esc>', type = 'command' },
         -- Use same horizontal and vertical mappings as Nerdtree.
-        ["<C-i>"] = actions.select_horizontal,
-        ["<C-s>"] = actions.select_vertical,
+        -- ["<C-i>"] = actions.select_horizontal,
+        ["<C-s>"] = actions.select_horizontal,
         ["<C-b>"] = actions.preview_scrolling_up,
         ["<C-f>"] = actions.preview_scrolling_down,
         ["<tab>"] = actions.toggle_selection,
         ["<C-u>"] = false, -- clears prompt
       },
       n = {
-        ["<C-i>"] = actions.select_horizontal,
-        ["<C-s>"] = actions.select_vertical,
+        -- ["<C-i>"] = actions.select_horizontal,
+        ["<C-s>"] = actions.select_horizontal,
         ["<tab>"] = actions.toggle_selection,
       }
     },
@@ -938,6 +971,7 @@ nnoremap <leader>gp <cmd>Plugins<cr>
 
 command! Nocheckin silent execute 'Ggrep nocheckin'
 command! Nch silent execute 'Ggrep nocheckin'
+" TODO: Add command to populate local list with nocheckins for file
 
 " --- Startify ---
 command! SQuit execute 'SClose | qa'
@@ -1149,7 +1183,7 @@ let g:switch_mapping = "gw"
 nmap gR gr$
 
 " --- Luasnip ---
-imap <silent><expr> <c-;> luasnip#expand_or_jumpable() ? '<Plug>luasnip-expand-or-jump' : '<c-,>'
+imap <silent><expr> <c-;> luasnip#expand_or_jumpable() ? '<Plug>luasnip-expand-or-jump' : '<c-;>'
 inoremap <silent> <c-l> <cmd>lua require'luasnip'.jump(-1)<cr>
 
 snoremap <silent> <c-;> <cmd>lua require('luasnip').jump(1)<cr>
@@ -1170,13 +1204,18 @@ EOF
 "--- Nvim treesitter ---
 lua <<EOF
 require'nvim-treesitter.configs'.setup {
+<<<<<<< HEAD
   ensure_installed = { "lua", "c", "cpp", "java", "javascript", "typescript", "tsx", "css", "html", "yaml"},
+=======
+  ensure_installed = { "go", "lua", "c", "cpp", "java", "javascript", "typescript", "tsx", "css", "html", "yaml"},
+>>>>>>> 83afefe (linux cfg)
   highlight = {
     enable = true,
     disable = { "kotlin" } -- highlights do not work correctly
   },
   indent = {
-    enable = true
+    enable = false,
+    disable = { "typescript" }
   },
   context_commentstring = {
     enable = true
@@ -1195,24 +1234,25 @@ set shortmess+=c
 
 " ----- Golang ------
 
-let g:go_def_mapping_enables = 0  " use gd from LSP
-let g:go_doc_keywordprg_enabled = 0 " use K from LSP
-
-" Go syntax highlighting
-let g:go_highlight_fields = 1
-let g:go_highlight_functions = 1
-let g:go_highlight_function_calls = 1
-" let g:go_highlight_types = 1
-" let g:go_highlight_extra_types = 1
-let g:go_highlight_operators = 1
-
- " Auto formatting and importing
-let g:go_fmt_autosave = 0
-let g:go_imports_autosave = 0
-let g:go_fmt_command = "goimports"
-
-" Status line types/signatures
-let g:go_auto_type_info = 1
+" let g:go_def_mapping_enables = 0  " use gd from LSP
+" let g:go_doc_keywordprg_enabled = 0 " use K from LSP
+"
+" " Go syntax highlighting
+" " Use treesitter for highlighting
+" let g:go_highlight_fields = 0
+" let g:go_highlight_functions = 0
+" let g:go_highlight_function_calls = 0
+" let g:go_highlight_types = 0
+" let g:go_highlight_extra_types = 0
+" let g:go_highlight_operators = 0
+"
+"  " Auto formatting and importing
+" let g:go_fmt_autosave = 0
+" let g:go_imports_autosave = 0
+" let g:go_fmt_command = "goimports"
+"
+" " Status line types/signatures
+" let g:go_auto_type_info = 1
 
 " ----- Elm -----
 let g:elm_setup_keybindings = 0
@@ -1226,14 +1266,38 @@ let g:tex_flavor='latex'
 let g:vimtex_quickfix_mode=0
 " Matchin of environments is too slow, escpecially for large files
 let g:vimtex_matchparen_enabled = 0
-let g:vimtex_view_general_viewer = 'SumatraPDF'
-let g:vimtex_view_general_options
-    \ = '-reuse-instance -forward-search @tex @line @pdf'
- let g:vimtex_compiler_latexmk = {
-    \ 'options' : [
-        \   '-reuse-instance',
-        \ ],
-    \ }
+if (has('win32'))
+  let g:vimtex_view_general_viewer = 'SumatraPDF'
+  let g:vimtex_view_general_options
+      \ = '-reuse-instance -forward-search @tex @line @pdf'
+  let g:vimtex_compiler_latexmk = {
+     \ 'options' : [
+         \   '-reuse-instance',
+         \ ],
+     \ }
+else
+  let g:vimtex_compiler_progname = 'nvr'
+  let g:vimtex_compiler_latexmk = {
+      \ 'build_dir' : '',
+      \ 'callback' : 1,
+      \ 'continuous' : 1,
+      \ 'executable' : 'latexmk',
+      \ 'hooks' : [],
+      \ 'options' : [
+      \   '-verbose',
+      \   '-file-line-error',
+      \   '-synctex=1',
+      \   '-interaction=nonstopmode',
+      \ ],
+      \}
+
+  let g:vimtex_view_general_viewer = 'okular'
+  let g:vimtex_view_general_options = '--unique file:@pdf\#src:@line@tex'
+
+  " Configure this in Okular -> Settings -> Configure okular -> Editor -> Custom editor
+  " nvr --remote-silent %f -c %l
+  "
+endif
 
 "\   '-interaction=nonstopmode', maybe use
 
@@ -1262,11 +1326,12 @@ Lsp_on_attach = function (client, bufnr)
 
   local opts = { noremap=true, silent=true }
 
-  if client.name == "elmls" then
+  -- TODO: uncomment after Trouble lsp_defintions works
+  -- if client.name == "elmls" then
     vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gd', '<cmd>lua vim.lsp.buf.definition()<cr>', opts)
-  else
-    vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gd', '<cmd>TroubleToggle lsp_definitions<cr>', opts)
-  end
+  -- else
+    -- vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gd', '<cmd>TroubleToggle lsp_definitions<cr>', opts)
+  -- end
   vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gD', '<cmd>TroubleToggle lsp_type_definitions<cr>', opts)
   vim.api.nvim_buf_set_keymap(bufnr, 'n', 'gs', '<cmd>TroubleToggle lsp_references<cr>', opts)
   -- I chaned trouble.nvim/lua/trouble/providers/lsp.lua includeDeclaration to false, since I can't pass it as arg.
@@ -1327,7 +1392,12 @@ end
 local lsp_installer = require("nvim-lsp-installer")
 
 local to_install = {
+<<<<<<< HEAD
   "pylsp", -- nocheckin install python-lsp-server
+=======
+  "gopls",
+  --"pylsp", -- TODO: install python-lsp-server
+>>>>>>> 83afefe (linux cfg)
   "kotlin_language_server",
   "bashls",
   "dockerls",
@@ -1338,6 +1408,10 @@ local to_install = {
   "tsserver",
   "vimls",
   "yamlls",
+<<<<<<< HEAD
+=======
+  "arduino_language_server"
+>>>>>>> 83afefe (linux cfg)
 }
 local installed = vim.tbl_map(function(server) return server.name end, lsp_installer.get_installed_servers())
 for _, server in ipairs(to_install) do
@@ -1421,6 +1495,28 @@ lsp_installer.on_server_ready(function(server)
     }
     config = vim.tbl_deep_extend("force", lua_cfg, config)
     -- TODO texlab (maybe)
+  elseif server.name == "arduino_language_server" then
+    if vim.fn.has('unix') then
+      config.cmd = {
+        "arduino-language-server",
+        "-cli-config", vim.fn.expand("$HOME/.arduino15/arduino-cli.yaml"),
+        "-cli", "/usr/bin/arduino-cli",
+        "-clangd", "/usr/bin/clangd",
+        "--fqbn", "arduino:avr:leonardo",
+      }
+    end
+  elseif server.name == "gopls" then
+    local go_cfg = {
+      handlers = {
+        ["textDocument/publishDiagnostics"] =
+          vim.lsp.with(vim.lsp.diagnostic.on_publish_diagnostics, {
+            underline = true,
+            update_in_insert = false,
+            virtual_text = false,
+        })
+      }
+    }
+    config = vim.tbl_deep_extend("force", go_cfg, config)
   end
 
   server:setup(config)
@@ -1435,7 +1531,11 @@ lspconfig.ccls.setup {
   ls_ranges = true,
   init_options = {
     cache = {
+<<<<<<< HEAD
       directory = vim.fn.has('win32') and "C:\\tools\\ccls\\.ccls_cache" or vim.fn.expand("$HOME/.cache/ccls"),
+=======
+      directory = vim.fn.has('win32') == 1 and "C:\\tools\\ccls\\.ccls_cache" or vim.fn.expand("$HOME/.cache/ccls"),
+>>>>>>> 83afefe (linux cfg)
     },
     client = {
       snippet_support = true
@@ -1550,3 +1650,7 @@ cmp.setup({
     entries = "custom",
   },
 })
+EOF
+
+" ----- Debugging -----
+let g:vimspector_enable_mappings = 'HUMAN'

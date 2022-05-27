@@ -20,10 +20,10 @@ local function request_code_actions(ctx, callback)
   vim.lsp.buf_request_all(0, "textDocument/codeAction", params, callback)
 end
 
-local function execute_action(act)
+local function execute_action(act, client)
   if act.edit or type(act.command) == "table" then
     if act.edit then
-      vim.lsp.util.apply_workspace_edit(act.edit)
+      vim.lsp.util.apply_workspace_edit(act.edit, client.offset_encoding)
     end
     if type(act.command) == "table" then
       vim.lsp.buf.execute_command(act.command)
@@ -49,13 +49,13 @@ local function do_action(action, client_id)
         return
       end
       if real then
-        execute_action(real)
+        execute_action(real, client)
       else
-        execute_action(action)
+        execute_action(action, client)
       end
     end)
   else
-    execute_action(action)
+    execute_action(action, client)
   end
 end
 
@@ -137,7 +137,8 @@ M.rename = function()
     end
 
     local variable_name
-    if result ~= nil then
+    P(result)
+    if result ~= nil and result.placeholder ~= nil then
       variable_name = result.placeholder
     else
       variable_name = vim.fn.expand '<cword>'
@@ -173,8 +174,10 @@ M.rename = function()
       focusable = true,
       border = "rounded", style = "minimal",
       width = width, height = 1,
-      relative = "editor",
-      row = vim.fn.screenrow(), col = vim.fn.screencol(),
+      -- relative = "editor",
+      -- row = vim.fn.screenrow(), col = vim.fn.screencol(),
+      relative = "cursor",
+      row = 0, col = 0,
       anchor = "NW"
     }
     if win_opts.row + win_opts.height > vim.o.lines - 4 then -- 4 is for padding
@@ -220,11 +223,13 @@ M.execute_rename = function ()
 
     -- Pouplate quickfix_list.
     local offset_encoding = vim.lsp.get_client_by_id(ctx.client_id).offset_encoding
-    local locations = vim.lsp.util.locations_to_items(result.changes)
-    if #locations == 0 then
-      return
-    else
-      vim.fn.setqflist(vim.lsp.util.locations_to_items(locations, offset_encoding), ' ')
+    if result.changes then
+      local locations = vim.lsp.util.locations_to_items(result.changes)
+      if #locations == 0 then
+        return
+      else
+        vim.fn.setqflist(vim.lsp.util.locations_to_items(locations, offset_encoding), ' ')
+    end
       -- We could open quickfix list here.
       -- vim.cmd "copen"
     end

@@ -1,5 +1,4 @@
 lua <<EOF
--- @OS_CHECK
 local workspace_dir = vim.fn.fnamemodify(vim.fn.getcwd(), ':p:h:t')
 local on_attach = function (client, bufnr)
   Lsp_on_attach(client, bufnr)
@@ -10,7 +9,7 @@ end
 local lombok_agent
 local jdtls_launcher
 local jdtls_config
-if (vim.fn.has('unix')) then
+if (vim.fn.has('unix') == 1) then
   lombok_agent   = '-javaagent:/usr/local/share/lombok.jar'
   jdtls_config   = vim.fn.expand('~/tools/jdtls_1.9.0/config_linux')
   jdtls_launcher = vim.fn.expand('~/tools/jdtls_1.9.0/plugins/org.eclipse.equinox.launcher_1.6.400.v20210924-0641.jar')
@@ -23,20 +22,20 @@ local config = {
   on_attach = on_attach,
   cmd = {
     'java',
-	'-Declipse.application=org.eclipse.jdt.ls.core.id1',
-	'-Dosgi.bundles.defaultStartLevel=4',
-	'-Declipse.product=org.eclipse.jdt.ls.core.product',
+    '-Declipse.application=org.eclipse.jdt.ls.core.id1',
+    '-Dosgi.bundles.defaultStartLevel=4',
+    '-Declipse.product=org.eclipse.jdt.ls.core.product',
     '-Dlog.protocol=true',
-	'-Dlog.level=ALL',
-	'-noverify',
-	'-Xmx1G',
-  lombok_agent,
-	'-jar', jdtls_launcher,
-	'-configuration', jdtls_config,
-	'-data', vim.fn.expand('~/.cache/jdtls-workspace') .. workspace_dir,
-  '--add-modules=ALL-SYSTEM',
-  '--add-opens', 'java.base/java.util=ALL-UNNAMED',
-  '--add-opens', 'java.base/java.lang=ALL-UNNAMED'
+    '-Dlog.level=ALL',
+    '-noverify',
+    '-Xmx1G',
+    lombok_agent,
+    '-jar', jdtls_launcher,
+    '-configuration', jdtls_config,
+    '-data', vim.fn.expand('~/.cache/jdtls-workspace') .. workspace_dir,
+    '--add-modules=ALL-SYSTEM',
+    '--add-opens', 'java.base/java.util=ALL-UNNAMED',
+    '--add-opens', 'java.base/java.lang=ALL-UNNAMED'
   },
   root_dir = require('jdtls.setup').find_root({'.git', 'mvnw', 'gradlew'}),
 

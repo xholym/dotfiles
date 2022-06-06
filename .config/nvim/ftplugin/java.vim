@@ -15,8 +15,8 @@ if (vim.fn.has('unix') == 1) then
   jdtls_launcher = vim.fn.expand('~/tools/jdtls_1.9.0/plugins/org.eclipse.equinox.launcher_1.6.400.v20210924-0641.jar')
 else
   lombok_agent   = '-javaagent:C:/tools/lombok.jar'
-  jdtls_config   = 'C:/tools/jdt-language-server-1.8.0/config_win'
-  jdtls_launcher = 'C:/tools/jdt-language-server-1.8.0/plugins/org.eclipse.equinox.launcher_1.6.400.v20210924-0641.jar'
+  jdtls_config   = 'C:/tools/jdtls_1.9.0/config_win'
+  jdtls_launcher = 'C:/tools/jdtls_1.9.0/plugins/org.eclipse.equinox.launcher_1.6.400.v20210924-0641.jar'
 end
 local config = {
   on_attach = on_attach,

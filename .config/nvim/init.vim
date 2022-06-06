@@ -376,11 +376,13 @@ function! s:my_highlights()
     hi SpellBad cterm=underline gui=undercurl guisp=#BADCEE
     " Use same colors as DiagnosticError / DiagnosticWarn and so on.
     " Nvim-qt does not render unercurl correctly, checkout their 2.17 release, it should be fixed there
-    " TODO: if neovim-qt
-    " hi DiagnosticUnderlineError guisp=#B65C60 gui=underline
-    " hi DiagnosticUnderlineWarn guisp=#EBC06D gui=underline
+
     hi DiagnosticUnderlineError guisp=#B65C60
     hi DiagnosticUnderlineWarn guisp=#EBC06D
+    if (has('win32'))
+      hi DiagnosticUnderlineError gui=underline
+      hi DiagnosticUnderlineWarn gui=underline
+    endif
     hi DiagnosticUnderlineInfo guisp=#9AACCE gui=NONE guibg=#353025
     hi DiagnosticUnderlineHint guisp=#99D59D gui=NONE guibg=#353025
     hi clear DiagnosticHint
@@ -868,6 +870,16 @@ local delete_buffer = function (force)
     end
   end
 end
+local show_in_nerdtree = function (prompt_buf)
+  local current_picker = action_state.get_current_picker(prompt_buf)
+  local selection = current_picker:get_selection()
+  local path = selection[1]
+  P(path)
+  if path ~= nil and type(path) == "string" then
+      actions.close(prompt_buf)
+      vim.cmd("NERDTreeFind " .. path)
+  end
+end
 
 require('telescope').setup {
   defaults = {
@@ -882,16 +894,21 @@ require('telescope').setup {
         --['jj'] = { '<esc>', type = 'command' },
         -- Use same horizontal and vertical mappings as Nerdtree.
         ["<C-i>"] = actions.select_horizontal,
+        ["<C-h>"] = actions.select_horizontal, -- TODO: temporary while C-i does not work
         ["<C-s>"] = actions.select_vertical,
         ["<C-b>"] = actions.preview_scrolling_up,
         ["<C-f>"] = actions.preview_scrolling_down,
         ["<tab>"] = actions.toggle_selection,
         ["<C-u>"] = false, -- clears prompt
+        ["<C-S-n>"] = show_in_nerdtree,
       },
       n = {
         ["<C-i>"] = actions.select_horizontal,
         ["<C-s>"] = actions.select_vertical,
+        ["<C-b>"] = actions.preview_scrolling_up,
+        ["<C-f>"] = actions.preview_scrolling_down,
         ["<tab>"] = actions.toggle_selection,
+        ["<C-S-n>"] = show_in_nerdtree,
       }
     },
   },
@@ -933,7 +950,7 @@ nnoremap <leader><Tab> <cmd>lua require('telescope.builtin').oldfiles(require('t
 " Search in files
 nnoremap <leader>/ <cmd>Telescope live_grep theme=ivy<cr>
 " TODO: use theme Ivy.
-nnoremap <leader>? <cmd>lua require('telescope.builtin').grep_string { search = vim.fn.input("Grep for ") } <cr>
+nnoremap <leader>? <cmd>lua require('telescope.builtin').grep_string(require('telescope.themes').get_ivy({ search = vim.fn.input("Grep for ") })) <cr>
 
 
 " Maybe temporary mappings
@@ -1333,17 +1350,18 @@ Lsp_on_attach = function (client, bufnr)
   --vim.api.nvim_buf_set_keymap(bufnr, 'n', '<space>wl', '<cmd>lua print(vim.inspect(vim.lsp.buf.list_workspace_folders()))<CR>', opts)
 
   if client.resolved_capabilities.document_highlight then
-    if client.name ~= "vimls" and client.name ~= "texlab" then
-      vim.api.nvim_exec(
-        [[
-        augroup lsp_document_highlight
-          autocmd! * <buffer>
-          autocmd CursorHold <buffer> lua vim.lsp.buf.document_highlight()
-          autocmd CursorMoved <buffer> lua vim.lsp.buf.clear_references()
-        augroup END
-      ]],
-        false
-      )
+    if client.name ~= "vimls" and client.name ~= "texlab" and client.name ~= "kotlin_language_server" then
+      --print('initializing hightlight for ' .. client.name)
+      --vim.api.nvim_exec(
+      --  [[
+      --  augroup lsp_document_highlight
+      --    autocmd! * <buffer>
+      --    autocmd CursorHold <buffer> lua vim.lsp.buf.document_highlight()
+      --    autocmd CursorMoved <buffer> lua vim.lsp.buf.clear_references()
+      --  augroup END
+      --]],
+      --  false
+      --)
     end
   end
 

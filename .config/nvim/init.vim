@@ -2,11 +2,7 @@
 " - on Windows run 'setx /M XDG_CONFIG_HOME "%USERPROFILE%\\.config"'
 "   - source: https://github.com/neovim/neovim/issues/3700
 " - C compiler is needed for treesitter to work (otherwise the is C compiler not found error.
-<<<<<<< HEAD
-" - lombok in C:\tools\lombok.jar
-=======
 " - lombok in tools dir
->>>>>>> 83afefe (linux cfg)
 " - install:
 "   - ripgrep for telescope
 "   - make for telescope-fzf-native
@@ -122,14 +118,6 @@ nnoremap <C-j> <C-w>j
 nnoremap <C-k> <C-w>k
 nnoremap + :vertical resize +5<CR>
 nnoremap _ :vertical resize -5<CR>
-<<<<<<< HEAD
-
-" Tabs navigation
-nnoremap <M-h> <cmd>tabfirst<cr>
-nnoremap <M-j> gT
-nnoremap <M-k> gt
-nnoremap <M-l> <cmd>tablast<cr>
-=======
 nnoremap <M--> :resize -5<CR>
 nnoremap <M-=> :resize +5<CR>
 
@@ -138,7 +126,6 @@ nnoremap <M-h> gT
 nnoremap <M-j> gT
 nnoremap <M-k> gt
 nnoremap <M-l> gt
->>>>>>> 83afefe (linux cfg)
 
 " Toggle wrapping
 set nowrap		   	" don't wrap lines
@@ -318,12 +305,9 @@ if (has('unix'))
   Plug 'khaveesh/vim-fish-syntax'
 endif
 
-<<<<<<< HEAD
-=======
 " Debugging
 Plug 'puremourning/vimspector'
 
->>>>>>> 83afefe (linux cfg)
 call plug#end()
 
 " ------ Highlighting --------
@@ -450,10 +434,7 @@ augroup my_syntax
     autocmd Filetype json     setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
     autocmd Filetype python   setlocal expandtab tabstop=4 shiftwidth=4 softtabstop=4
     autocmd Filetype markdown setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
-<<<<<<< HEAD
-=======
     autocmd Filetype arduino  setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
->>>>>>> 83afefe (linux cfg)
     autocmd Filetype javascript      setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
     autocmd Filetype typescript      setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
     autocmd Filetype typescriptreact setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2
@@ -1204,11 +1185,7 @@ EOF
 "--- Nvim treesitter ---
 lua <<EOF
 require'nvim-treesitter.configs'.setup {
-<<<<<<< HEAD
-  ensure_installed = { "lua", "c", "cpp", "java", "javascript", "typescript", "tsx", "css", "html", "yaml"},
-=======
   ensure_installed = { "go", "lua", "c", "cpp", "java", "javascript", "typescript", "tsx", "css", "html", "yaml"},
->>>>>>> 83afefe (linux cfg)
   highlight = {
     enable = true,
     disable = { "kotlin" } -- highlights do not work correctly
@@ -1392,12 +1369,8 @@ end
 local lsp_installer = require("nvim-lsp-installer")
 
 local to_install = {
-<<<<<<< HEAD
-  "pylsp", -- nocheckin install python-lsp-server
-=======
   "gopls",
   --"pylsp", -- TODO: install python-lsp-server
->>>>>>> 83afefe (linux cfg)
   "kotlin_language_server",
   "bashls",
   "dockerls",
@@ -1408,10 +1381,7 @@ local to_install = {
   "tsserver",
   "vimls",
   "yamlls",
-<<<<<<< HEAD
-=======
   "arduino_language_server"
->>>>>>> 83afefe (linux cfg)
 }
 local installed = vim.tbl_map(function(server) return server.name end, lsp_installer.get_installed_servers())
 for _, server in ipairs(to_install) do
@@ -1531,11 +1501,7 @@ lspconfig.ccls.setup {
   ls_ranges = true,
   init_options = {
     cache = {
-<<<<<<< HEAD
-      directory = vim.fn.has('win32') and "C:\\tools\\ccls\\.ccls_cache" or vim.fn.expand("$HOME/.cache/ccls"),
-=======
       directory = vim.fn.has('win32') == 1 and "C:\\tools\\ccls\\.ccls_cache" or vim.fn.expand("$HOME/.cache/ccls"),
->>>>>>> 83afefe (linux cfg)
     },
     client = {
       snippet_support = true
